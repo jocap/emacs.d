@@ -25,6 +25,7 @@
 (global-set-key (kbd "M-]") 'mark-line)
 (global-set-key (kbd "ESC <f3>") 'kmacro-start-macro-or-insert-counter) ; for some reason, <F3> outputs "R" when using tmux
 (global-set-key (kbd "ESC <f4>") 'kmacro-end-or-call-macro) ; same problem here, but with "S"
+(global-set-key (kbd "ESC <f5>") 'toggle-truncate-lines)
 
 ;; Markdown preview (requires my markdown-preview script and its dependencies)
 
