@@ -3,8 +3,16 @@
 (server-start) ; Start in server mode (launch using emacsclient)
 (setq backup-directory-alist `(("." . "~/.saves"))) ; Saves ~ files to ~/.saves instead of current directory
 
-; Packages
+; Packages & themes
 
-(add-to-list 'load-path "~/.emacs.d/")
-(load-file "personal.el")
-(load-file "markdown-mode.el")
+(let ((default-directory "~/.emacs.d/packages"))
+  (load-file (expand-file-name "personal.el"))
+;  (load-file (expand-file-name "automode.el"))
+;  (load-file (expand-file-name "pasta.el"))
+  (load-file (expand-file-name "markdown-mode.el")))
+
+; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes") ; currently not used
+
+; Auto mode
+
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode)) ; needed? is it working?
