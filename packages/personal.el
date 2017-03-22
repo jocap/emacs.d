@@ -3,7 +3,7 @@
 
 ;; Miscellaneous preferences
 
-(load-theme 'wombat) ; an awesome theme
+;(load-theme 'wombat) ; an awesome theme
 (electric-pair-mode 1) ; lisp auto-insertion of parentheses
 (setq kill-whole-line t) ; C-k kills newline as well
 (setq-default indent-tabs-mode nil) ; don't mix spaces and tabs
