@@ -22,12 +22,18 @@
   "Sets a light theme for day and a dark theme for night.
   Depends on the script 'sun' being found in path."
   (interactive)
-  (let ((time (string-to-number (format-time-string "%H.%M")))
-        (sunrise (string-to-number (shell-command-to-string "sun _rise")))
-        (sunset (string-to-number (shell-command-to-string "sun _set"))))
-    (if (and (> time sunrise) (< time sunset))
-        (load-theme light-theme t)
-      (load-theme dark-theme t))))
+  (let ((time (string-to-number (format-time-string "%H.%M"))))
+        (if (string-match "not found" (shell-command-to-string "which sun"))
+            (if (and (> time 6.00) (< time 18.00))
+                (load-theme light-theme t)
+              (load-theme dark-theme t))
+          (let ((sunrise (string-to-number (shell-command-to-string "sun _rise")))
+                (sunset (string-to-number (shell-command-to-string "sun _set"))))
+            (if (and (> time sunrise) (< time sunset))
+                (load-theme light-theme t)
+              (load-theme dark-theme t))))))
+
+;; Jump to next fold
 
 (defun next-fold (arg)
   "Jumps to the beginning of the next fold, marked with a triplet
@@ -41,6 +47,30 @@
       (condition-case err
           (re-search-backward "^.*\{\{\{$" nil nil)
         (error (message "Previous fold not found.")))))
+
+;; Set title of current tty
+
+(defun tty-set-name (name)
+  "Sets the title of the tty in which Emacs is open. I don't know
+  how portable this is, although it should work on many systems.
+  But it works - Emacs *can* run commands on its parent shell.
+  Take that, EmacsWiki!"
+  
+  (let ((tty (terminal-name)))
+    (shell-command (concat
+                    "echo -ne \"\033]0;"
+                    name
+                    "\007\" >"
+                    tty
+                    " 2>&1"))))
+
+(defun tty-reset-name () (tty-set-name "Terminal"))
+(defun tty-set-name-emacs () (tty-set-name "Emacs"))
+(add-hook 'delete-terminal-functions 'tty-reset-name)
+(add-hook 'kill-emacs 'tty-reset-name)
+(add-hook 'suspend-hook 'tty-reset-name) ; hooks not working?
+
+;; Various functions
 
 (defun ctrl-e-in-vi (n)
   (interactive "p")
@@ -147,10 +177,12 @@
 
 (xterm-mouse-mode t)
 (electric-pair-mode 1) ; auto-insert matching pairs
-(menu-bar-mode -1) ; disable menu bar
-(global-hl-line-mode) ; highlight current line
-(global-linum-mode) ; line numbers
-(save-place-mode 1) ; save cursor position
+(menu-bar-mode -1)     ; disable menu bar
+(global-hl-line-mode)  ; highlight current line
+(global-linum-mode)    ; line numbers
+(save-place-mode 1)    ; save cursor position
+
+(add-hook 'text-mode-hook 'turn-on-auto-fill) ; auto-fill-mode
 
 ;; rainbow delimiters
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
@@ -203,7 +235,7 @@
 (defun custom-origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
   (interactive)
   (save-excursion ; leave point where it is
-    (goto-char (point-at-eol)) ;; then go to the end of line
+    (goto-char (point-at-eol)) ; then go to the end of line
     (origami-toggle-node (current-buffer) (point)))) ; and try to fold
 (add-hook 'origami-mode-hook
           (lambda ()
@@ -238,6 +270,12 @@
 ;; wrap-region
 (wrap-region-mode t)
 
+;; paredit
+(global-set-key (kbd "C-h )") 'paredit-forward-slurp-sexp)
+(global-set-key (kbd "C-h }") 'paredit-forward-barf-sexp)
+(global-set-key (kbd "C-h (") 'paredit-backward-slurp-sexp)
+(global-set-key (kbd "C-h {") 'paredit-backward-barf-sexp)
+
 ;; }}}
 
 ;; Keybindings {{{
@@ -249,9 +287,9 @@
 (global-set-key (kbd "C-c z") 'next-fold)
 (global-set-key (kbd "M-n") 'ctrl-e-in-vi)
 (global-set-key (kbd "M-p") 'ctrl-y-in-vi)
-(global-set-key (kbd "M-o") 'smart-open-line)
-(global-set-key (kbd "M-O") 'smart-open-line-above)
-(global-set-key "\M-;" 'comment-dwim-line)
+(global-set-key (kbd "M-RET") 'smart-open-line)
+(global-set-key (kbd "M-o") 'smart-open-line-above)
+(global-set-key (kbd "M-;") 'comment-dwim-line)
 (global-set-key (kbd "C-c C-k") 'copy-line)
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
@@ -266,9 +304,9 @@
 ;; Published under GNU General Public License
 (define-minor-mode swedish-mode
   "A mode for conveniently using Swedish letters in Emacs.
-Note that this rebinds several important Emacs bindings,
-including xterm-mouse-mode. To use these bindings again, toggle
-the submode off."
+  Note that this rebinds several important Emacs bindings,
+  including ones used by xterm-mouse-mode. To use these bindings
+  again, be sure to toggle the submode off."
   nil
   :lighter " åäö"
   :keymap '(("\M-[" . (lambda () (interactive) (insert ?å)))
