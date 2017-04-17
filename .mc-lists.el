@@ -3,9 +3,11 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        electric-pair-delete-pair
         ))
 
 (setq mc/cmds-to-run-once
       '(
         electric-newline-and-maybe-indent
+        eval-print-last-sexp
         ))
