@@ -32,11 +32,15 @@ bindsym $mod+Shift+c reload
 # Restart i3
 bindsym $mod+Shift+r restart
 
-# Change focus
+# Change focus (vi/emacs)
 bindsym $mod+h focus left
+bindsym $mod+b focus left
 bindsym $mod+j focus down
+bindsym $mod+n focus down
 bindsym $mod+k focus up
+bindsym $mod+p focus up
 bindsym $mod+l focus right
+bindsym $mod+f focus right
 
 # Change layout
 bindsym $mod+Control+v layout splitv

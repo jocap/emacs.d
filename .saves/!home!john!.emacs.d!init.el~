@@ -2,7 +2,7 @@
 ;                           init.el by John Ankarström
 ; ==============================================================================
 
-;; Packages {{{
+; Packages {{{
 
 (require 'package)
 (add-to-list 'package-archives
@@ -12,7 +12,7 @@
   (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
 
-;; origami-mode
+; origami-mode
 
 ;; (global-set-key (kbd "M-Z") 'origami-mode)
 (defun custom-origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
@@ -27,21 +27,21 @@
             (setq-local origami-fold-style 'triple-braces)))
 (global-origami-mode t)
 
-;; auctex-latexmk
+; auctex-latexmk
 (require 'auctex-latexmk)
 (auctex-latexmk-setup)
 
-;; expand-region
+; expand-region
 (require 'expand-region)
 (global-set-key (kbd "C-\\") 'er/expand-region)
 
-;; multiple-cursors
+; multiple-cursors
 (global-set-key (kbd "C-c c") 'mc/edit-lines)
 (global-set-key (kbd "C-c >") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-c <") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c ?") 'mc/mark-all-like-this)
 
-;; visual-regexp-steroids
+; visual-regexp-steroids
 (require 'visual-regexp-steroids)
 (define-key global-map (kbd "C-c r") 'vr/replace)
 (define-key global-map (kbd "C-c q") 'vr/query-replace)
@@ -49,10 +49,11 @@
 (define-key esc-map (kbd "C-r") 'vr/isearch-backward) ; C-M-r
 (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ; C-M-s
 
-;; }}}
+; }}}
 
-;; Preferences {{{
+; Preferences {{{
 
+; (load-theme 'subatomic256 t)
 (load-theme 'gruvbox t)
 (setq-default fill-column 80)
 ;; (setq-default kill-whole-line t) ; C-k kills newline as well
@@ -63,42 +64,42 @@
 (setq-default indent-tabs-mode nil) ; don't use tabs
 (setq sentence-end-double-space nil) ; don't use double-spacing
 
-;; Save ~ files to ~/.emacs.d/.saves instead of current directory
+; Save ~ files to ~/.emacs.d/.saves instead of current directory
 (setq backup-directory-alist `(("." . "~/.emacs.d/.saves")))
 
-;; Line numbers
+; Line numbers
 (global-linum-mode)
 (setq linum-format "%4d \u2502 ")
 
-;; Shebang mode detection
+; Shebang mode detection
 (add-to-list 'interpreter-mode-alist
              '("python3" . python-mode))
 
-;; Enabling disabled commands
+; Enabling disabled commands
 (defadvice en/disable-command (around put-in-custom-file activate)
   "Put declarations in `custom-file'."
   (let ((user-init-file "/home/john/.emacs.d/.commands"))
     ad-do-it))
 
-;; Modes {{{
+; Modes {{{
 
 (xterm-mouse-mode t)
 (electric-pair-mode 1) ; auto-insert matching pairs
 (menu-bar-mode -1) ; disable menu bar
 (global-hl-line-mode) ; highlight current line
 
-;; rainbow delimiters
+; rainbow delimiters
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
-;; save-place (save cursor position in file)
+; save-place (save cursor position in file)
 (require 'saveplace)
 (setq-default save-place t)
 
-;; ido-mode
+; ido-mode
 (require 'ido)
 (ido-mode t)
 
-;; python-mode
+; python-mode
 (defun shell-compile () ; (courtesy of djangoliv @ stack interchange)
   (interactive)
   (shell-command (concat "python " (buffer-file-name)))
@@ -109,7 +110,7 @@
           '(lambda ()
              (define-key python-mode-map (kbd "C-c C-c") 'shell-compile)))
 
-;; (La)TeX-mode
+; (La)TeX-mode
 (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
 (defun my-latex-setup ()
   (defun update-mupdf ()
@@ -138,19 +139,18 @@
   (define-key LaTeX-mode-map (kbd "C-c M-w") 'latex-write-word-count))
 (add-hook 'LaTeX-mode-hook 'my-latex-setup t)
 
-;; }}}
+; }}}
 
-;; }}}
+; }}}
 
-;; Custom keybindings {{{
+; Custom keybindings {{{
 
-;; Quick window switching
+; Quick window switching
 
 (global-set-key (kbd "M-N") 'next-multiframe-window)
 (global-set-key (kbd "M-P") 'previous-multiframe-window)
 
-;; C-e & C-y like in vi
-
+; C-e & C-y like in vi
 (defun ctrl-e-in-vi (n)
  (interactive "p")
  (scroll-up n))
@@ -160,7 +160,7 @@
 (global-set-key (kbd "M-n") 'ctrl-e-in-vi)
 (global-set-key (kbd "M-p") 'ctrl-y-in-vi)
 
-;; Open-line above and below (courtesy of Emacs Redux)
+; Open-line above and below (courtesy of Emacs Redux)
 
 (defun smart-open-line ()
   "Insert an empty line after the current line.
@@ -181,7 +181,7 @@ Position the cursor at it's beginning, according to the current mode."
 (global-set-key (kbd "M-o") 'smart-open-line)
 (global-set-key (kbd "M-O") 'smart-open-line-above)
 
-;; Commenting
+; Commenting
 
 (defun comment-dwim-line (&optional arg) ; (courtesy of Jason Viers @ SE)
   "Replacement for the comment-dwim command.
@@ -195,7 +195,7 @@ Position the cursor at it's beginning, according to the current mode."
     (comment-dwim arg)))
 (global-set-key "\M-;" 'comment-dwim-line)
 
-;; Mark line
+; Mark line
 
 (defun mark-line ()
   "Marks the current line."
@@ -208,7 +208,7 @@ Position the cursor at it's beginning, according to the current mode."
 
 (global-set-key (kbd "M-]") 'mark-line)
 
-;; Copy line
+; Copy line
 
 (defun copy-line (arg)
   "Copy lines (as many as prefix argument) in the kill ring.
@@ -232,7 +232,7 @@ Position the cursor at it's beginning, according to the current mode."
   (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
 (global-set-key (kbd "C-c C-k") 'copy-line)
 
-;; Move to beginning of line like vi (courtesy of Emacs Redux)
+; Move to beginning of line like vi (courtesy of Emacs Redux)
 (defun smarter-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
 
@@ -259,31 +259,16 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
 
-;; }}}
+; }}}
 
-;; Custom functions {{{
+; Custom modes {{{
 
-;; Set color scheme according to daylight
+; Swedish letters
 
-(defun daylight-sets-color ()
-  "Sets a light theme for day and a dark theme for night.
-Depends on the script 'sun' being found in path."
-  (interactive)
-  (let hour (format-time-string "%H.%M")))
-
-;; }}}
-
-;; Custom modes {{{
-
-;; Swedish letters
-
-;; Based on work by Moritz Ulrich <ulrich.moritz@googlemail.com>
-;; Published under GNU General Public License
+; Based on work by Moritz Ulrich <ulrich.moritz@googlemail.com>
+; Published under GNU General Public License
 (define-minor-mode swedish-mode
-  "A mode for conveniently using Swedish letters in Emacs.
-Note that this rebinds several important Emacs bindings,
-including xterm-mouse-mode. To use these bindings again, toggle
-the submode off."
+  "A mode for conveniently using Swedish letters in Emacs"
   nil
   :lighter " åäö"
   :keymap '(("\M-[" . (lambda () (interactive) (insert ?å)))
@@ -294,10 +279,7 @@ the submode off."
             ("\M-:" . (lambda () (interactive) (insert ?Ö)))))
 (provide 'swedish-mode)
 
-;; }}}
-
-;; Automatically set {{{
-
+; }}}
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -305,7 +287,7 @@ the submode off."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region auctex-latexmk))))
+    (visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region auctex-latexmk))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

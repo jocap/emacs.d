@@ -1,0 +1,29 @@
+;;; -*- coding: utf-8 -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("/home/john/.config/" . "i3/")
+ ("/home/john/" . ".config/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ "/home/john/.config/i3/"
+)
+
+;; ----- ido-work-file-list -----
+(
+ "config"
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("/home/john/.config/i3/" (22772 6488 853524 400000) "config" "../" "./")
+
+ ("/home/john/.config/" (22772 6440 212543 0) "kdebugrc" "i3/" "dconf/" "alacritty/" "../" "./")
+
+ ("/home/john/" (22772 33855 619262 0) "org/" "downloads/" "documents/" "dev/" "bin/" "Backup/" ".zshrc" ".zsh_history" ".zsh/" ".zcompdump" ".wallpapers/" ".vimrc" ".viminfo" ".vim/" ".sudo_as_admin_successful" ".ssh/" ".servers/" ".rustup/" ".profile" ".multirust/" ".local/" ".gnupg/" ".gitconfig" ".gconf/" ".fehbg" ".emacs.d/" ".dircolors" ".dbus/" ".config/" ".cargo/" ".cache/" ".bashrc" ".bash_logout" ".bash_history" ".Xresources" ".Xmodmap" "../" "./")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t
