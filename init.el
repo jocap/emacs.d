@@ -68,7 +68,9 @@
       (if return-nil nil output))))
 
 (defun tty-set-name (name &optional terminal)
-  "Sets the title of the tty in which the current frame is open."
+  "Sets the title of the tty in which the current frame is
+  open (or the tty provided by argument)."
+  
   (tty-shell-command (concat
                       "echo -ne \"\033]0;"
                       name
@@ -131,8 +133,10 @@
         (end (line-end-position arg)))
     (when mark-active
       (if (> (point) (mark))
-          (setq beg (save-excursion (goto-char (mark)) (line-beginning-position)))
-        (setq end (save-excursion (goto-char (mark)) (line-end-position)))))
+          (setq beg
+                (save-excursion (goto-char (mark)) (line-beginning-position)))
+        (setq end
+              (save-excursion (goto-char (mark)) (line-end-position)))))
     (if (eq last-command 'copy-line)
         (kill-append (buffer-substring beg end) (< end beg))
       (kill-ring-save beg end)))
@@ -286,7 +290,8 @@
 ;; paredit
 
 ;; - enable automatically
-(autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+(autoload 'enable-paredit-mode
+  "paredit" "Turn on pseudo-structural editing of Lisp code." t)
 (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
 (add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
 (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
@@ -300,6 +305,10 @@
 (global-set-key (kbd "C-h }") 'paredit-forward-barf-sexp)
 (global-set-key (kbd "C-h (") 'paredit-backward-slurp-sexp)
 (global-set-key (kbd "C-h {") 'paredit-backward-barf-sexp)
+
+(add-hook 'paredit-mode-hook ; re-map M-r, overriden by paredit-mode
+          (lambda ()
+            (local-set-key (kbd "M-R") 'move-to-window-line-top-bottom)))
 
 ;; }}}
 
