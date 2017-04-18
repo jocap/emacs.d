@@ -37,23 +37,24 @@
 ;; Jump to next fold
 
 (defun traverse-folds (times)
+  "Traverses through folds as many times as ordered by argument.
+  A negative argument makes it traverse backwards."
+  
   (if (> times 0)
       (progn
         (move-end-of-line nil)
-        (setq regex "^.*\{\{\{$")
-        (fset 're-search-fun 're-search-forward))
+        (fset 'fun 'origami-forward-fold))
     (progn
-      (move-beginning-of-line nil)
-      (setq regex "\{\{\{$")
-      (fset 're-search-fun 're-search-backward)))
+      (move-beginning-of-line nil) 
+      (fset 'fun 'origami-previous-fold)))
   (dotimes (i (abs times))
     (condition-case err
-        (re-search-fun regex nil nil)
+        (fun (current-buffer) (point))
       (error (message "Fold not found.")))))
 
 (defun next-fold (times)
-  "Jumps to the beginning of the next fold, marked with a triplet
-  braces before EOL."
+  "Jumps to the beginning of the next fold (or previous, on
+  negative argument)."
 
   (interactive "P")
   (if (equal times nil)
@@ -194,6 +195,10 @@
 (add-to-list 'interpreter-mode-alist
              '("python3" . python-mode))
 
+;; GUI
+(add-to-list 'default-frame-alist
+             '(font . "Fira Mono Medium-10"))
+
 ;; Enabling disabled commands
 (defadvice en/disable-command (around put-in-custom-file activate)
   "Put declarations in `custom-file'."
@@ -212,78 +217,31 @@
 
 ;; Modes {{{
 
-(xterm-mouse-mode t)
-(electric-pair-mode 1) ; auto-insert matching pairs
-(menu-bar-mode -1)     ; disable menu bar
-(global-hl-line-mode)  ; highlight current line
-(global-linum-mode)    ; line numbers
-(save-place-mode 1)    ; save cursor position
+(electric-pair-mode 1)      ; auto-insert matching pairs
+(menu-bar-mode -1)          ; disable menu bar
+(global-hl-line-mode)       ; highlight current line
+(global-linum-mode)         ; line numbers
+(save-place-mode 1)         ; save cursor position
+(xterm-mouse-mode t)        ; use mouse (somewhat) in terminal
+(tool-bar-mode -1)          ; disable gui toolbar
+(smart-cursor-color-mode 1) ; dynamic cursor color
 
-(add-hook 'text-mode-hook 'turn-on-auto-fill) ; auto-fill-mode
-
-;; rainbow delimiters
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+;; wrap-region
+(wrap-region-mode t)
 
 ;; ido-mode
 (require 'ido)
 (ido-mode t)
 
-;; python-mode
-(defun shell-compile () ; (courtesy of djangoliv @ stack interchange)
-  (interactive)
-  (shell-command (concat "python " (buffer-file-name)))
-  (if (<= (* 2 (window-height)) (frame-height))
-      (enlarge-window 20)
-    (/ (frame-height) 2)))
-(add-hook 'python-mode-hook
-          '(lambda ()
-             (define-key python-mode-map (kbd "C-c C-c") 'shell-compile)))
-
-;; (La)TeX-mode
-(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
-(defun my-latex-setup ()
-  (defun update-mupdf ()
-    "Updates mupdf by sending a SIGHUP signal to it."
-    (interactive)
-    (shell-command "killall -HUP mupdf & echo 'Update signal sent.'"))
-  (define-key LaTeX-mode-map (kbd "C-c C-u") 'update-mupdf)
-
-  (defun latex-word-count () ; (courtesy of Nicholas Riley @ SE)
-    (interactive)
-    (let* ((this-file (buffer-file-name))
-           (word-count
-            (with-output-to-string
-              (with-current-buffer standard-output
-                (call-process "texcount" nil t nil "-brief" this-file)))))
-      (string-match "\n$" word-count)
-      (message (replace-match "" nil nil word-count))))
-  (define-key LaTeX-mode-map (kbd "C-c w") 'latex-word-count)
-
-  (defun latex-write-word-count ()
-    "Writes the word count to count.txt (if it exists)."
-    (interactive)
-    (shell-command (concat "texcount -brief "
-                    (shell-quote-argument buffer-file-name)
-                    " | sed -e 's/+.*//' > count.txt; cat count.txt")))
-  (define-key LaTeX-mode-map (kbd "C-c M-w") 'latex-write-word-count))
-(add-hook 'LaTeX-mode-hook 'my-latex-setup t)
-
-;; origami-mode
-(defun custom-origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
-  (interactive)
-  (save-excursion ; leave point where it is
-    (goto-char (point-at-eol)) ; then go to the end of line
-    (origami-toggle-node (current-buffer) (point)))) ; and try to fold
-(add-hook 'origami-mode-hook
-          (lambda ()
-            (global-set-key (kbd "M-Z") 'custom-origami-toggle-node)
-            (global-set-key (kbd "C-M-z") 'origami-toggle-all-nodes)
-            (setq-local origami-fold-style 'triple-braces)))
-(global-origami-mode t)
-
 ;; auctex-latexmk
 (require 'auctex-latexmk)
 (auctex-latexmk-setup)
+
+;; auto-fill-mode
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+
+;; rainbow delimiters
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
 ;; expand-region
 (require 'expand-region)
@@ -303,9 +261,6 @@
 (define-key esc-map (kbd "C-r") 'vr/isearch-backward) ; C-M-r
 (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ; C-M-s
 ;; (NOTE: Make sure to use pcre2el - much faster than Python)
-
-;; wrap-region
-(wrap-region-mode t)
 
 ;; paredit
 
@@ -329,6 +284,59 @@
 (add-hook 'paredit-mode-hook ; re-map M-r, overriden by paredit-mode
           (lambda ()
             (local-set-key (kbd "M-R") 'move-to-window-line-top-bottom)))
+
+;; python-mode
+(defun shell-compile () ; (courtesy of djangoliv @ stack interchange)
+  (interactive)
+  (shell-command (concat "python " (buffer-file-name)))
+  (if (<= (* 2 (window-height)) (frame-height))
+      (enlarge-window 20)
+    (/ (frame-height) 2)))
+(add-hook 'python-mode-hook
+          '(lambda ()
+             (define-key python-mode-map (kbd "C-c C-c") 'shell-compile)))
+
+;; origami-mode
+(defun custom-origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
+  (interactive)
+  (save-excursion ; leave point where it is
+    (goto-char (point-at-eol)) ; then go to the end of line
+    (origami-toggle-node (current-buffer) (point)))) ; and try to fold
+(add-hook 'origami-mode-hook
+          (lambda ()
+            (global-set-key (kbd "M-Z") 'custom-origami-toggle-node)
+            (global-set-key (kbd "C-M-z") 'origami-toggle-all-nodes)
+            (setq-local origami-fold-style 'triple-braces)))
+(global-origami-mode t)
+
+;; (La)TeX-mode
+(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+(defun my-latex-setup ()
+  (defun update-mupdf ()
+    "Updates mupdf by sending a SIGHUP signal to it."
+    (interactive)
+    (shell-command "killall -HUP mupdf-x11 & echo 'Update signal sent.'"))
+  (define-key LaTeX-mode-map (kbd "C-c C-u") 'update-mupdf)
+
+  (defun latex-word-count () ; (courtesy of Nicholas Riley @ SE)
+    (interactive)
+    (let* ((this-file (buffer-file-name))
+           (word-count
+            (with-output-to-string
+              (with-current-buffer standard-output
+                (call-process "texcount" nil t nil "-brief" this-file)))))
+      (string-match "\n$" word-count)
+      (message (replace-match "" nil nil word-count))))
+  (define-key LaTeX-mode-map (kbd "C-c w") 'latex-word-count)
+
+  (defun latex-write-word-count ()
+    "Writes the word count to count.txt (if it exists)."
+    (interactive)
+    (shell-command (concat "texcount -brief "
+                    (shell-quote-argument buffer-file-name)
+                    " | sed -e 's/+.*//' > count.txt; cat count.txt")))
+  (define-key LaTeX-mode-map (kbd "C-c M-w") 'latex-write-word-count))
+(add-hook 'LaTeX-mode-hook 'my-latex-setup t)
 
 ;; }}}
 
