@@ -21,6 +21,7 @@
 (defun daylight-sets-color (light-theme dark-theme)
   "Sets a light theme for day and a dark theme for night.
   Depends on the script 'sun' being found in path."
+
   (interactive)
   (let ((time (string-to-number (format-time-string "%H.%M"))))
         (if (string-match "not found" (shell-command-to-string "which sun"))
@@ -39,36 +40,60 @@
   "Jumps to the beginning of the next fold, marked with a triplet
   braces before EOL. When prefixed with a universal
   argument (C-u), it jumps to the previous fold."
+
   (interactive "P")
   (if (equal arg nil)
       (condition-case err
           (re-search-forward "^.*\{\{\{$" nil nil)
         (error (message "Next fold not found.")))
-      (condition-case err
-          (re-search-backward "^.*\{\{\{$" nil nil)
-        (error (message "Previous fold not found.")))))
+    (progn (move-beginning-of-line nil)
+        (condition-case err
+            (re-search-backward "\{\{\{$" nil nil)
+          (error (message "Previous fold not found."))))))
 
 ;; Set title of current tty
 
-(defun tty-set-name (name)
+(defun tty-set-name (name &optional terminal)
   "Sets the title of the tty in which Emacs is open. I don't know
   how portable this is, although it should work on many systems.
   But it works - Emacs *can* run commands on its parent shell.
-  Take that, EmacsWiki!"
-  
-  (let ((tty (terminal-name)))
-    (shell-command (concat
-                    "echo -ne \"\033]0;"
-                    name
-                    "\007\" >"
-                    tty
-                    " 2>&1"))))
+  Take that, EmacsWiki!
 
-(defun tty-reset-name () (tty-set-name "Terminal"))
-(defun tty-set-name-emacs () (tty-set-name "Emacs"))
-(add-hook 'delete-terminal-functions 'tty-reset-name)
-(add-hook 'kill-emacs 'tty-reset-name)
-(add-hook 'suspend-hook 'tty-reset-name) ; hooks not working?
+  Note that it will *only* work in Emacs frames attached to using
+  emacsclient -t.
+
+  If you don't want to use Emacs as a server, you might be able
+  to start Emacs with some type of argument specifying the
+  current tty and modify this function to use that instead
+  of (terminal-name)."
+  (unless terminal (setq terminal (get-device-terminal nil)))
+  (let ((tty (terminal-name terminal)))
+    (if (shell-command (concat
+                         "echo -ne \"\033]0;"
+                         name
+                         "\007\" >"
+                         tty
+                         " 2>&1"))
+        nil
+      nil))) ; return nil whatever happens
+
+(defun tty-reset-name (&optional x) (tty-set-name "Terminal"))
+(defun tty-set-name-emacs (&optional x) (tty-set-name "Emacs"))
+
+(defun tty-reset-name-if-same (terminal)
+  (if (equal terminal (get-device-terminal nil)) (tty-reset-name)))
+(defun tty-set-name-emacs-if-same (terminal)
+  (if (equal terminal (get-device-terminal nil)) (tty-set-name-emacs)))
+
+(advice-add 'save-buffers-kill-terminal :before #'tty-reset-name)
+(add-hook 'kill-emacs-hook 'tty-reset-name)
+
+(add-hook 'delete-terminal-functions 'tty-reset-name-if-same)
+(add-hook 'suspend-tty-functions 'tty-reset-name-if-same)
+(add-hook 'resume-tty-functions 'tty-set-name-emacs-if-same)
+
+(add-hook 'suspend-hook 'tty-reset-name)
+(add-hook 'suspend-resume-hook 'tty-set-name-emacs)
 
 ;; Various functions
 
@@ -284,7 +309,7 @@
 (global-set-key (kbd "M-P") 'previous-multiframe-window)
 (global-set-key (kbd "M-]") 'mark-line)
 
-(global-set-key (kbd "C-c z") 'next-fold)
+(global-set-key (kbd "C-c C-z") 'next-fold)
 (global-set-key (kbd "M-n") 'ctrl-e-in-vi)
 (global-set-key (kbd "M-p") 'ctrl-y-in-vi)
 (global-set-key (kbd "M-RET") 'smart-open-line)
