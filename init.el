@@ -77,24 +77,6 @@
         nil
       nil))) ; return nil whatever happens
 
-(defun tty-reset-name (&optional x) (tty-set-name "Terminal"))
-(defun tty-set-name-emacs (&optional x) (tty-set-name "Emacs"))
-
-(defun tty-reset-name-if-same (terminal)
-  (if (equal terminal (get-device-terminal nil)) (tty-reset-name)))
-(defun tty-set-name-emacs-if-same (terminal)
-  (if (equal terminal (get-device-terminal nil)) (tty-set-name-emacs)))
-
-(advice-add 'save-buffers-kill-terminal :before #'tty-reset-name)
-(add-hook 'kill-emacs-hook 'tty-reset-name)
-
-(add-hook 'delete-terminal-functions 'tty-reset-name-if-same)
-(add-hook 'suspend-tty-functions 'tty-reset-name-if-same)
-(add-hook 'resume-tty-functions 'tty-set-name-emacs-if-same)
-
-(add-hook 'suspend-hook 'tty-reset-name)
-(add-hook 'suspend-resume-hook 'tty-set-name-emacs)
-
 ;; Various functions
 
 (defun ctrl-e-in-vi (n)
