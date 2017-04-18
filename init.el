@@ -51,31 +51,29 @@
             (re-search-backward "\{\{\{$" nil nil)
           (error (message "Previous fold not found."))))))
 
-;; Set title of current tty
+;; Execute shell commands on parent shell (or any other tty)
+
+(defun tty-shell-command (command &optional terminal &optional return-nil)
+  "Executes a command on terminal (default: parent tty of frame).
+  Note that it only works in Emacs frames attached to using
+  emacsclient -t."
+  
+  (unless terminal (setq terminal (get-device-terminal nil))) ; tty of frame
+  (let ((tty (terminal-name terminal)))
+    (progn (setq output (shell-command (concat
+                                        command
+                                        " >"
+                                        tty
+                                        " 2>&1")))
+      (if return-nil nil output))))
 
 (defun tty-set-name (name &optional terminal)
-  "Sets the title of the tty in which Emacs is open. I don't know
-  how portable this is, although it should work on many systems.
-  But it works - Emacs *can* run commands on its parent shell.
-  Take that, EmacsWiki!
-
-  Note that it will *only* work in Emacs frames attached to using
-  emacsclient -t.
-
-  If you don't want to use Emacs as a server, you might be able
-  to start Emacs with some type of argument specifying the
-  current tty and modify this function to use that instead
-  of (terminal-name)."
-  (unless terminal (setq terminal (get-device-terminal nil)))
-  (let ((tty (terminal-name terminal)))
-    (if (shell-command (concat
-                         "echo -ne \"\033]0;"
-                         name
-                         "\007\" >"
-                         tty
-                         " 2>&1"))
-        nil
-      nil))) ; return nil whatever happens
+  "Sets the title of the tty in which the current frame is open."
+  (tty-shell-command (concat
+                      "echo -ne \"\033]0;"
+                      name
+                      "\007\"")
+                     terminal) t) ; return-nil = t -> return nil no matter what
 
 ;; Various functions
 
@@ -178,6 +176,14 @@
   (let ((user-init-file "/home/john/.emacs.d/.commands"))
     ad-do-it))
 
+;; Change cursor to block on suspend, and back to ibeam on resume
+(add-hook 'suspend-tty-functions
+          (lambda (terminal)
+            (tty-shell-command "echo -ne \"\e[2 q\"" terminal)))
+(add-hook 'resume-tty-functions
+          (lambda (terminal)
+            (tty-shell-command "echo -ne \"\e[6 q\"" terminal)))
+
 ;; }}}
 
 ;; Modes {{{
@@ -278,6 +284,18 @@
 (wrap-region-mode t)
 
 ;; paredit
+
+;; - enable automatically
+(autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+(add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
+(add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
+(add-hook 'ielm-mode-hook             #'enable-paredit-mode)
+(add-hook 'lisp-mode-hook             #'enable-paredit-mode)
+(add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
+(add-hook 'scheme-mode-hook           #'enable-paredit-mode)
+(add-hook 'prog-mode-hook 'paredit-everywhere-mode) ; paredit-everywhere
+
+;; - keybindings
 (global-set-key (kbd "C-h )") 'paredit-forward-slurp-sexp)
 (global-set-key (kbd "C-h }") 'paredit-forward-barf-sexp)
 (global-set-key (kbd "C-h (") 'paredit-backward-slurp-sexp)
