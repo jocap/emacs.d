@@ -36,20 +36,40 @@
 
 ;; Jump to next fold
 
-(defun next-fold (arg)
+(defun traverse-folds (times)
+  (if (> times 0)
+      (progn
+        (move-end-of-line nil)
+        (setq regex "^.*\{\{\{$")
+        (fset 're-search-fun 're-search-forward))
+    (progn
+      (move-beginning-of-line nil)
+      (setq regex "\{\{\{$")
+      (fset 're-search-fun 're-search-backward)))
+  (dotimes (i (abs times))
+    (condition-case err
+        (re-search-fun regex nil nil)
+      (error (message "Fold not found.")))))
+
+(defun next-fold (times)
   "Jumps to the beginning of the next fold, marked with a triplet
-  braces before EOL. When prefixed with a universal
-  argument (C-u), it jumps to the previous fold."
+  braces before EOL."
 
   (interactive "P")
-  (if (equal arg nil)
-      (condition-case err
-          (re-search-forward "^.*\{\{\{$" nil nil)
-        (error (message "Next fold not found.")))
-    (progn (move-beginning-of-line nil)
-        (condition-case err
-            (re-search-backward "\{\{\{$" nil nil)
-          (error (message "Previous fold not found."))))))
+  (if (equal times nil)
+      (traverse-folds 1)
+    (traverse-folds times)))
+
+(defun goto-fold (number)
+  "Jumps to fold # (provided by argument) in file."
+  
+  (interactive "P")
+  (unless number (setq number (string-to-number (read-string "Jump to fold: "))))
+  (if (equal number 0) (setq number 1))
+  (if (> number 0)
+      (goto-char (point-min))
+    (goto-char (point-max)))
+  (traverse-folds number))
 
 ;; Execute shell commands on parent shell (or any other tty)
 
@@ -318,7 +338,12 @@
 (global-set-key (kbd "M-P") 'previous-multiframe-window)
 (global-set-key (kbd "M-]") 'mark-line)
 
-(global-set-key (kbd "C-c C-z") 'next-fold)
+(global-set-key (kbd "C-c C-z") 'goto-fold)
+(global-set-key (kbd "C-c C-n") 'next-fold)
+(global-set-key (kbd "C-c C-p") '(lambda (arg)
+                                   (interactive "P")
+                                   (unless arg (setq arg 1))
+                                   (next-fold (* arg -1))))
 (global-set-key (kbd "M-n") 'ctrl-e-in-vi)
 (global-set-key (kbd "M-p") 'ctrl-y-in-vi)
 (global-set-key (kbd "M-RET") 'smart-open-line)
