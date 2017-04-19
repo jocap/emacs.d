@@ -2,7 +2,7 @@
 ;                           init.el by John Ankarström
 ; ==============================================================================
 
-;; Packages {{{
+;; 1. Packages {{{
 
 (require 'package)
 (add-to-list 'package-archives
@@ -14,7 +14,7 @@
 
 ;; }}}
 
-;; Functions {{{
+;; 2. Functions {{{
 
 ;; Set color scheme according to daylight
 
@@ -207,11 +207,13 @@
 
 ;; }}}
 
-;; Preferences {{{
+;; 3. Preferences {{{
 
-(server-start) ; use emacs as a server - edit new files using emacsclient
+(server-start) ; use emacs as a server
 
 ;; Directories
+(setq custom-file (concat user-emacs-directory "custom.el"))
+
 (setq emacs-state-directory (concat user-emacs-directory "state/"))
 (setq save-place-file (concat emacs-state-directory "save-place"))
 (setq recentf-save-file (concat emacs-state-directory "recentf"))
@@ -266,7 +268,33 @@
 
 ;; }}}
 
-;; Modes {{{
+;; 4. Keybindings {{{
+
+(global-set-key (kbd "M-<f1>") 'menu-bar-mode)
+(windmove-default-keybindings)
+(setq framemove-hook-into-windmove t)
+
+(global-set-key (kbd "M-m") 'iy-go-to-char)
+(global-set-key (kbd "M-M") 'iy-go-to-char-backward)
+(global-set-key (kbd "C-.") 'iy-go-to-char-continue)
+(global-set-key (kbd "C-,") 'iy-go-to-char-continue-backward)
+
+(global-set-key (kbd "C-c C-z") 'goto-fold)
+(global-set-key (kbd "C-c C-n") 'next-fold)
+(global-set-key (kbd "C-c C-p") 'previous-fold)
+
+(global-set-key (kbd "M-n") 'ctrl-e-in-vi)
+(global-set-key (kbd "M-p") 'ctrl-y-in-vi)
+(global-set-key (kbd "M-RET") 'smart-open-line)
+(global-set-key (kbd "M-o") 'smart-open-line-above)
+(global-set-key (kbd "C-;") 'comment-dwim-line)
+(global-set-key (kbd "C-c C-k") 'copy-line)
+(global-set-key [remap move-beginning-of-line]
+                'smarter-move-beginning-of-line)
+
+;; }}}
+
+;; 5. Mode configuration {{{
 
 (electric-pair-mode 1)      ; auto-insert matching pairs
 (menu-bar-mode -1)          ; disable menu bar
@@ -410,33 +438,7 @@
 
 ;; }}}
 
-;; Keybindings {{{
-
-(global-set-key (kbd "M-<f1>") 'menu-bar-mode)
-(windmove-default-keybindings)
-(setq framemove-hook-into-windmove t)
-
-(global-set-key (kbd "M-m") 'iy-go-to-char)
-(global-set-key (kbd "M-M") 'iy-go-to-char-backward)
-(global-set-key (kbd "C-.") 'iy-go-to-char-continue)
-(global-set-key (kbd "C-,") 'iy-go-to-char-continue-backward)
-
-(global-set-key (kbd "C-c C-z") 'goto-fold)
-(global-set-key (kbd "C-c C-n") 'next-fold)
-(global-set-key (kbd "C-c C-p") 'previous-fold)
-
-(global-set-key (kbd "M-n") 'ctrl-e-in-vi)
-(global-set-key (kbd "M-p") 'ctrl-y-in-vi)
-(global-set-key (kbd "M-RET") 'smart-open-line)
-(global-set-key (kbd "M-o") 'smart-open-line-above)
-(global-set-key (kbd "C-;") 'comment-dwim-line)
-(global-set-key (kbd "C-c C-k") 'copy-line)
-(global-set-key [remap move-beginning-of-line]
-                'smarter-move-beginning-of-line)
-
-;; }}}
-
-;; Custom modes {{{
+;; 6. Custom modes {{{
 
 ;; Swedish letters
 
@@ -459,9 +461,8 @@
 
 ;; }}}
 
-;; Customize {{{
+;; 7. Customize {{{
 
-(setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
 ;; }}}
