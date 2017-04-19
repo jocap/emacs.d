@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         electric-pair-delete-pair
+        paredit-forward-kill-word
         ))
 
 (setq mc/cmds-to-run-once

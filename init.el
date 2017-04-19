@@ -224,7 +224,6 @@
 (save-place-mode 1)         ; save cursor position
 (xterm-mouse-mode t)        ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)          ; disable gui toolbar
-(smart-cursor-color-mode 1) ; dynamic cursor color
 
 ;; wrap-region
 (wrap-region-mode t)
@@ -252,6 +251,10 @@
 (global-set-key (kbd "C-c >") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-c <") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c ?") 'mc/mark-all-like-this)
+;; (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos)
+
+;; TODO: For some reason, mc/cursor-specific-vars doesn't seem to exist. Do I
+;; need this at all?
 
 ;; visual-regexp-steroids
 (require 'visual-regexp-steroids)
@@ -346,17 +349,23 @@
 (global-set-key (kbd "M-P") 'previous-multiframe-window)
 (global-set-key (kbd "M-]") 'mark-line)
 
+(global-set-key (kbd "M-m") 'iy-go-to-char)
+(global-set-key (kbd "M-M") 'iy-go-to-char-backward)
+(global-set-key (kbd "C-.") 'iy-go-to-char-continue)
+(global-set-key (kbd "C-,") 'iy-go-to-char-continue-backward)
+
 (global-set-key (kbd "C-c C-z") 'goto-fold)
 (global-set-key (kbd "C-c C-n") 'next-fold)
 (global-set-key (kbd "C-c C-p") '(lambda (arg)
                                    (interactive "P")
                                    (unless arg (setq arg 1))
                                    (next-fold (* arg -1))))
+
 (global-set-key (kbd "M-n") 'ctrl-e-in-vi)
 (global-set-key (kbd "M-p") 'ctrl-y-in-vi)
 (global-set-key (kbd "M-RET") 'smart-open-line)
 (global-set-key (kbd "M-o") 'smart-open-line-above)
-(global-set-key (kbd "M-;") 'comment-dwim-line)
+(global-set-key (kbd "C-;") 'comment-dwim-line)
 (global-set-key (kbd "C-c C-k") 'copy-line)
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
