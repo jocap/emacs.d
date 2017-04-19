@@ -72,7 +72,8 @@
   "Jumps to fold # (provided by argument) in file."
   
   (interactive "P")
-  (unless number (setq number (string-to-number (read-string "Jump to fold: "))))
+  (unless number (setq number
+                       (string-to-number (read-string "Jump to fold: "))))
   (if (equal number 0) (setq number 1))
   (if (> number 0)
       (goto-char (point-min))
@@ -131,9 +132,10 @@
 
 (defun comment-dwim-line (&optional arg) ; (courtesy of Jason Viers @ SE)
   "Replacement for the comment-dwim command.
-  If no region is selected and current line is not blank and we are not at the end of the line,
-  then comment current line.
-  Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
+  If no region is selected and current line is not blank and we
+  are not at the end of the line, then comment current line.
+  Replaces default behaviour of comment-dwim, when it inserts
+  comment at the end of the line."
   (interactive "*P")
   (comment-normalize-vars)
   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
@@ -232,6 +234,10 @@
 (xterm-mouse-mode t)        ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)          ; disable gui toolbar
 
+;; fci-mode
+(add-hook 'prog-mode-hook (lambda () (fci-mode 1)))
+(add-hook 'text-mode-hook (lambda () (fci-mode 1)))
+
 ;; wrap-region
 (wrap-region-mode t)
 
@@ -267,7 +273,9 @@
 (global-set-key (kbd "C-c >") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-c <") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c ?") 'mc/mark-all-like-this)
-(global-set-key (kbd "C-c C") mc/mark-more-like-this-extended)
+(add-hook 'multiple-cursors-hook
+          (lambda () ; I'm not sure how, but this is supposed to be good
+            (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos)))
 
 ;; visual-regexp-steroids
 (require 'visual-regexp-steroids)

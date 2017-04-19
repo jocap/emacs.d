@@ -24,4 +24,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))) nil "Made text visible.")
+ '(magit-diff-conflict-heading ((t (:inherit magit-diff-hunk-heading :distant-foreground "dim gray"))))
+ '(magit-diff-context-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))))
+ '(magit-diff-file-heading-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))))
+ '(magit-diff-hunk-heading ((t (:background "#f5ebcc" :distant-foreground "dim gray"))))
+ '(magit-diff-hunk-heading-highlight ((t (:background "#e8debf" :distant-foreground "dim gray"))))
+ '(magit-section-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))) nil "Made text visible.")
+ '(widget-field ((t (:background "#eee8d5" :foreground "dim gray"))) nil "Made text visible."))
