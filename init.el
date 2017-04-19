@@ -57,9 +57,16 @@
   negative argument)."
 
   (interactive "P")
-  (if (equal times nil)
-      (traverse-folds 1)
-    (traverse-folds times)))
+  (unless times (setq times 1))
+  (traverse-folds times))
+
+(defun previous-fold (times)
+  "Jumps to the beginning of the previous fold, as many times as
+  ordered by argument."
+  
+  (interactive "P")
+  (unless times (setq times 1))
+  (next-fold (* times -1)))
 
 (defun goto-fold (number)
   "Jumps to fold # (provided by argument) in file."
@@ -228,9 +235,18 @@
 ;; wrap-region
 (wrap-region-mode t)
 
+;; emacs-dashboard
+(dashboard-setup-startup-hook)
+
 ;; ido-mode
 (require 'ido)
 (ido-mode t)
+(ido-everywhere 1)
+
+;; flx-ido-mode (fuzzy matching for ido)
+(flx-ido-mode 1)
+(setq ido-enable-flex-matching t)
+(setq ido-use-faces nil)
 
 ;; auctex-latexmk
 (require 'auctex-latexmk)
@@ -251,10 +267,7 @@
 (global-set-key (kbd "C-c >") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-c <") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c ?") 'mc/mark-all-like-this)
-;; (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos)
-
-;; TODO: For some reason, mc/cursor-specific-vars doesn't seem to exist. Do I
-;; need this at all?
+(global-set-key (kbd "C-c C") mc/mark-more-like-this-extended)
 
 ;; visual-regexp-steroids
 (require 'visual-regexp-steroids)
@@ -345,9 +358,9 @@
 
 ;; Keybindings {{{
 
-(global-set-key (kbd "M-N") 'next-multiframe-window)
-(global-set-key (kbd "M-P") 'previous-multiframe-window)
-(global-set-key (kbd "M-]") 'mark-line)
+(global-set-key (kbd "M-<f1>") 'menu-bar-mode)
+(windmove-default-keybindings)
+(setq framemove-hook-into-windmove t)
 
 (global-set-key (kbd "M-m") 'iy-go-to-char)
 (global-set-key (kbd "M-M") 'iy-go-to-char-backward)
@@ -356,10 +369,7 @@
 
 (global-set-key (kbd "C-c C-z") 'goto-fold)
 (global-set-key (kbd "C-c C-n") 'next-fold)
-(global-set-key (kbd "C-c C-p") '(lambda (arg)
-                                   (interactive "P")
-                                   (unless arg (setq arg 1))
-                                   (next-fold (* arg -1))))
+(global-set-key (kbd "C-c C-p") 'previous-fold)
 
 (global-set-key (kbd "M-n") 'ctrl-e-in-vi)
 (global-set-key (kbd "M-p") 'ctrl-y-in-vi)
