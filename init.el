@@ -200,6 +200,14 @@
 (server-start) ; use emacs as a server - edit new files using emacsclient
 (daylight-sets-color 'solarized-light 'gruvbox) ; light & dark themes
 
+;; Directories
+(setq emacs-state-directory (concat user-emacs-directory "state/"))
+(setq save-place-file (concat emacs-state-directory "save-place"))
+(setq recentf-save-file (concat emacs-state-directory "recentf"))
+(setq ido-save-directory-list-file (concat emacs-state-directory "ido.last"))
+(setq backup-directory-alist
+      `((".*" . ,(concat emacs-state-directory "saves"))))
+
 ;; Shebang mode detection
 (add-to-list 'interpreter-mode-alist
              '("python3" . python-mode))
@@ -221,6 +229,12 @@
 (add-hook 'resume-tty-functions
           (lambda (terminal)
             (tty-shell-command "echo -ne \"\e[6 q\"" terminal)))
+
+;; Disable previous theme when enabling new theme
+(add-hook 'after-init-hook
+          (lambda () (defadvice load-theme 
+                         (before theme-dont-propagate activate)
+                       (mapcar #'disable-theme custom-enabled-themes))))
 
 ;; }}}
 
@@ -419,3 +433,7 @@
 (load custom-file)
 
 ;; }}}
+
+
+
+
