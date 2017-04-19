@@ -18,7 +18,7 @@
 
 ;; Set color scheme according to daylight
 
-(defun daylight-sets-color (light-theme dark-theme)
+(defun daylight-sets-color ()
   "Sets a light theme for day and a dark theme for night.
   Depends on the script 'sun' being found in path."
 
@@ -36,10 +36,11 @@
 
 ;; Jump to next fold
 
-(defun traverse-folds (times)
+(defun traverse-folds (times &optional beginning)
   "Traverses through folds as many times as ordered by argument.
   A negative argument makes it traverse backwards."
-  
+
+  (unless beginning (setq beginning (point)))
   (if (> times 0)
       (progn
         (move-end-of-line nil)
@@ -50,7 +51,9 @@
   (dotimes (i (abs times))
     (condition-case err
         (fun (current-buffer) (point))
-      (error (message "Fold not found.")))))
+      (error (message "Fold not found."))))
+  (set-mark beginning)
+  (deactivate-mark))
 
 (defun next-fold (times)
   "Jumps to the beginning of the next fold (or previous, on
@@ -74,11 +77,12 @@
   (interactive "P")
   (unless number (setq number
                        (string-to-number (read-string "Jump to fold: "))))
+  (setq beginning (point))
   (if (equal number 0) (setq number 1))
   (if (> number 0)
       (goto-char (point-min))
     (goto-char (point-max)))
-  (traverse-folds number))
+  (traverse-folds number beginning))
 
 ;; Execute shell commands on parent shell (or any other tty)
 
@@ -105,6 +109,14 @@
                       name
                       "\007\"")
                      terminal) t) ; return-nil = t -> return nil no matter what
+
+;; Dynamic settings for light/dark themes
+
+(defun dynamic-load-theme (theme &optional rest ...)
+  (if (and (fboundp 'light-theme-do) (equal theme 'solarized-light))
+      (light-theme-do))
+  (if (and (fboundp 'dark-theme-do) (equal theme 'gruvbox))
+      (dark-theme-do)))
 
 ;; Various functions
 
@@ -198,7 +210,6 @@
 ;; Preferences {{{
 
 (server-start) ; use emacs as a server - edit new files using emacsclient
-(daylight-sets-color 'solarized-light 'gruvbox) ; light & dark themes
 
 ;; Directories
 (setq emacs-state-directory (concat user-emacs-directory "state/"))
@@ -216,6 +227,29 @@
 (add-to-list 'default-frame-alist
              '(font . "Fira Mono Medium-10"))
 
+;; Themes
+
+(setq light-theme 'solarized-light)
+(setq dark-theme 'gruvbox)
+
+(defun light-theme-do ()
+  (setq fci-rule-color "#cccccc"))
+
+(defun dark-theme-do ()
+  (setq fci-rule-color "#333333"))
+
+;; - Set theme according to daylight
+(daylight-sets-color)
+
+;; - Disable previous theme when enabling new theme
+(add-hook 'after-init-hook
+          (lambda () (defadvice load-theme 
+                         (before theme-dont-propagate activate)
+                       (mapcar #'disable-theme custom-enabled-themes))))
+
+;; - Dynamic settings for light/dark themes
+(advice-add 'load-theme :after #'dynamic-load-theme)
+
 ;; Enabling disabled commands
 (defadvice en/disable-command (around put-in-custom-file activate)
   "Put declarations in `custom-file'."
@@ -230,12 +264,6 @@
           (lambda (terminal)
             (tty-shell-command "echo -ne \"\e[6 q\"" terminal)))
 
-;; Disable previous theme when enabling new theme
-(add-hook 'after-init-hook
-          (lambda () (defadvice load-theme 
-                         (before theme-dont-propagate activate)
-                       (mapcar #'disable-theme custom-enabled-themes))))
-
 ;; }}}
 
 ;; Modes {{{
@@ -249,14 +277,16 @@
 (tool-bar-mode -1)          ; disable gui toolbar
 
 ;; fci-mode
-(add-hook 'prog-mode-hook (lambda () (fci-mode 1)))
-(add-hook 'text-mode-hook (lambda () (fci-mode 1)))
+(global-set-key (kbd "C-c i") 'fci-mode)
 
 ;; wrap-region
 (wrap-region-mode t)
 
 ;; emacs-dashboard
 (dashboard-setup-startup-hook)
+
+;; auctex-latexmk
+(auctex-latexmk-setup)
 
 ;; ido-mode
 (require 'ido)
@@ -268,10 +298,6 @@
 (setq ido-enable-flex-matching t)
 (setq ido-use-faces nil)
 
-;; auctex-latexmk
-(require 'auctex-latexmk)
-(auctex-latexmk-setup)
-
 ;; auto-fill-mode
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
@@ -279,8 +305,14 @@
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
 ;; expand-region
-(require 'expand-region)
 (global-set-key (kbd "C-\\") 'er/expand-region)
+(global-set-key (kbd "C-' w") 'er/mark-word)
+(global-set-key (kbd "C-' '") 'er/mark-inside-quotes)
+(global-set-key (kbd "C-' \"") 'er/mark-outside-quotes)
+(global-set-key (kbd "C-' c") 'er/mark-comment)
+(global-set-key (kbd "C-' t") 'er/mark-inner-tag)
+(global-set-key (kbd "C-' T") 'er/mark-outer-tag)
+(global-set-key (kbd "C-' f") 'er/mark-defun)
 
 ;; multiple-cursors
 (global-set-key (kbd "C-c c") 'mc/edit-lines)
