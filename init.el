@@ -357,10 +357,13 @@
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
 ;; expand-region
+(require 'expand-region)
 (global-set-key (kbd "C-\\") 'er/expand-region)
 (global-set-key (kbd "C-' w") 'er/mark-word)
 (global-set-key (kbd "C-' '") 'er/mark-inside-quotes)
 (global-set-key (kbd "C-' \"") 'er/mark-outside-quotes)
+(global-set-key (kbd "C-' p") 'er/mark-inside-pairs)
+(global-set-key (kbd "C-' P") 'er/mark-outside-pairs)
 (global-set-key (kbd "C-' c") 'er/mark-comment)
 (global-set-key (kbd "C-' t") 'er/mark-inner-tag)
 (global-set-key (kbd "C-' T") 'er/mark-outer-tag)
