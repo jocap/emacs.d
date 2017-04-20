@@ -3,9 +3,11 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        Buffer-menu-delete
         electric-pair-delete-pair
         iy-go-to-char--command
         paredit-forward-kill-word
+        paredit-kill
         ))
 
 (setq mc/cmds-to-run-once

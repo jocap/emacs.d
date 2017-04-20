@@ -38,6 +38,8 @@
    (quote
     ("#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36")))
  '(indent-tabs-mode nil)
+ '(ispell-highlight-face (quote flyspell-incorrect))
+ '(ispell-local-dictionary-alist nil)
  '(linum-format "%4d │ ")
  '(magit-diff-use-overlays nil)
  '(nrepl-message-colors

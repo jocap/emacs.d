@@ -252,6 +252,30 @@
 ;; - Dynamic settings for light/dark themes
 (advice-add 'load-theme :after #'dynamic-load-theme)
 
+;; Spelling
+(require 'ispell)
+(add-to-list 'ispell-dictionary-alist
+             '("swedish-hunspell"
+               "[[:alpha:]]"
+               "[^[:alpha:]]"
+               "[']"
+               t
+               ("-d" "sv_SE")
+               nil
+               utf-8))
+
+(add-to-list 'ispell-dictionary-alist
+             '("english-hunspell"
+               "[[:alpha:]]"
+               "[^[:alpha:]]"
+               "[']"
+               t
+               ("-d" "en_US")
+               nil
+               utf-8))
+(setq ispell-program-name "hunspell"
+      ispell-dictionary   "swedish-hunspell")
+
 ;; Enabling disabled commands
 (defadvice en/disable-command (around put-in-custom-file activate)
   "Put declarations in `custom-file'."
