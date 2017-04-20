@@ -436,12 +436,27 @@
 
 ;; (La)TeX-mode
 (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
-(defun my-latex-setup ()
-  (defun update-mupdf ()
-    "Updates mupdf by sending a SIGHUP signal to it."
+(defun my-latex-setup (&optional args)
+  (defun start-update-viewer ()
+    "Starts/updates PDF viewer."
     (interactive)
-    (shell-command "killall -HUP mupdf-x11 & echo 'Update signal sent.'"))
-  (define-key LaTeX-mode-map (kbd "C-c C-u") 'update-mupdf)
+    (if (string-match "no process found"
+                      (shell-command-to-string "killall -HUP mupdf-x11"))
+        (start-process-shell-command
+         "mupdf"          ; process name
+         "mupdf"          ; process buffer
+         (concat "mupdf " ; shell command
+                 (expand-file-name
+                  (concat "output/"
+                          (file-name-base (buffer-file-name))
+                          ".pdf"))))))
+  (define-key LaTeX-mode-map (kbd "C-c C-u") 'start-update-viewer)
+
+  (defun save-run ()
+    "Saves the document and processes it."
+    (interactive)
+    (save-buffer)
+    (TeX-command-run-all nil))
 
   (defun latex-word-count () ; (courtesy of Nicholas Riley @ SE)
     (interactive)
