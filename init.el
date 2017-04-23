@@ -309,6 +309,9 @@
 (global-set-key (kbd "C-.") 'iy-go-to-char-continue)
 (global-set-key (kbd "C-,") 'iy-go-to-char-continue-backward)
 
+(global-set-key (kbd "C-c g") 'magit-status)
+(global-set-key (kbd "C-c C-g") 'magit-diff-unstaged)
+
 (global-set-key (kbd "C-c C-z") 'goto-fold)
 (global-set-key (kbd "C-c C-n") 'next-fold)
 (global-set-key (kbd "C-c C-p") 'previous-fold)
