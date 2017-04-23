@@ -279,8 +279,9 @@
 ;; Enabling disabled commands
 (defadvice en/disable-command (around put-in-custom-file activate)
   "Put declarations in `custom-file'."
-  (let ((user-init-file "/home/john/.emacs.d/.commands"))
+  (let ((user-init-file (concat user-emacs-directory ".commands")))
     ad-do-it))
+(load-file (concat user-emacs-directory ".commands"))
 
 ;; Change cursor to block on suspend, and back to ibeam on resume
 (add-hook 'suspend-tty-functions
