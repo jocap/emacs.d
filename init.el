@@ -451,6 +451,8 @@
                           (file-name-base (buffer-file-name))
                           ".pdf"))))))
   (define-key LaTeX-mode-map (kbd "C-c C-u") 'start-update-viewer)
+  (add-hook 'TeX-after-compilation-finished-hook 'start-update-viewer)
+  ;; TODO: figure out why this doesn't work - try restarting Emacs!
 
   (defun save-run ()
     "Saves the document and processes it."
@@ -460,13 +462,13 @@
 
   (defun latex-word-count () ; (courtesy of Nicholas Riley @ SE)
     (interactive)
-    (let* ((this-file (buffer-file-name))
-           (word-count
+    (let ((word-count
             (with-output-to-string
               (with-current-buffer standard-output
-                (call-process "texcount" nil t nil "-brief" this-file)))))
-      (string-match "\n$" word-count)
-      (message (replace-match "" nil nil word-count))))
+                (call-process "texcount" nil t nil (buffer-file-name))))))
+      ;; TODO: convert the following shell command to elisp:
+      ;; texcount hist2.tex | grep "Subsection: PM" | sed "s/\+.*//g" | sed "s/[^0-9]*//g"
+      ))
   (define-key LaTeX-mode-map (kbd "C-c w") 'latex-word-count)
 
   (defun latex-write-word-count ()
@@ -508,7 +510,3 @@
 (load custom-file)
 
 ;; }}}
-
-
-
-
