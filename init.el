@@ -358,7 +358,7 @@
 
 ;; expand-region
 (require 'expand-region)
-(global-set-key (kbd "C-\\") 'er/expand-region)
+(global-set-key (kbd "C-' r") 'er/expand-region)
 (global-set-key (kbd "C-' w") 'er/mark-word)
 (global-set-key (kbd "C-' '") 'er/mark-inside-quotes)
 (global-set-key (kbd "C-' \"") 'er/mark-outside-quotes)

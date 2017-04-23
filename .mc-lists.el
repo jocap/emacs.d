@@ -6,6 +6,8 @@
         Buffer-menu-delete
         electric-pair-delete-pair
         iy-go-to-char--command
+        paredit-backslash
+        paredit-forward-delete
         paredit-forward-kill-word
         paredit-kill
         ))
