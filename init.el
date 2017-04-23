@@ -298,6 +298,9 @@
 (windmove-default-keybindings)
 (setq framemove-hook-into-windmove t)
 
+;; I just want this keybinding to do NOTHING - how hard can that be?
+(global-set-key (kbd "<f13>") (lambda () (interactive) (message "")))
+
 (global-set-key (kbd "M-m") 'iy-go-to-char)
 (global-set-key (kbd "M-M") 'iy-go-to-char-backward)
 (global-set-key (kbd "C-.") 'iy-go-to-char-continue)
