@@ -240,9 +240,6 @@
 (defun dark-theme-do ()
   (setq fci-rule-color "#333333"))
 
-;; - Set theme according to daylight
-(daylight-sets-color)
-
 ;; - Disable previous theme when enabling new theme
 (add-hook 'after-init-hook
           (lambda () (defadvice load-theme 
@@ -251,6 +248,9 @@
 
 ;; - Dynamic settings for light/dark themes
 (advice-add 'load-theme :after #'dynamic-load-theme)
+
+;; - Set theme according to daylight
+(daylight-sets-color)
 
 ;; Spelling
 (require 'ispell)
