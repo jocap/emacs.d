@@ -122,13 +122,6 @@
 
 ;; Various functions
 
-(defun ctrl-e-in-vi (n)
-  (interactive "p")
-  (scroll-up n))
-(defun ctrl-y-in-vi (n)
-  (interactive "p")
-  (scroll-down n))
-
 (defun smart-open-line () ; (courtesy of Emacs Redux)
   "Insert an empty line after the current line.
   Position the cursor at beginning, according to current mode."
@@ -319,8 +312,8 @@
 (global-set-key (kbd "C-c C-n") 'next-fold)
 (global-set-key (kbd "C-c C-p") 'previous-fold)
 
-(global-set-key (kbd "M-n") 'ctrl-e-in-vi)
-(global-set-key (kbd "M-p") 'ctrl-y-in-vi)
+(global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
+(global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 (global-set-key (kbd "M-RET") 'smart-open-line)
 (global-set-key (kbd "M-o") 'smart-open-line-above)
 (global-set-key (kbd "C-;") 'comment-dwim-line)
