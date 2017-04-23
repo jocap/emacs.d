@@ -7,9 +7,12 @@
         electric-pair-delete-pair
         iy-go-to-char--command
         paredit-backslash
+        paredit-close-round
+        paredit-doublequote
         paredit-forward-delete
         paredit-forward-kill-word
         paredit-kill
+        paredit-open-round
         ))
 
 (setq mc/cmds-to-run-once

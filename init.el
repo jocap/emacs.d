@@ -153,7 +153,8 @@
   (interactive "*P")
   (comment-normalize-vars)
   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
-      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+      (comment-or-uncomment-region (line-beginning-position)
+                                   (line-end-position))
     (comment-dwim arg)))
 
 (defun mark-line ()
@@ -304,6 +305,8 @@
 ;; I just want this keybinding to do NOTHING - how hard can that be?
 (global-set-key (kbd "<f13>") (lambda () (interactive) (message "")))
 
+(global-set-key (kbd "C-c i") 'fci-mode)
+
 (global-set-key (kbd "M-m") 'iy-go-to-char)
 (global-set-key (kbd "M-M") 'iy-go-to-char-backward)
 (global-set-key (kbd "C-.") 'iy-go-to-char-continue)
@@ -336,9 +339,6 @@
 (save-place-mode 1)         ; save cursor position
 (xterm-mouse-mode t)        ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)          ; disable gui toolbar
-
-;; fci-mode
-(global-set-key (kbd "C-c i") 'fci-mode)
 
 ;; wrap-region
 (wrap-region-mode t)
