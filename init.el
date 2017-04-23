@@ -20,16 +20,18 @@
 
 (defun daylight-sets-color ()
   "Sets a light theme for day and a dark theme for night.
-  Depends on the script 'sun' being found in path."
+  Depends on the script `sun' being found in path."
 
   (interactive)
   (let ((time (string-to-number (format-time-string "%H.%M"))))
         (if (string-match "not found" (shell-command-to-string "which sun"))
-            (if (and (> time 6.00) (< time 18.00))
+            (if (and (> time 6.00) (< time 18.00)) ; default if `sun' not found
                 (load-theme light-theme t)
               (load-theme dark-theme t))
-          (let ((sunrise (string-to-number (shell-command-to-string "sun _rise")))
-                (sunset (string-to-number (shell-command-to-string "sun _set"))))
+          (let ((sunrise
+                 (string-to-number (shell-command-to-string "sun _rise")))
+                (sunset
+                 (string-to-number (shell-command-to-string "sun _set"))))
             (if (and (> time sunrise) (< time sunset))
                 (load-theme light-theme t)
               (load-theme dark-theme t))))))
@@ -89,7 +91,7 @@
 (defun tty-shell-command (command &optional terminal &optional return-nil)
   "Executes a command on terminal (default: parent tty of frame).
   Note that it only works in Emacs frames attached to using
-  emacsclient -t."
+  `emacsclient -t'."
   
   (unless terminal (setq terminal (get-device-terminal nil))) ; tty of frame
   (let ((tty (terminal-name terminal)))
