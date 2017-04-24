@@ -307,6 +307,7 @@
 
 (global-set-key (kbd "C-c g") 'magit-status)
 (global-set-key (kbd "C-c C-g") 'magit-diff-unstaged)
+(global-set-key (kbd "C-c M-g") 'magit-commit)
 
 (global-set-key (kbd "C-c C-z") 'goto-fold)
 (global-set-key (kbd "C-c C-n") 'next-fold)
