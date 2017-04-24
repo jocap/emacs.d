@@ -116,6 +116,15 @@
 (use-package fill-column-indicator
   :bind ("C-c i" . fci-mode))
 
+(use-package avy
+  :commands avy-isearch
+  :init (global-set-key (kbd "M-'") nil) ; reset M-'
+  :config (define-key isearch-mode-map (kbd "M-'") 'avy-isearch)
+  :bind (("C-M-'" . abbrev-prefix-mark) ; re-bind default M-'
+         ("M-' l" . avy-goto-line)
+         ("M-' s" . avy-goto-char-timer)
+         ("M-' w" . avy-goto-word-1)))
+
 ;; }}}
 
 ;; 2. Functions {{{
