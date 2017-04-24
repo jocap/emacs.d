@@ -12,6 +12,110 @@
   (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
 
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish) ; if you use :diminish
+(require 'bind-key) ; if you use any :bind variant
+
+(use-package wrap-region
+  :config (wrap-region-mode t))
+
+(use-package dashboard
+  :config (dashboard-setup-startup-hook))
+
+(use-package flx-ido ; fuzzy matching for ido
+  :config
+  (flx-ido-mode 1)
+  (setq ido-enable-flex-matching t)
+  (setq ido-use-faces nil))
+
+(use-package rainbow-delimiters
+  :config (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+
+(use-package expand-region
+  :bind (("C-' r" . er/expand-region)
+         ("C-' w" . er/mark-word)
+         ("C-' '" . er/mark-inside-quotes)
+         ("C-' \"" . er/mark-outside-quotes)
+         ("C-' p" . er/mark-inside-pairs)
+         ("C-' P" . er/mark-outside-pairs)
+         ("C-' c" . er/mark-comment)
+         ("C-' t" . er/mark-inner-tag)
+         ("C-' T" . er/mark-outer-tag)
+         ("C-' f" . er/mark-defun)))
+
+(use-package multiple-cursors
+  :bind (("C-c c" . mc/edit-lines)
+         ("C-c >" . mc/mark-next-like-this)
+         ("C-c <" . mc/mark-previous-like-this)
+         ("C-c ?" . mc/mark-all-like-this))
+  :config (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos))
+
+(use-package visual-regexp
+  :defer) ; prevent loading this package before visual-regexp-steroids!
+
+(use-package visual-regexp-steroids
+  :ensure pcre2el ; much faster than Python
+  :demand ; load this package immediately, regardless of :bind
+  :bind (("C-c r" . vr/replace)
+         ("C-c q" . vr/query-replace)
+         ("C-c m" . vr/mc-mark)
+         ("C-M-r" . vr/isearch-backward)
+         ("C-M-s" . vr/isearch-forward))
+  :config (setq vr/engine 'pcre2el))
+
+;; for more information on how to load visual-regexp-steroids with use-package,
+;; see workaround by alamaison @ GitHub at the following link:
+;; https://github.com/benma/visual-regexp-steroids.el/issues/16#issue-123951566
+
+(use-package paredit
+  :config
+  (autoload 'enable-paredit-mode
+    "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+  (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
+  (add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
+  (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
+  (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
+  (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
+  (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
+
+  ;; re-map M-r, overriden by paredit-raise-sexp
+  :bind ("M-R" . move-to-window-line-top-bottom))
+
+(use-package paredit-everywhere
+  :ensure paredit
+  :config (add-hook 'prog-mode-hook 'paredit-everywhere-mode))
+
+(use-package origami
+  :config
+  (global-origami-mode t)
+  (setq-local origami-fold-style 'triple-braces)
+  (defun custom-origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
+    (interactive)
+    (save-excursion ; leave point where it is
+      (goto-char (point-at-eol)) ; then go to the end of line
+      (origami-toggle-node (current-buffer) (point)))) ; and try to fold
+
+  :bind (("M-Z"   . custom-origami-toggle-node)
+         ("C-M-z" . origami-toggle-all-nodes)))
+
+(use-package framemove
+  :config (setq framemove-hook-into-windmove t))
+
+(use-package iy-go-to-char
+  :bind (("M-m" . iy-go-to-char)
+         ("M-M" . iy-go-to-char-backward)
+         ("C-." . iy-go-to-char-continue)
+         ("C-," . iy-go-to-char-continue-backward)))
+
+(use-package magit
+  :bind (("C-c g"   . magit-status)
+         ("C-c C-g" . magit-diff-unstaged)
+         ("C-c M-g" . magit-commit)))
+
+(use-package fill-column-indicator
+  :bind ("C-c i" . fci-mode))
+
 ;; }}}
 
 ;; 2. Functions {{{
@@ -293,21 +397,9 @@
 
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 (windmove-default-keybindings)
-(setq framemove-hook-into-windmove t)
 
 ;; I just want this keybinding to do NOTHING - how hard can that be?
 (global-set-key (kbd "<f13>") (lambda () (interactive) (message "")))
-
-(global-set-key (kbd "C-c i") 'fci-mode)
-
-(global-set-key (kbd "M-m") 'iy-go-to-char)
-(global-set-key (kbd "M-M") 'iy-go-to-char-backward)
-(global-set-key (kbd "C-.") 'iy-go-to-char-continue)
-(global-set-key (kbd "C-,") 'iy-go-to-char-continue-backward)
-
-(global-set-key (kbd "C-c g") 'magit-status)
-(global-set-key (kbd "C-c C-g") 'magit-diff-unstaged)
-(global-set-key (kbd "C-c M-g") 'magit-commit)
 
 (global-set-key (kbd "C-c C-z") 'goto-fold)
 (global-set-key (kbd "C-c C-n") 'next-fold)
@@ -334,84 +426,13 @@
 (xterm-mouse-mode t)        ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)          ; disable gui toolbar
 
-;; wrap-region
-(wrap-region-mode t)
-
-;; emacs-dashboard
-(dashboard-setup-startup-hook)
-
-;; auctex-latexmk
-(auctex-latexmk-setup)
-
 ;; ido-mode
 (require 'ido)
 (ido-mode t)
 (ido-everywhere 1)
 
-;; flx-ido-mode (fuzzy matching for ido)
-(flx-ido-mode 1)
-(setq ido-enable-flex-matching t)
-(setq ido-use-faces nil)
-
 ;; auto-fill-mode
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
-
-;; rainbow delimiters
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-
-;; expand-region
-(require 'expand-region)
-(global-set-key (kbd "C-' r") 'er/expand-region)
-(global-set-key (kbd "C-' w") 'er/mark-word)
-(global-set-key (kbd "C-' '") 'er/mark-inside-quotes)
-(global-set-key (kbd "C-' \"") 'er/mark-outside-quotes)
-(global-set-key (kbd "C-' p") 'er/mark-inside-pairs)
-(global-set-key (kbd "C-' P") 'er/mark-outside-pairs)
-(global-set-key (kbd "C-' c") 'er/mark-comment)
-(global-set-key (kbd "C-' t") 'er/mark-inner-tag)
-(global-set-key (kbd "C-' T") 'er/mark-outer-tag)
-(global-set-key (kbd "C-' f") 'er/mark-defun)
-
-;; multiple-cursors
-(global-set-key (kbd "C-c c") 'mc/edit-lines)
-(global-set-key (kbd "C-c >") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-c <") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c ?") 'mc/mark-all-like-this)
-(add-hook 'multiple-cursors-hook
-          (lambda () ; I'm not sure how, but this is supposed to be good
-            (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos)))
-
-;; visual-regexp-steroids
-(require 'visual-regexp-steroids)
-(define-key global-map (kbd "C-c r") 'vr/replace)
-(define-key global-map (kbd "C-c q") 'vr/query-replace)
-(define-key global-map (kbd "C-c m") 'vr/mc-mark)
-(define-key esc-map (kbd "C-r") 'vr/isearch-backward) ; C-M-r
-(define-key esc-map (kbd "C-s") 'vr/isearch-forward) ; C-M-s
-;; (NOTE: Make sure to use pcre2el - much faster than Python)
-
-;; paredit
-
-;; - enable automatically
-(autoload 'enable-paredit-mode
-  "paredit" "Turn on pseudo-structural editing of Lisp code." t)
-(add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
-(add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
-(add-hook 'ielm-mode-hook             #'enable-paredit-mode)
-(add-hook 'lisp-mode-hook             #'enable-paredit-mode)
-(add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
-(add-hook 'scheme-mode-hook           #'enable-paredit-mode)
-(add-hook 'prog-mode-hook 'paredit-everywhere-mode) ; paredit-everywhere
-
-;; - keybindings
-(global-set-key (kbd "C-h )") 'paredit-forward-slurp-sexp)
-(global-set-key (kbd "C-h }") 'paredit-forward-barf-sexp)
-(global-set-key (kbd "C-h (") 'paredit-backward-slurp-sexp)
-(global-set-key (kbd "C-h {") 'paredit-backward-barf-sexp)
-
-(add-hook 'paredit-mode-hook ; re-map M-r, overriden by paredit-mode
-          (lambda ()
-            (local-set-key (kbd "M-R") 'move-to-window-line-top-bottom)))
 
 ;; python-mode
 (defun shell-compile () ; (courtesy of djangoliv @ stack interchange)
@@ -424,18 +445,6 @@
           '(lambda ()
              (define-key python-mode-map (kbd "C-c C-c") 'shell-compile)))
 
-;; origami-mode
-(defun custom-origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
-  (interactive)
-  (save-excursion ; leave point where it is
-    (goto-char (point-at-eol)) ; then go to the end of line
-    (origami-toggle-node (current-buffer) (point)))) ; and try to fold
-(add-hook 'origami-mode-hook
-          (lambda ()
-            (global-set-key (kbd "M-Z") 'custom-origami-toggle-node)
-            (global-set-key (kbd "C-M-z") 'origami-toggle-all-nodes)
-            (setq-local origami-fold-style 'triple-braces)))
-(global-origami-mode t)
 
 ;; (La)TeX-mode
 (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
@@ -511,7 +520,3 @@
 (load custom-file)
 
 ;; }}}
-
-
-
-
