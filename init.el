@@ -33,16 +33,16 @@
   :config (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 (use-package expand-region
-  :bind (("C-' r" . er/expand-region)
-         ("C-' w" . er/mark-word)
-         ("C-' '" . er/mark-inside-quotes)
+  :bind (("C-' r"  . er/expand-region)
+         ("C-' w"  . er/mark-word)
+         ("C-' '"  . er/mark-inside-quotes)
          ("C-' \"" . er/mark-outside-quotes)
-         ("C-' p" . er/mark-inside-pairs)
-         ("C-' P" . er/mark-outside-pairs)
-         ("C-' c" . er/mark-comment)
-         ("C-' t" . er/mark-inner-tag)
-         ("C-' T" . er/mark-outer-tag)
-         ("C-' f" . er/mark-defun)))
+         ("C-' p"  . er/mark-inside-pairs)
+         ("C-' P"  . er/mark-outside-pairs)
+         ("C-' c"  . er/mark-comment)
+         ("C-' t"  . er/mark-inner-tag)
+         ("C-' T"  . er/mark-outer-tag)
+         ("C-' f"  . er/mark-defun)))
 
 (use-package multiple-cursors
   :bind (("C-c c" . mc/edit-lines)
@@ -404,16 +404,14 @@
 
 ;; 4. Keybindings {{{
 
-(global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 (windmove-default-keybindings)
 
-;; I just want this keybinding to do NOTHING - how hard can that be?
-(global-set-key (kbd "<f13>") (lambda () (interactive) (message "")))
-
+(global-set-key (kbd "M-<f1>") 'menu-bar-mode)
+ 
 (global-set-key (kbd "C-c C-z") 'goto-fold)
 (global-set-key (kbd "C-c C-n") 'next-fold)
 (global-set-key (kbd "C-c C-p") 'previous-fold)
-
+ 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 (global-set-key (kbd "M-RET") 'smart-open-line)
@@ -427,13 +425,13 @@
 
 ;; 5. Mode configuration {{{
 
-(electric-pair-mode 1)      ; auto-insert matching pairs
-(menu-bar-mode -1)          ; disable menu bar
-(global-hl-line-mode)       ; highlight current line
-(global-linum-mode)         ; line numbers
-(save-place-mode 1)         ; save cursor position
-(xterm-mouse-mode t)        ; use mouse (somewhat) in terminal
-(tool-bar-mode -1)          ; disable gui toolbar
+(electric-pair-mode 1) ; auto-insert matching pairs
+(menu-bar-mode -1)     ; disable menu bar
+(global-hl-line-mode)  ; highlight current line
+(global-linum-mode)    ; line numbers
+(save-place-mode 1)    ; save cursor position
+(xterm-mouse-mode t)   ; use mouse (somewhat) in terminal
+(tool-bar-mode -1)     ; disable gui toolbar
 
 ;; ido-mode
 (require 'ido)
@@ -514,12 +512,12 @@
   again, be sure to toggle the submode off."
   nil
   :lighter " åäö"
-  :keymap '(("\M-[" . (lambda () (interactive) (insert ?å)))
-            ("\M-'" . (lambda () (interactive) (insert ?ä)))
-            ("\M-;" . (lambda () (interactive) (insert ?ö)))
-            ("\M-{" . (lambda () (interactive) (insert ?Å)))
+  :keymap '(("\M-["  . (lambda () (interactive) (insert ?å)))
+            ("\M-'"  . (lambda () (interactive) (insert ?ä)))
+            ("\M-;"  . (lambda () (interactive) (insert ?ö)))
+            ("\M-{"  . (lambda () (interactive) (insert ?Å)))
             ("\M-\"" . (lambda () (interactive) (insert ?Ä)))
-            ("\M-:" . (lambda () (interactive) (insert ?Ö)))))
+            ("\M-:"  . (lambda () (interactive) (insert ?Ö)))))
 (provide 'swedish-mode)
 
 ;; }}}

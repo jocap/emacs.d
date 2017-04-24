@@ -5,6 +5,7 @@
       '(
         Buffer-menu-delete
         electric-pair-delete-pair
+        indent-for-tab-command
         iy-go-to-char--command
         paredit-backslash
         paredit-close-round
