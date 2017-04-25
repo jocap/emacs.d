@@ -138,10 +138,18 @@
   (add-hook 'org-shiftright-final-hook 'windmove-right))
 
 (use-package helm
-  :bind ("M-x" . helm-M-x)
+  :bind (("M-x"     . helm-M-x)
+         ("C-x C-f" . helm-find-files))
+  :init
+  (require 'helm-config)
   :config
+  (helm-mode 1)
+  (helm-autoresize-mode 1)
   (setq helm-mode-fuzzy-match t
-        helm-completion-in-region-fuzzy-match t))
+        helm-completion-in-region-fuzzy-match t ; "fuzzy" matching
+        helm-split-window-in-side-p           t ; helm inside current window
+        helm-autoresize-max-height           40
+        helm-autoresize-min-height           0))
 
 (use-package relative-line-numbers
   :config
@@ -265,6 +273,17 @@
       (light-theme-do))
   (if (and (fboundp 'dark-theme-do) (equal theme 'gruvbox))
       (dark-theme-do)))
+
+;; Custom Helm buffers
+
+;; (defvar my/helm-source-spotify
+;;   '((name . "Spotify")
+;;     (:candidates "Song 1" "Song 2")))
+
+;; (defun my/helm-spotify-remote ()
+;;   (interactive)
+;;   (helm :sources '(my/helm-source-spotify)
+;;         :buffer "*helm-spotify-remote*"))
 
 ;; Various functions
 
@@ -464,11 +483,6 @@
 (save-place-mode 1)    ; save cursor position
 (xterm-mouse-mode t)   ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)     ; disable gui toolbar
-
-;; ido-mode
-(require 'ido)
-(ido-mode t)
-(ido-everywhere 1)
 
 ;; auto-fill-mode
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
