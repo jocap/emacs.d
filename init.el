@@ -125,6 +125,17 @@
          ("M-' s" . avy-goto-char-timer)
          ("M-' w" . avy-goto-word-1)))
 
+(use-package org
+  :mode (("\\.org$" . org-mode))
+  ;; :ensure org-plus-contrib
+  :config
+  (define-key org-mode-map (kbd "<C-M-return>") 'smart-open-line)
+  (define-key org-mode-map (kbd "C-'") nil)
+  ;; make windmove work in org-mode
+  (add-hook 'org-shiftup-final-hook 'windmove-up)
+  (add-hook 'org-shiftleft-final-hook 'windmove-left)
+  (add-hook 'org-shiftdown-final-hook 'windmove-down)
+  (add-hook 'org-shiftright-final-hook 'windmove-right))
 (use-package relative-line-numbers
   :config
   (defun relative-abs-line-numbers-format (offset)
