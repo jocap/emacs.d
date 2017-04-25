@@ -161,10 +161,62 @@
     Furthermore, the function adds padding as well as
     a separating line between the line numbers and the buffer."
     
-    (format "%4d \u2502 " (if (= 0 offset)
-                              (line-number-at-pos)
-                            (abs offset))))
-  (setq relative-line-numbers-format 'relative-abs-line-numbers-format))
+    (concat (format "%4d " (if (= 0 offset)
+                                            (line-number-at-pos)
+                             (abs offset)))
+            "\u2502"))
+  (setq relative-line-numbers-format 'relative-abs-line-numbers-format)
+
+  (defun toggle-line-numbers (&optional arg)
+    "Toggles `relative-line-numbers-mode' and, as an added bonus,
+    also the left fringe. The old fringe is saved in a variable
+    and restored when line numbers are toggled off.
+
+    I like to disable the left fringe to create an illusion of
+    the hl-line continuing through the current line number. This,
+    of course, requires that the current line number background
+    is configured to be the same as the hl-line background. The
+    function makes this happen as well.
+
+    I only wrote this complicated function because
+    `relative-line-numbers' provides no hooks.
+
+    To force on, use C-u or provide `t' as an argument. To force
+    off, use C-u C-u or provide `-1' as an argument."
+
+    (interactive "p")
+    (require 'cl-lib)
+
+    (unless (boundp 'line-numbers-on)
+      (setq line-numbers-on
+            (if relative-line-numbers-mode t nil)))
+
+    (set-face-background 'relative-line-numbers-current-line
+                         (face-attribute 'hl-line :background))
+
+    (cl-flet ((on (lambda ()
+                    (setq old-fringe fringe-mode) ;; save old fringe
+                    (if fringe-mode
+                        (let ((right-fringe (cdr fringe-mode)))
+                          (fringe-mode (cons 0 right-fringe)))
+                      (fringe-mode '(0 . 8)))
+                    (relative-line-numbers-mode)
+                    (setq line-numbers-on t)))
+              (off (lambda ()
+                     (fringe-mode old-fringe) ;; reset to old fringe
+                     (setq line-numbers-on nil)
+                     (relative-line-numbers--off))))
+      (if (or (eq arg 4) (eq arg t))
+          (unless line-numbers-on (on)) ;; C-u -> on
+        (if (or (eq arg 16) (eq arg -1))
+            (if line-numbers-on (off)) ;; C-u C-u -> off
+          (if line-numbers-on ;; no prefix -> toggle
+              (off)
+            (on))))))
+  
+  (add-hook 'prog-mode-hook '(lambda () (toggle-line-numbers t)))
+
+  :bind ("C-c l" . toggle-line-numbers))
 
 ;; }}}
 
