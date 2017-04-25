@@ -138,12 +138,16 @@
   (add-hook 'org-shiftright-final-hook 'windmove-right))
 
 (use-package helm
+  :commands helm-command-prefix
   :bind (("M-x"     . helm-M-x)
-         ("C-x C-f" . helm-find-files))
+         ("C-x C-f" . helm-find-files)
+         ("C-x C-b" . helm-buffers-list))
   :init
+  (global-set-key (kbd "C-c C-h") 'helm-command-prefix)
+  (global-unset-key (kbd "C-x c"))
   (require 'helm-config)
-  :config
   (helm-mode 1)
+  :config
   (helm-autoresize-mode 1)
   (setq helm-mode-fuzzy-match t
         helm-completion-in-region-fuzzy-match t ; "fuzzy" matching
