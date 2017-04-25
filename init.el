@@ -125,6 +125,21 @@
          ("M-' s" . avy-goto-char-timer)
          ("M-' w" . avy-goto-word-1)))
 
+(use-package relative-line-numbers
+  :config
+  (defun relative-abs-line-numbers-format (offset)
+    "Custom format function for `relative-line-numbers' that
+    returns the absolute line number if the offset is zero (point
+    is on the current line) and the relative number otherwise.
+
+    Furthermore, the function adds padding as well as
+    a separating line between the line numbers and the buffer."
+    
+    (format "%4d \u2502 " (if (= 0 offset)
+                              (line-number-at-pos)
+                            (abs offset))))
+  (setq relative-line-numbers-format 'relative-abs-line-numbers-format))
+
 ;; }}}
 
 ;; 2. Functions {{{
@@ -428,7 +443,6 @@
 (electric-pair-mode 1) ; auto-insert matching pairs
 (menu-bar-mode -1)     ; disable menu bar
 (global-hl-line-mode)  ; highlight current line
-(global-linum-mode)    ; line numbers
 (save-place-mode 1)    ; save cursor position
 (xterm-mouse-mode t)   ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)     ; disable gui toolbar
