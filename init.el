@@ -160,7 +160,7 @@
 
     Furthermore, the function adds padding as well as
     a separating line between the line numbers and the buffer."
-    
+
     (concat (format "%4d " (if (= 0 offset)
                                             (line-number-at-pos)
                              (abs offset)))
@@ -213,7 +213,7 @@
           (if line-numbers-on ;; no prefix -> toggle
               (off)
             (on))))))
-  
+
   (add-hook 'prog-mode-hook '(lambda () (toggle-line-numbers t)))
 
   :bind ("C-c l" . toggle-line-numbers))
@@ -254,7 +254,7 @@
         (move-end-of-line nil)
         (fset 'fun 'origami-forward-fold))
     (progn
-      (move-beginning-of-line nil) 
+      (move-beginning-of-line nil)
       (fset 'fun 'origami-previous-fold)))
   (dotimes (i (abs times))
     (condition-case err
@@ -274,14 +274,14 @@
 (defun previous-fold (times)
   "Jumps to the beginning of the previous fold, as many times as
   ordered by argument."
-  
+
   (interactive "P")
   (unless times (setq times 1))
   (next-fold (* times -1)))
 
 (defun goto-fold (number)
   "Jumps to fold # (provided by argument) in file."
-  
+
   (interactive "P")
   (unless number (setq number
                        (string-to-number (read-string "Jump to fold: "))))
@@ -298,7 +298,7 @@
   "Executes a command on terminal (default: parent tty of frame).
   Note that it only works in Emacs frames attached to using
   `emacsclient -t'."
-  
+
   (unless terminal (setq terminal (get-device-terminal nil))) ; tty of frame
   (let ((tty (terminal-name terminal)))
     (progn (setq output (shell-command (concat
@@ -311,7 +311,7 @@
 (defun tty-set-name (name &optional terminal)
   "Sets the title of the tty in which the current frame is
   open (or the tty provided by argument)."
-  
+
   (tty-shell-command (concat
                       "echo -ne \"\033]0;"
                       name
@@ -455,7 +455,7 @@
 
 ;; - Disable previous theme when enabling new theme
 (add-hook 'after-init-hook
-          (lambda () (defadvice load-theme 
+          (lambda () (defadvice load-theme
                          (before theme-dont-propagate activate)
                        (mapcar #'disable-theme custom-enabled-themes))))
 
@@ -511,11 +511,11 @@
 (windmove-default-keybindings)
 
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
- 
+
 (global-set-key (kbd "C-c C-z") 'goto-fold)
 (global-set-key (kbd "C-c C-n") 'next-fold)
 (global-set-key (kbd "C-c C-p") 'previous-fold)
- 
+
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 (global-set-key (kbd "M-RET") 'smart-open-line)
