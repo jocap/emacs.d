@@ -136,6 +136,13 @@
   (add-hook 'org-shiftleft-final-hook 'windmove-left)
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
   (add-hook 'org-shiftright-final-hook 'windmove-right))
+
+(use-package helm
+  :bind ("M-x" . helm-M-x)
+  :config
+  (setq helm-mode-fuzzy-match t
+        helm-completion-in-region-fuzzy-match t))
+
 (use-package relative-line-numbers
   :config
   (defun relative-abs-line-numbers-format (offset)
