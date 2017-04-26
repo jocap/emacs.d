@@ -357,12 +357,13 @@
 
 ;; Desktop saving and loading
 
-(defun init-desktop ()
-  "Load the desktop and enable autosaving."
+(defun init-desktop (&optional arg)
+  "Load the desktop (unless C-u is provided) and enable autosaving."
 
-  (interactive)
-  (desktop-read)
-  (desktop-save-mode 1))
+  (interactive "p")
+  (unless current-prefix-arg (desktop-read))
+  (desktop-save-mode 1)
+  (message "Desktop-Save mode enabled"))
 
 ;; Custom Helm buffers
 
