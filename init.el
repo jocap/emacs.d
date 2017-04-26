@@ -268,14 +268,13 @@
     (unless (boundp 'old-fringes)
       (setq old-fringes (window-fringes)))
 
-    (set-face-background 'relative-line-numbers-current-line
-                         (face-attribute 'hl-line :background))
-
     (cl-flet ((on (lambda ()
                     ;; Save old fringes
                     (setq old-fringes (window-fringes))
                     ;; nil <- current window, 0 <- left fringe
                     (set-window-fringes nil 0)
+                    ;; Add current line number background as hl-line
+                    (add-current-line-no-bg)
                     ;; Toggle relative-line-numbers-mode
                     (relative-line-numbers-mode)
                     ;; Set variable to remember state
@@ -285,6 +284,8 @@
                      (apply 'set-window-fringes (cons nil old-fringes))
                      ;; Reset state
                      (setq line-numbers-on nil)
+                    ;; Remove current line number background from buffer
+                    (remove-current-line-no-bg)
                      ;; Toggle relative-line-numbers off
                      (relative-line-numbers--off))))
       (if (or (eq arg 4) (eq arg t)) ;; arg = C-u or t -> force on
@@ -294,6 +295,26 @@
           (if line-numbers-on ;; no prefix -> toggle
               (off)
             (on))))))
+
+  (defun remove-current-line-no-bg (&rest args)
+    "Removes current line number background from current
+    window (actually buffer) (before selecting new one)."
+
+    (face-remap-set-base 'relative-line-numbers-current-line
+                         :background (face-attribute 'default :background)
+                         :foreground (face-attribute 'linum :foreground)))
+
+  (defun add-current-line-no-bg (&rest args)
+    "Adds current line number background (as hl-line background) to
+    current window (actually buffer) (after selecting new one)."
+
+    (face-remap-set-base 'relative-line-numbers-current-line
+                         :background (face-attribute 'hl-line :background)
+                         :foreground (face-attribute 'linum :foreground)))
+
+  ;; Use custom window focus hooks in an attempt to match hl-line
+  (add-hook 'window-focus-out-hook 'remove-current-line-no-bg)
+  (add-hook 'window-focus-in-hook 'add-current-line-no-bg)
 
   :bind ("C-c l" . toggle-line-numbers))
 
@@ -642,7 +663,28 @@
 
 ;; }}}
 
-;; 6. Custom modes {{{
+;; 6. Custom hooks {{{
+
+(defun add-window-focus-out-hook (&rest args)
+  (run-hooks 'window-focus-out-hook))
+(defun add-window-focus-in-hook (&rest args)
+  (run-hooks 'window-focus-in-hook))
+
+(advice-add 'other-window :before 'add-window-focus-out-hook)
+(advice-add 'other-window :after  'add-window-focus-in-hook)
+
+(advice-add 'windmove-right :before 'add-window-focus-out-hook)
+(advice-add 'windmove-left  :before 'add-window-focus-out-hook)
+(advice-add 'windmove-right :after  'add-window-focus-in-hook)
+(advice-add 'windmove-left  :after  'add-window-focus-in-hook)
+(advice-add 'windmove-up    :before 'add-window-focus-out-hook)
+(advice-add 'windmove-down  :before 'add-window-focus-out-hook)
+(advice-add 'windmove-up    :after  'add-window-focus-in-hook)
+(advice-add 'windmove-down  :after  'add-window-focus-in-hook)
+
+;; }}}
+
+;; 7. Custom modes {{{
 
 ;; Swedish letters
 
@@ -665,7 +707,7 @@
 
 ;; }}}
 
-;; 7. Customize {{{
+;; 8. Customize {{{
 
 (load custom-file)
 
