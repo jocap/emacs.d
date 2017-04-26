@@ -3,6 +3,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(browse-url-browser-function (quote browse-url-firefox))
  '(column-number-mode t)
  '(compilation-message-face (quote default))
  '(cua-global-mark-cursor-color "#2aa198")
@@ -62,6 +63,7 @@
  '(tab-width 4)
  '(term-default-bg-color "#002b36")
  '(term-default-fg-color "#839496")
+ '(truncate-lines t)
  '(vc-annotate-background nil)
  '(vc-annotate-background-mode nil)
  '(vc-annotate-color-map
@@ -101,4 +103,6 @@
  ;; If there is more than one, they won't work right.
  '(magit-diff-conflict-heading ((t (:inherit magit-diff-hunk-heading :distant-foreground "dim gray"))))
  '(magit-section-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))) nil "Made text visible.")
+ '(relative-line-numbers ((t (:inherit (linum default)))))
+ '(relative-line-numbers-current-line ((t (:inherit relative-line-numbers))))
  '(widget-field ((t (:background "#eee8d5" :foreground "dim gray"))) nil "Made text visible."))

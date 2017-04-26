@@ -7,7 +7,9 @@
         electric-pair-delete-pair
         indent-for-tab-command
         iy-go-to-char--command
+        kill-region
         paredit-backslash
+        paredit-backward-kill-word
         paredit-close-round
         paredit-doublequote
         paredit-forward-delete
