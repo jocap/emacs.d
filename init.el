@@ -472,7 +472,7 @@
 (advice-add 'load-theme :after #'dynamic-load-theme)
 
 ;; - Set theme according to daylight
-(daylight-sets-color)
+(add-hook 'after-init-hook 'daylight-sets-color)
 
 ;; Spelling
 (require 'ispell)
