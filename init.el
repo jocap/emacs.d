@@ -180,17 +180,36 @@
   :mode (("\\.org$" . org-mode))
   ;; :ensure org-plus-contrib
   :config
-  (define-key org-mode-map (kbd "<C-M-return>") 'smart-open-line)
-  (define-key org-mode-map (kbd "C-'") nil)
   ;; make windmove work in org-mode
   (add-hook 'org-shiftup-final-hook 'windmove-up)
   (add-hook 'org-shiftleft-final-hook 'windmove-left)
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
-  (add-hook 'org-shiftright-final-hook 'windmove-right))
+  (add-hook 'org-shiftright-final-hook 'windmove-right)
+
+  (defun org-html-export-to-html-open-wsl (&rest args)
+    "Exports current org file to html file using
+    `org-html-export-to-html' with the provided arguments.
+
+    Then opens the file in the web browser, using the correct URL
+    scheme for WSL (Windows Susbsystem for Linux)."
+
+    (interactive)
+    (unless (boundp 'wsl-url-root)
+      (setq wsl-url-root "file:///C:/Users/JohnAJ/AppData/Local/lxss"))
+    (let ((file-path (file-truename (apply #'org-html-export-to-html args))))
+      (browse-url (concat wsl-url-root file-path))))
+
+  ;; remove C-' keybinding (because I use it for expand-region)
+  (define-key org-mode-map (kbd "C-'") nil)
+
+  :bind (:map org-mode-map
+              ("<C-M-return>" . smart-open-line)
+              ("C-c C-x C-e"  . org-html-export-to-html-open-wsl)))
 
 (use-package helm
   :commands helm-command-prefix
   :bind (("M-x"     . helm-M-x)
+         ("C-c C-m" . helm-mini)
          ("C-x C-f" . helm-find-files)
          ("C-x C-b" . helm-buffers-list))
   :init
