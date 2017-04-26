@@ -162,7 +162,6 @@
 
 (use-package magit
   :bind (("C-c g"   . magit-status)
-         ("C-c C-g" . magit-diff-unstaged)
          ("C-c M-g" . magit-commit)))
 
 (use-package fill-column-indicator
