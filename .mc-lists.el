@@ -14,6 +14,10 @@
         paredit-forward-kill-word
         paredit-kill
         paredit-open-round
+        paredit-semicolon
+        smart-open-line-above
+        smarter-move-beginning-of-line
+        upcase-region
         ))
 
 (setq mc/cmds-to-run-once

@@ -90,14 +90,66 @@
   :config
   (global-origami-mode t)
   (setq-local origami-fold-style 'triple-braces)
+
   (defun custom-origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
     (interactive)
     (save-excursion ; leave point where it is
       (goto-char (point-at-eol)) ; then go to the end of line
       (origami-toggle-node (current-buffer) (point)))) ; and try to fold
 
-  :bind (("M-Z"   . custom-origami-toggle-node)
-         ("C-M-z" . origami-toggle-all-nodes)))
+  (defun traverse-folds (times &optional beginning)
+    "Traverses through folds as many times as ordered by argument.
+  A negative argument makes it traverse backwards."
+
+    (unless beginning (setq beginning (point)))
+    (if (> times 0)
+        (progn
+          (move-end-of-line nil)
+          (fset 'fun 'origami-forward-fold))
+      (progn
+        (move-beginning-of-line nil)
+        (fset 'fun 'origami-previous-fold)))
+    (dotimes (i (abs times))
+      (condition-case err
+          (fun (current-buffer) (point))
+        (error (message "Fold not found: %s" err))))
+    (set-mark beginning)
+    (deactivate-mark))
+
+  (defun next-fold (times)
+    "Jumps to the beginning of the next fold (or previous, on
+  negative argument)."
+
+    (interactive "P")
+    (unless times (setq times 1))
+    (traverse-folds times))
+
+  (defun previous-fold (times)
+    "Jumps to the beginning of the previous fold, as many times as
+  ordered by argument."
+
+    (interactive "P")
+    (unless times (setq times 1))
+    (next-fold (* times -1)))
+
+  (defun goto-fold (number)
+    "Jumps to fold # (provided by argument) in file."
+
+    (interactive "P")
+    (unless number (setq number
+                         (string-to-number (read-string "Jump to fold: "))))
+    (setq beginning (point))
+    (if (equal number 0) (setq number 1))
+    (if (> number 0)
+        (goto-char (point-min))
+      (goto-char (point-max)))
+    (traverse-folds number beginning))
+
+  :bind (("M-Z"     . custom-origami-toggle-node)
+         ("C-M-z"   . origami-toggle-all-nodes)
+         ("C-c C-z" . goto-fold)
+         ("C-c C-n" . next-fold)
+         ("C-c C-p" . previous-fold)))
 
 (use-package framemove
   :config (setq framemove-hook-into-windmove t))
@@ -250,56 +302,6 @@
             (if (and (> time sunrise) (< time sunset))
                 (load-theme light-theme t)
               (load-theme dark-theme t))))))
-
-;; Jump to next fold
-
-(defun traverse-folds (times &optional beginning)
-  "Traverses through folds as many times as ordered by argument.
-  A negative argument makes it traverse backwards."
-
-  (unless beginning (setq beginning (point)))
-  (if (> times 0)
-      (progn
-        (move-end-of-line nil)
-        (fset 'fun 'origami-forward-fold))
-    (progn
-      (move-beginning-of-line nil)
-      (fset 'fun 'origami-previous-fold)))
-  (dotimes (i (abs times))
-    (condition-case err
-        (fun (current-buffer) (point))
-      (error (message "Fold not found."))))
-  (set-mark beginning)
-  (deactivate-mark))
-
-(defun next-fold (times)
-  "Jumps to the beginning of the next fold (or previous, on
-  negative argument)."
-
-  (interactive "P")
-  (unless times (setq times 1))
-  (traverse-folds times))
-
-(defun previous-fold (times)
-  "Jumps to the beginning of the previous fold, as many times as
-  ordered by argument."
-
-  (interactive "P")
-  (unless times (setq times 1))
-  (next-fold (* times -1)))
-
-(defun goto-fold (number)
-  "Jumps to fold # (provided by argument) in file."
-
-  (interactive "P")
-  (unless number (setq number
-                       (string-to-number (read-string "Jump to fold: "))))
-  (setq beginning (point))
-  (if (equal number 0) (setq number 1))
-  (if (> number 0)
-      (goto-char (point-min))
-    (goto-char (point-max)))
-  (traverse-folds number beginning))
 
 ;; Execute shell commands on parent shell (or any other tty)
 
