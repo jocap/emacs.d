@@ -199,15 +199,12 @@
                          (face-attribute 'hl-line :background))
 
     (cl-flet ((on (lambda ()
-                    (setq old-fringe fringe-mode) ;; save old fringe
-                    (if fringe-mode
-                        (let ((right-fringe (cdr fringe-mode)))
-                          (fringe-mode (cons 0 right-fringe)))
-                      (fringe-mode '(0 . 8)))
+                    (setq old-fringes (window-fringes)) ;; save old fringe
+                    (set-window-fringes nil 0) ;; left fringe -> 0
                     (relative-line-numbers-mode)
                     (setq line-numbers-on t)))
               (off (lambda ()
-                     (fringe-mode old-fringe) ;; reset to old fringe
+                     (apply 'set-window-fringes (cons nil old-fringes)) ;; reset to old fringes
                      (setq line-numbers-on nil)
                      (relative-line-numbers--off))))
       (if (or (eq arg 4) (eq arg t))
