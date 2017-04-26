@@ -335,6 +335,15 @@
   (if (and (fboundp 'dark-theme-do) (equal theme 'gruvbox))
       (dark-theme-do)))
 
+;; Desktop saving and loading
+
+(defun init-desktop ()
+  "Load the desktop and enable autosaving."
+
+  (interactive)
+  (desktop-read)
+  (desktop-save-mode 1))
+
 ;; Custom Helm buffers
 
 ;; (defvar my/helm-source-spotify
@@ -437,11 +446,19 @@
 (setq custom-file (concat user-emacs-directory "custom.el"))
 
 (setq emacs-state-directory (concat user-emacs-directory "state/"))
+
 (setq save-place-file (concat emacs-state-directory "save-place"))
 (setq recentf-save-file (concat emacs-state-directory "recentf"))
 (setq ido-save-directory-list-file (concat emacs-state-directory "ido.last"))
 (setq backup-directory-alist
       `((".*" . ,(concat emacs-state-directory "saves"))))
+
+;; Desktop
+(setq desktop-dirname             (concat emacs-state-directory "desktop/")
+      desktop-base-file-name      "emacs.desktop"
+      desktop-base-lock-name      "lock"
+      desktop-path                (list desktop-dirname)
+      desktop-save                t)
 
 ;; Shebang mode detection
 (add-to-list 'interpreter-mode-alist
@@ -521,9 +538,7 @@
 
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 
-(global-set-key (kbd "C-c C-z") 'goto-fold)
-(global-set-key (kbd "C-c C-n") 'next-fold)
-(global-set-key (kbd "C-c C-p") 'previous-fold)
+(global-set-key (kbd "C-c D") 'init-desktop)
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
