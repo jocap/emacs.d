@@ -168,7 +168,7 @@
     (concat (format "%4d " (if (= 0 offset)
                                             (line-number-at-pos)
                              (abs offset)))
-            "\u2502"))
+            "\u2502 "))
   (setq relative-line-numbers-format 'relative-abs-line-numbers-format)
 
   (defun toggle-line-numbers (&optional arg)
@@ -195,27 +195,35 @@
       (setq line-numbers-on
             (if relative-line-numbers-mode t nil)))
 
+    (unless (boundp 'old-fringes)
+      (setq old-fringes (window-fringes)))
+
     (set-face-background 'relative-line-numbers-current-line
                          (face-attribute 'hl-line :background))
 
     (cl-flet ((on (lambda ()
-                    (setq old-fringes (window-fringes)) ;; save old fringe
-                    (set-window-fringes nil 0) ;; left fringe -> 0
+                    ;; Save old fringes
+                    (setq old-fringes (window-fringes))
+                    ;; nil <- current window, 0 <- left fringe
+                    (set-window-fringes nil 0)
+                    ;; Toggle relative-line-numbers-mode
                     (relative-line-numbers-mode)
+                    ;; Set variable to remember state
                     (setq line-numbers-on t)))
               (off (lambda ()
-                     (apply 'set-window-fringes (cons nil old-fringes)) ;; reset to old fringes
+                     ;; Reset to old fringes
+                     (apply 'set-window-fringes (cons nil old-fringes))
+                     ;; Reset state
                      (setq line-numbers-on nil)
+                     ;; Toggle relative-line-numbers off
                      (relative-line-numbers--off))))
-      (if (or (eq arg 4) (eq arg t))
-          (unless line-numbers-on (on)) ;; C-u -> on
-        (if (or (eq arg 16) (eq arg -1))
-            (if line-numbers-on (off)) ;; C-u C-u -> off
+      (if (or (eq arg 4) (eq arg t)) ;; arg = C-u or t -> force on
+          (unless line-numbers-on (on))
+        (if (or (eq arg 16) (eq arg -1)) ;; arg = C-u C-u or -1 -> force off
+            (if line-numbers-on (off))
           (if line-numbers-on ;; no prefix -> toggle
               (off)
             (on))))))
-
-  (add-hook 'prog-mode-hook '(lambda () (toggle-line-numbers t)))
 
   :bind ("C-c l" . toggle-line-numbers))
 
