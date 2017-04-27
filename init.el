@@ -697,22 +697,52 @@
 
 ;; 7. Custom hooks {{{
 
-(defun add-window-focus-out-hook (&rest args)
+;; window-focus-out-hook, window-focus-in-hook
+
+(defun run-window-focus-out-hook (&optional &rest args)
   (run-hooks 'window-focus-out-hook))
-(defun add-window-focus-in-hook (&rest args)
+(defun run-window-focus-in-hook (&optional &rest args)
   (run-hooks 'window-focus-in-hook))
 
-(advice-add 'other-window :before 'add-window-focus-out-hook)
-(advice-add 'other-window :after  'add-window-focus-in-hook)
+(add-hook 'mouse-leave-buffer-hook 'run-window-focus-out-hook)
+(advice-add 'mouse-set-point :after 'run-window-focus-in-hook)
 
-(advice-add 'windmove-right :before 'add-window-focus-out-hook)
-(advice-add 'windmove-left  :before 'add-window-focus-out-hook)
-(advice-add 'windmove-right :after  'add-window-focus-in-hook)
-(advice-add 'windmove-left  :after  'add-window-focus-in-hook)
-(advice-add 'windmove-up    :before 'add-window-focus-out-hook)
-(advice-add 'windmove-down  :before 'add-window-focus-out-hook)
-(advice-add 'windmove-up    :after  'add-window-focus-in-hook)
-(advice-add 'windmove-down  :after  'add-window-focus-in-hook)
+(advice-add 'other-window :before 'run-window-focus-out-hook)
+(advice-add 'other-window :after  'run-window-focus-in-hook)
+
+(advice-add 'windmove-right :before 'run-window-focus-out-hook)
+(advice-add 'windmove-left  :before 'run-window-focus-out-hook)
+(advice-add 'windmove-right :after  'run-window-focus-in-hook)
+(advice-add 'windmove-left  :after  'run-window-focus-in-hook)
+(advice-add 'windmove-up    :before 'run-window-focus-out-hook)
+(advice-add 'windmove-down  :before 'run-window-focus-out-hook)
+(advice-add 'windmove-up    :after  'run-window-focus-in-hook)
+(advice-add 'windmove-down  :after  'run-window-focus-in-hook)
+
+;; before-minibuffer-hook, after-minibuffer-hook
+
+(defun run-before-minibuffer-hook (&optional &rest args)
+  (run-hooks 'before-minibuffer-hook)
+  (add-hook 'post-command-hook 'run-after-minibuffer-hook))
+(defun run-after-minibuffer-hook (&optional &rest args)
+  (unless (minibufferp)
+    (run-hooks 'after-minibuffer-hook)
+    (remove-hook 'post-command-hook 'run-after-minibuffer-hook)))
+
+(advice-add 'read-from-minibuffer :before 'run-before-minibuffer-hook)
+(advice-add 'read-no-blanks-input :before 'run-before-minibuffer-hook)
+(advice-add 'read-string          :before 'run-before-minibuffer-hook)
+
+;; before-helm-hook, after-helm-hook
+
+(defun run-before-helm-hook (&optional &rest args)
+  (run-hooks 'before-helm-hook))
+(defun run-after-helm-hook (&optional &rest args)
+  (run-hooks 'after-helm-hook))
+
+(add-hook 'helm-before-initialize-hook 'run-before-helm-hook)
+(add-hook 'helm-exit-minibuffer-hook   'run-after-helm-hook)
+(advice-add 'helm-keyboard-quit :after 'run-after-helm-hook)
 
 ;; }}}
 
