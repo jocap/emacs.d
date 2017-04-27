@@ -555,6 +555,24 @@
 ;; - Set theme according to daylight
 (add-hook 'after-init-hook 'daylight-sets-color)
 
+;; Dynamic cursor (focused -> bar, unfocused -> block)
+
+(setq default-cursor-type cursor-type)
+
+(defun cursor-focused ()
+  (setq-local cursor-type default-cursor-type))
+(defun cursor-unfocused ()
+  (setq-local cursor-type 'block))
+
+(add-hook 'post-command-hook 'cursor-focused)
+;; Using post-command-hook because setting the cursor type is such a simple
+;; action, and because select-window is called surprisingly often, and often
+;; without the suitable `norecord' argument ...
+
+(add-hook 'window-focus-out-hook  'cursor-unfocused)
+(add-hook 'before-minibuffer-hook 'cursor-unfocused)
+(add-hook 'before-helm-hook       'cursor-unfocused)
+
 ;; Directories
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
