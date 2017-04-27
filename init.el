@@ -2,7 +2,39 @@
 ;                           init.el by John Ankarström
 ; ==============================================================================
 
-;; 1. Packages {{{
+;; 1. init.el reload/restore {{{
+
+;; These are at the top to make sure they are always available, even if there is
+;; an error farther down init.el
+
+(defun reload-init ()
+  "Copies init.el to a backup file and restarts Emacs."
+  (interactive)
+  (shell-command (concat "cp "
+                         user-emacs-directory
+                         "init.el "
+                         user-emacs-directory
+                         ".init.el.restore"))
+  (restart-emacs))
+
+(defun restore-init ()
+  "Copies init.el to a backup file, restores the old backup file and restarts."
+  (interactive)
+  (shell-command (concat "cp "
+                         user-emacs-directory
+                         "init.el "
+                         user-emacs-directory
+                         ".init.el.new"))
+  (shell-command (concat "mv "
+                         user-emacs-directory
+                         ".init.el.restore "
+                         user-emacs-directory
+                         "init.el"))
+  (restart-emacs))
+
+;; }}}
+
+;; 2. Packages {{{
 
 (require 'package)
 (add-to-list 'package-archives
@@ -320,7 +352,7 @@
 
 ;; }}}
 
-;; 2. Functions {{{
+;; 3. Functions {{{
 
 ;; Set color scheme according to daylight
 
@@ -480,7 +512,7 @@
 
 ;; }}}
 
-;; 3. Preferences {{{
+;; 4. Preferences {{{
 
 (server-start) ; use emacs as a server
 
@@ -574,7 +606,7 @@
 
 ;; }}}
 
-;; 4. Keybindings {{{
+;; 5. Keybindings {{{
 
 (windmove-default-keybindings)
 
@@ -593,7 +625,7 @@
 
 ;; }}}
 
-;; 5. Mode configuration {{{
+;; 6. Mode configuration {{{
 
 (electric-pair-mode 1) ; auto-insert matching pairs
 (menu-bar-mode -1)     ; disable menu bar
@@ -663,7 +695,7 @@
 
 ;; }}}
 
-;; 6. Custom hooks {{{
+;; 7. Custom hooks {{{
 
 (defun add-window-focus-out-hook (&rest args)
   (run-hooks 'window-focus-out-hook))
@@ -684,7 +716,7 @@
 
 ;; }}}
 
-;; 7. Custom modes {{{
+;; 8. Custom modes {{{
 
 ;; Swedish letters
 
@@ -707,7 +739,7 @@
 
 ;; }}}
 
-;; 8. Customize {{{
+;; 9. Customize {{{
 
 (load custom-file)
 
