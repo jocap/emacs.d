@@ -330,9 +330,10 @@
     "Removes current line number background from current
     window (actually buffer) (before selecting new one)."
 
-    (face-remap-set-base 'relative-line-numbers-current-line
-                         :background (face-attribute 'default :background)
-                         :foreground (face-attribute 'linum :foreground)))
+    (if (and (boundp 'line-numbers-on) line-numbers-on)
+      (face-remap-set-base 'relative-line-numbers-current-line
+                           :background (face-attribute 'default :background)
+                           :foreground (face-attribute 'linum :foreground))))
 
   (defun add-current-line-num-bg (&rest args)
     "Adds current line number background (as hl-line background) to
@@ -342,18 +343,20 @@
                          :background (face-attribute 'hl-line :background)
                          :foreground (face-attribute 'linum :foreground))
     ;; Make sure left fringe behaves correctly
-    (if (boundp 'line-numbers-on)
-        (if line-numbers-on
-            (set-window-fringes nil 0)
-          (set-window-fringes nil left-fringe-default))
+    (if (and (boundp 'line-numbers-on) line-numbers-on)
+        (set-window-fringes nil 0)
       (set-window-fringes nil left-fringe-default)))
 
-  (add-hook 'window-focus-out-hook 'remove-current-line-num-bg)
   (add-hook 'window-focus-in-hook 'add-current-line-num-bg)
-  (add-hook 'before-minibuffer-hook 'remove-current-line-num-bg)
+  (add-hook 'window-focus-out-hook 'remove-current-line-num-bg)
+
   (add-hook 'after-minibuffer-hook 'add-current-line-num-bg)
-  (add-hook 'before-helm-hook 'remove-current-line-num-bg)
+  (add-hook 'before-minibuffer-hook 'remove-current-line-num-bg)
+
   (add-hook 'after-helm-hook 'add-current-line-num-bg)
+  (add-hook 'before-helm-hook 'remove-current-line-num-bg) ; not strictly
+                                                           ; necessary, as helm
+                                                           ; uses select-window
 
   ;; TODO: Update all buffers' current line number background on theme change
   ;; (advice-add 'load-theme :after 'update-current-line-num-bg)
@@ -709,25 +712,15 @@
 
 ;; window-focus-out-hook, window-focus-in-hook
 
-(defun run-window-focus-out-hook (&optional &rest args)
-  (run-hooks 'window-focus-out-hook))
-(defun run-window-focus-in-hook (&optional &rest args)
-  (run-hooks 'window-focus-in-hook))
+(defun run-window-focus-out-hook (window &optional norecord)
+  (unless norecord
+    (run-hooks 'window-focus-out-hook)))
+(defun run-window-focus-in-hook (window &optional norecord)
+  (unless norecord
+    (run-hooks 'window-focus-in-hook)))
 
-(add-hook 'mouse-leave-buffer-hook 'run-window-focus-out-hook)
-(advice-add 'mouse-set-point :after 'run-window-focus-in-hook)
-
-(advice-add 'other-window :before 'run-window-focus-out-hook)
-(advice-add 'other-window :after  'run-window-focus-in-hook)
-
-(advice-add 'windmove-right :before 'run-window-focus-out-hook)
-(advice-add 'windmove-left  :before 'run-window-focus-out-hook)
-(advice-add 'windmove-right :after  'run-window-focus-in-hook)
-(advice-add 'windmove-left  :after  'run-window-focus-in-hook)
-(advice-add 'windmove-up    :before 'run-window-focus-out-hook)
-(advice-add 'windmove-down  :before 'run-window-focus-out-hook)
-(advice-add 'windmove-up    :after  'run-window-focus-in-hook)
-(advice-add 'windmove-down  :after  'run-window-focus-in-hook)
+(advice-add 'select-window :before 'run-window-focus-out-hook)
+(advice-add 'select-window :after 'run-window-focus-in-hook)
 
 ;; before-minibuffer-hook, after-minibuffer-hook
 
