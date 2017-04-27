@@ -10,6 +10,7 @@
 (defun reload-init ()
   "Copies init.el to a backup file and restarts Emacs."
   (interactive)
+  (save-some-buffers)
   (shell-command (concat "cp "
                          user-emacs-directory
                          "init.el "
@@ -37,11 +38,13 @@
 ;; 2. Packages {{{
 
 (require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
-(when (< emacs-major-version 24)
-  ;; For important compatibility libraries like cl-lib
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+        ("org" . "http://orgmode.org/elpa/")
+        ("melpa" . "http://melpa.org/packages/")
+        ("melpa-stable" . "http://stable.melpa.org/packages/")))
+(setq package-archive-priorities
+      '(("melpa-stable" . 1)))
 (package-initialize)
 
 (eval-when-compile
@@ -719,6 +722,18 @@
 
 (advice-add 'select-window :before 'run-window-focus-out-hook)
 (advice-add 'select-window :after 'run-window-focus-in-hook)
+
+;; NOTE: This doesn't always play nice with magit. For example, select-window
+;; seems to be run when opening the commit message buffer, but *not* when
+;; returning to the magit status buffer. I'm not quite sure why, but I suppose I
+;; could add an exception for it. I'd have to look at the magit source. Perhaps
+;; I could just run a function upon switch-to-buffer that checks whether the
+;; current-window is different from the previous-current-window (saved in a
+;; variable); that might be the most simple solution, similar to what hl-line
+;; does, but as I've said before, more efficient than attaching everything to
+;; post-command-hook ...
+
+;; TODO: Add exception for magit buffer switching.
 
 ;; before-minibuffer-hook, after-minibuffer-hook
 
