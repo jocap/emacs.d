@@ -258,6 +258,8 @@
         helm-autoresize-min-height           0))
 
 (use-package relative-line-numbers
+  :init
+  (setq left-fringe-default (car (window-fringes)))
   :config
   (defun relative-abs-line-numbers-format (offset)
     "Custom format function for `relative-line-numbers' that
@@ -294,30 +296,26 @@
     (require 'cl-lib)
 
     (unless (boundp 'line-numbers-on)
-      (setq line-numbers-on
+      (setq-local line-numbers-on
             (if relative-line-numbers-mode t nil)))
 
-    (unless (boundp 'old-fringes)
-      (setq old-fringes (window-fringes)))
+    (unless (boundp 'left-fringe-default)
+      (setq left-fringe-default 8))
 
     (cl-flet ((on (lambda ()
-                    ;; Save old fringes
-                    (setq old-fringes (window-fringes))
-                    ;; nil <- current window, 0 <- left fringe
-                    (set-window-fringes nil 0)
-                    ;; Add current line number background as hl-line
-                    (add-current-line-no-bg)
-                    ;; Toggle relative-line-numbers-mode
-                    (relative-line-numbers-mode)
                     ;; Set variable to remember state
-                    (setq line-numbers-on t)))
+                    (setq-local line-numbers-on t)
+                    ;; Add current line number background as hl-line
+                    (add-current-line-num-bg)
+                    ;; Toggle relative-line-numbers-mode
+                    (relative-line-numbers-mode)))
               (off (lambda ()
-                     ;; Reset to old fringes
-                     (apply 'set-window-fringes (cons nil old-fringes))
+                     ;; Reset to default left fringe
+                     (set-window-fringes nil left-fringe-default)
                      ;; Reset state
-                     (setq line-numbers-on nil)
+                     (setq-local line-numbers-on nil)
                     ;; Remove current line number background from buffer
-                    (remove-current-line-no-bg)
+                    (remove-current-line-num-bg)
                      ;; Toggle relative-line-numbers off
                      (relative-line-numbers--off))))
       (if (or (eq arg 4) (eq arg t)) ;; arg = C-u or t -> force on
@@ -328,7 +326,7 @@
               (off)
             (on))))))
 
-  (defun remove-current-line-no-bg (&rest args)
+  (defun remove-current-line-num-bg (&rest args)
     "Removes current line number background from current
     window (actually buffer) (before selecting new one)."
 
@@ -336,17 +334,29 @@
                          :background (face-attribute 'default :background)
                          :foreground (face-attribute 'linum :foreground)))
 
-  (defun add-current-line-no-bg (&rest args)
+  (defun add-current-line-num-bg (&rest args)
     "Adds current line number background (as hl-line background) to
     current window (actually buffer) (after selecting new one)."
 
     (face-remap-set-base 'relative-line-numbers-current-line
                          :background (face-attribute 'hl-line :background)
-                         :foreground (face-attribute 'linum :foreground)))
+                         :foreground (face-attribute 'linum :foreground))
+    ;; Make sure left fringe behaves correctly
+    (if (boundp 'line-numbers-on)
+        (if line-numbers-on
+            (set-window-fringes nil 0)
+          (set-window-fringes nil left-fringe-default))
+      (set-window-fringes nil left-fringe-default)))
 
-  ;; Use custom window focus hooks in an attempt to match hl-line
-  (add-hook 'window-focus-out-hook 'remove-current-line-no-bg)
-  (add-hook 'window-focus-in-hook 'add-current-line-no-bg)
+  (add-hook 'window-focus-out-hook 'remove-current-line-num-bg)
+  (add-hook 'window-focus-in-hook 'add-current-line-num-bg)
+  (add-hook 'before-minibuffer-hook 'remove-current-line-num-bg)
+  (add-hook 'after-minibuffer-hook 'add-current-line-num-bg)
+  (add-hook 'before-helm-hook 'remove-current-line-num-bg)
+  (add-hook 'after-helm-hook 'add-current-line-num-bg)
+
+  ;; TODO: Update all buffers' current line number background on theme change
+  ;; (advice-add 'load-theme :after 'update-current-line-num-bg)
 
   :bind ("C-c l" . toggle-line-numbers))
 
