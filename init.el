@@ -529,32 +529,6 @@
 
 (server-start) ; use emacs as a server
 
-;; Directories
-(setq custom-file (concat user-emacs-directory "custom.el"))
-
-(setq emacs-state-directory (concat user-emacs-directory "state/"))
-
-(setq save-place-file (concat emacs-state-directory "save-place"))
-(setq recentf-save-file (concat emacs-state-directory "recentf"))
-(setq ido-save-directory-list-file (concat emacs-state-directory "ido.last"))
-(setq backup-directory-alist
-      `((".*" . ,(concat emacs-state-directory "saves"))))
-
-;; Desktop
-(setq desktop-dirname             (concat emacs-state-directory "desktop/")
-      desktop-base-file-name      "emacs.desktop"
-      desktop-base-lock-name      "lock"
-      desktop-path                (list desktop-dirname)
-      desktop-save                t)
-
-;; Shebang mode detection
-(add-to-list 'interpreter-mode-alist
-             '("python3" . python-mode))
-
-;; GUI
-(add-to-list 'default-frame-alist
-             '(font . "Fira Mono Medium-10"))
-
 ;; Themes
 
 (setq light-theme 'solarized-light)
@@ -578,7 +552,27 @@
 ;; - Set theme according to daylight
 (add-hook 'after-init-hook 'daylight-sets-color)
 
+;; Directories
+
+(setq custom-file (concat user-emacs-directory "custom.el"))
+
+(setq emacs-state-directory (concat user-emacs-directory "state/"))
+
+(setq save-place-file (concat emacs-state-directory "save-place"))
+(setq recentf-save-file (concat emacs-state-directory "recentf"))
+(setq ido-save-directory-list-file (concat emacs-state-directory "ido.last"))
+(setq backup-directory-alist
+      `((".*" . ,(concat emacs-state-directory "saves"))))
+
+;; Desktop
+(setq desktop-dirname             (concat emacs-state-directory "desktop/")
+      desktop-base-file-name      "emacs.desktop"
+      desktop-base-lock-name      "lock"
+      desktop-path                (list desktop-dirname)
+      desktop-save                t)
+
 ;; Spelling
+
 (require 'ispell)
 (add-to-list 'ispell-dictionary-alist
              '("swedish-hunspell"
@@ -601,6 +595,10 @@
                utf-8))
 (setq ispell-program-name "hunspell"
       ispell-dictionary   "swedish-hunspell")
+
+;; Shebang mode detection
+(add-to-list 'interpreter-mode-alist
+             '("python3" . python-mode))
 
 ;; Enabling disabled commands
 (defadvice en/disable-command (around put-in-custom-file activate)

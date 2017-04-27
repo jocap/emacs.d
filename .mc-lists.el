@@ -15,6 +15,7 @@
         paredit-forward-delete
         paredit-forward-kill-word
         paredit-kill
+        paredit-newline
         paredit-open-round
         paredit-semicolon
         smart-open-line-above
