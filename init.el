@@ -570,7 +570,7 @@
                        (mapcar #'disable-theme custom-enabled-themes))))
 
 ;; - Dynamic settings for light/dark themes
-(advice-add 'load-theme :after #'dynamic-load-theme)
+(advice-add 'load-theme :after 'dynamic-load-theme)
 
 ;; - Set theme according to daylight
 (add-hook 'after-init-hook 'daylight-sets-color)
