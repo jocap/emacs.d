@@ -3,6 +3,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
  '(browse-url-browser-function (quote browse-url-firefox))
  '(column-number-mode t)
  '(compilation-message-face (quote default))
@@ -13,11 +15,13 @@
  '(cursor-type (quote (bar . 1)))
  '(custom-safe-themes
    (quote
-    ("a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
+    ("b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
  '(default-frame-alist (quote ((font . "Fira Mono Medium-10"))))
  '(default-input-method "russian-computer")
- '(fci-rule-color "#eee8d5" t)
+ '(fci-rule-color "#eee8d5")
  '(fill-column 80)
+ '(fringe-mode nil nil (fringe))
+ '(helm-external-programs-associations (quote (("html" . "firefox"))))
  '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
  '(highlight-symbol-colors
    (--map
@@ -49,17 +53,18 @@
  '(nrepl-message-colors
    (quote
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
+ '(org-edit-src-content-indentation 0)
  '(org-replace-disputed-keys t)
  '(org-src-fontify-natively t)
+ '(org-src-tab-acts-natively t)
  '(package-selected-packages
    (quote
-    (dash relative-line-numbers helm diminish use-package dashboard framemove flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (s zenity-color-picker helm-projectile term-projectile dash relative-line-numbers helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)
  '(sentence-end-double-space nil)
  '(show-paren-mode t)
- '(show-trailing-whitespace t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
  '(tab-width 4)
  '(term-default-bg-color "#002b36")
@@ -106,4 +111,5 @@
  '(magit-section-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))) nil "Made text visible.")
  '(relative-line-numbers ((t (:inherit (linum default)))))
  '(relative-line-numbers-current-line ((t (:inherit relative-line-numbers))))
+ '(variable-pitch ((t (:height 110 :family "FreeSans"))))
  '(widget-field ((t (:background "#eee8d5" :foreground "dim gray"))) nil "Made text visible."))

@@ -71,7 +71,7 @@
   (setq ido-use-faces nil))
 
 (use-package rainbow-delimiters
-  :config (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+  :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
 (use-package expand-region
   :bind (("C-' r"  . er/expand-region)
@@ -191,9 +191,6 @@
          ("C-c C-z" . goto-fold)
          ("C-c C-n" . next-fold)
          ("C-c C-p" . previous-fold)))
-
-(use-package framemove
-  :config (setq framemove-hook-into-windmove t))
 
 (use-package iy-go-to-char
   :bind (("M-m" . iy-go-to-char)
@@ -371,6 +368,37 @@
   ;; (advice-add 'load-theme :after 'update-current-line-num-bg)
 
   :bind ("C-c l" . toggle-line-numbers))
+
+(use-package projectile
+  :ensure helm-projectile
+  :config
+  (projectile-global-mode)
+  (setq projectile-enable-caching t)
+  (setq projectile-require-project-root nil)
+
+  (setq projectile-completion-system 'helm)
+  (setq projectile-switch-project-action 'helm-projectile) ;; see http://tuhdo.github.io/helm-projectile.html#sec-5
+  (helm-projectile-on))
+
+(use-package dropbox
+  :load-path (lambda () (concat user-emacs-directory "packages/dropbox"))
+  :init
+  (require 's)
+  ;; Load API key and secret from file
+  (setq dropbox-token-file (concat user-emacs-directory
+                                   "secret/dropbox/token"))
+  (setq dropbox-consumer-key
+        (s-trim
+         (with-temp-buffer (insert-file-contents
+                            (concat user-emacs-directory
+                                    "secret/dropbox/key"))
+                           (buffer-string))))
+  (setq dropbox-consumer-secret
+        (s-trim
+         (with-temp-buffer (insert-file-contents
+                            (concat user-emacs-directory
+                                    "secret/dropbox/secret"))
+                           (buffer-string)))))
 
 ;; }}}
 
@@ -583,13 +611,29 @@
 
 (setq custom-file (concat user-emacs-directory "custom.el"))
 
-(setq emacs-state-directory (concat user-emacs-directory "state/"))
+(setq emacs-state-directory (expand-file-name "state/" user-emacs-directory))
+(defun state-dir (file)
+  (concat emacs-state-directory file))
 
-(setq save-place-file (concat emacs-state-directory "save-place"))
-(setq recentf-save-file (concat emacs-state-directory "recentf"))
-(setq ido-save-directory-list-file (concat emacs-state-directory "ido.last"))
+(setq auto-save-list-file-prefix (state-dir "auto-save-list/.saves~"))
+(setq save-place-file (state-dir "save-place"))
+(setq recentf-save-file (state-dir "recentf"))
+(setq ido-save-directory-list-file (state-dir "ido.last"))
 (setq backup-directory-alist
-      `((".*" . ,(concat emacs-state-directory "saves"))))
+      `((".*" . ,(state-dir "saves"))))
+
+(setq tramp-backup-directory-alist backup-directory-alist)
+(setq tramp-auto-save-directory (state-dir
+                                        "tramp/auto-save/"))
+(setq tramp-persistency-file-name (state-dir
+                                          "tramp/persistency.el"))
+
+;; - Projectile
+(setq projectile-cache-file (concat emacs-state-directory
+                                    "projectile/cache.el"))
+(setq projectile-known-projects-file
+      (concat emacs-state-directory
+              "projectile/known-projects.el"))
 
 ;; Desktop
 (setq desktop-dirname             (concat emacs-state-directory "desktop/")
