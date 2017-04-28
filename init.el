@@ -448,14 +448,6 @@
                       "\007\"")
                      terminal) t) ; return-nil = t -> return nil no matter what
 
-;; Dynamic settings for light/dark themes
-
-(defun dynamic-load-theme (theme &optional rest ...)
-  (if (and (fboundp 'light-theme-do) (equal theme 'solarized-light))
-      (light-theme-do))
-  (if (and (fboundp 'dark-theme-do) (equal theme 'gruvbox))
-      (dark-theme-do)))
-
 ;; Desktop saving and loading
 
 (defun init-desktop (&optional arg)
@@ -564,16 +556,68 @@
 
 (server-start) ; use emacs as a server
 
+(add-hook 'prog-mode-hook (lambda ()
+                            (setq-local show-trailing-whitespace t)))
+
 ;; Themes
 
 (setq light-theme 'solarized-light)
 (setq dark-theme 'gruvbox)
 
-(defun light-theme-do ()
-  (setq fci-rule-color "#cccccc"))
+(defun theme-do (theme)
+  "Actions to perform when `theme' loads. Also includes
+  configuration for all themes."
 
-(defun dark-theme-do ()
-  (setq fci-rule-color "#333333"))
+  ;; Specific theme settings
+
+  (cl-case theme
+    ('gruvbox
+     (custom-theme-set-faces
+      'gruvbox ; Fix hard-to-see org-mode colors
+      '(org-verbatim ((t (:foreground "DarkGray"))))
+      '(org-document-info-keyword ((t (:foreground "DarkGoldenrod"))))))
+
+    ('tango
+     (custom-theme-set-faces
+      'tango
+      '(hl-line ((t (:background "#dddddd"))))))
+
+    ('tango-dark
+     (custom-theme-set-faces
+      'tango-dark ;; fix crazy hl-line (bright yellow per default!)
+      '(hl-line ((t (:background "#444444")))))))
+
+  ;; Do for all themes
+
+  ;; - Dynamic colors (based on theme)
+  (let* ((bg
+          (alist-get 'background-mode (frame-parameters)))
+         (intensify
+          (if (eq bg 'dark) 'color-darken-name 'color-lighten-name))
+         (anti-intensify
+          (if (eq bg 'dark) 'color-lighten-name 'color-darken-name)))
+    (setq fci-rule-color (color-desaturate-name
+                          (funcall anti-intensify
+                                   (face-attribute 'default :background) 15) 50))
+    (set-face-attribute 'org-block-background nil :background
+                        (color-desaturate-name
+                         (color-darken-name
+                          (face-attribute 'default :background) 3) 20))
+    (cl-loop for face in '(org-block-begin-line org-block-end-line)
+             do (set-face-attribute
+                 face nil
+                 :background (color-desaturate-name
+                              (color-darken-name
+                               (face-attribute 'default :background) 15) 50)
+                 :foreground (color-desaturate-name
+                              (funcall intensify
+                                       (face-attribute 'default :foreground) 20) 90)
+                 :weight (face-attribute 'default :weight)
+                 :slant (face-attribute 'default :slant))))
+
+  ;; - Reset fci-mode
+  (call-interactively 'fci-mode)
+  (call-interactively 'fci-mode))
 
 ;; - Disable previous theme when enabling new theme
 (add-hook 'after-init-hook
@@ -581,8 +625,9 @@
                          (before theme-dont-propagate activate)
                        (mapcar #'disable-theme custom-enabled-themes))))
 
-;; - Dynamic settings for light/dark themes
-(advice-add 'load-theme :after 'dynamic-load-theme)
+;; - Dynamic settings for different themes
+(advice-add 'load-theme :after (lambda (theme &optional rest ...)
+                                 (theme-do theme)))
 
 ;; - Set theme according to daylight
 (add-hook 'after-init-hook 'daylight-sets-color)
