@@ -224,21 +224,9 @@
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
   (add-hook 'org-shiftright-final-hook 'windmove-right)
 
-  (defun org-html-export-to-html-open-wsl (&rest args)
-    "Exports current org file to html file using
-    `org-html-export-to-html' with the provided arguments.
-
-    Then opens the file in the web browser, using the correct URL
-    scheme for WSL (Windows Susbsystem for Linux)."
-
-    (interactive)
-    (unless (boundp 'wsl-url-root)
-      (setq wsl-url-root "file:///C:/Users/JohnAJ/AppData/Local/lxss"))
-    (let ((file-path (file-truename (apply #'org-html-export-to-html args))))
-      (browse-url (concat wsl-url-root file-path))))
-
-  ;; remove C-' keybinding (because I use it for expand-region)
+  ;; Remove keybindings that I already use
   (define-key org-mode-map (kbd "C-'") nil)
+  (define-key org-mode-map (kbd "C-c C-m") nil)
 
   :bind (:map org-mode-map
               ("<C-M-return>" . smart-open-line)
