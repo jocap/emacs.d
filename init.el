@@ -7,10 +7,12 @@
 ;; These are at the top to make sure they are always available, even if there is
 ;; an error farther down init.el
 
+;; TODO: Fix this. Of course this won't work. Add a hook when saving init.el,
+;; instead, that saves it to a `restore' file.
+
 (defun reload-init ()
   "Copies init.el to a backup file and restarts Emacs."
   (interactive)
-  (save-some-buffers)
   (shell-command (concat "cp "
                          user-emacs-directory
                          "init.el "
@@ -18,20 +20,24 @@
                          ".init.el.restore"))
   (restart-emacs))
 
-(defun restore-init ()
+(defun revert-init (arg)
   "Copies init.el to a backup file, restores the old backup file and restarts."
-  (interactive)
-  (shell-command (concat "cp "
-                         user-emacs-directory
-                         "init.el "
-                         user-emacs-directory
-                         ".init.el.new"))
-  (shell-command (concat "mv "
-                         user-emacs-directory
-                         ".init.el.restore "
-                         user-emacs-directory
-                         "init.el"))
-  (restart-emacs))
+  (interactive
+   (list
+    (read-string "Are you sure? (y/N) ")))
+  (if (eq arg "y")
+      (progn
+        (shell-command (concat "cp "
+                               user-emacs-directory
+                               "init.el "
+                               user-emacs-directory
+                               ".init.el.new"))
+        (shell-command (concat "mv "
+                               user-emacs-directory
+                               ".init.el.restore "
+                               user-emacs-directory
+                               "init.el"))
+        (restart-emacs))))
 
 ;; }}}
 
