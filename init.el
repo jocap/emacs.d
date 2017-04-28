@@ -326,16 +326,23 @@
 
     (if (and (boundp 'line-numbers-on) line-numbers-on)
       (face-remap-set-base 'relative-line-numbers-current-line
-                           :background (face-attribute 'default :background)
-                           :foreground (face-attribute 'linum :foreground))))
+                           :background (face-attribute 'default :background nil t)
+                           :foreground (face-attribute 'linum :foreground nil t)
+                           :slant (face-attribute 'linum :slant nil t)
+                           :weight (face-attribute 'linum :weight nil t))))
+
+  ;; face-remap-set-base: third argument:  frame (nil -> currently open and all new)
+  ;;                      fourth argument: include inherited attributes (yes/no)
 
   (defun add-current-line-num-bg (&rest args)
     "Adds current line number background (as hl-line background) to
     current window (actually buffer) (after selecting new one)."
 
     (face-remap-set-base 'relative-line-numbers-current-line
-                         :background (face-attribute 'hl-line :background)
-                         :foreground (face-attribute 'linum :foreground))
+                         :background (face-attribute 'hl-line :background nil t)
+                         :foreground (face-attribute 'linum :foreground nil t)
+                         :slant (face-attribute 'linum :slant nil t)
+                         :weight (face-attribute 'linum :weight nil t))
     ;; Make sure left fringe behaves correctly
     (if (and (boundp 'line-numbers-on) line-numbers-on)
         (set-window-fringes nil 0)
@@ -354,6 +361,9 @@
 
   ;; TODO: Update all buffers' current line number background on theme change
   ;; (advice-add 'load-theme :after 'update-current-line-num-bg)
+
+  (add-hook 'prog-mode-hook (lambda ()
+                              (toggle-line-numbers t)))
 
   :bind ("C-c l" . toggle-line-numbers))
 
