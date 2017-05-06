@@ -647,10 +647,7 @@ twice, it calls `smarter-beginning-of-line' once."
 (setq dark-theme 'gruvbox)
 
 (defun theme-do (theme)
-  "Actions to perform when `theme' loads. Also includes
-  configuration for all themes."
-
-  ;; Specific theme settings
+  "Actions to perform when `theme' loads."
 
   (cl-case theme
     ('gruvbox
@@ -667,35 +664,46 @@ twice, it calls `smarter-beginning-of-line' once."
     ('tango-dark
      (custom-theme-set-faces
       'tango-dark ;; fix crazy hl-line (bright yellow per default!)
-      '(hl-line ((t (:background "#444444")))))))
+      '(hl-line ((t (:background "#444444"))))))))
 
-  ;; Do for all themes
+(defun theme-do-all ()
+  "Actions to perform when any theme loads"
 
-  ;; - Dynamic colors (based on theme)
+  ;; Dynamic colors
+
+  (require 'color)
   (let* ((bg
           (alist-get 'background-mode (frame-parameters)))
          (intensify
           (if (eq bg 'dark) 'color-darken-name 'color-lighten-name))
          (anti-intensify
           (if (eq bg 'dark) 'color-lighten-name 'color-darken-name)))
+
+    ;; * fci-rule-color -> desaturate, anti-intensity
     (setq fci-rule-color (color-desaturate-name
                           (funcall anti-intensify
                                    (face-attribute 'default :background) 15) 50))
-    (set-face-attribute 'org-block-background nil :background
-                        (color-desaturate-name
-                         (color-darken-name
-                          (face-attribute 'default :background) 3) 20))
-    (cl-loop for face in '(org-block-begin-line org-block-end-line)
-             do (set-face-attribute
-                 face nil
-                 :background (color-desaturate-name
-                              (color-darken-name
-                               (face-attribute 'default :background) 15) 50)
-                 :foreground (color-desaturate-name
-                              (funcall intensify
-                                       (face-attribute 'default :foreground) 20) 90)
-                 :weight (face-attribute 'default :weight)
-                 :slant (face-attribute 'default :slant))))
+
+    ;; * org-block-background -> desaturate, darken
+    (set-face-attribute 'org-block nil
+                        :background (color-desaturate-name
+                                     (color-darken-name
+                                      (face-attribute 'default :background) 3) 20)
+                        :foreground (face-attribute 'default :foreground))
+
+    ;; * org-block-begin-line, *org-block-end-line
+    (cl-loop
+     for face in '(org-block-begin-line org-block-end-line)
+     do (set-face-attribute
+         face nil
+         :background (color-desaturate-name
+                      (color-darken-name
+                       (face-attribute 'default :background) 15) 50)
+         :foreground (color-desaturate-name
+                      (funcall intensify
+                               (face-attribute 'default :foreground) 20) 90)
+         :weight (face-attribute 'default :weight)
+         :slant (face-attribute 'default :slant))))
 
   ;; - Reset fci-mode
   (call-interactively 'fci-mode)
@@ -709,7 +717,8 @@ twice, it calls `smarter-beginning-of-line' once."
 
 ;; - Dynamic settings for different themes
 (advice-add 'load-theme :after (lambda (theme &optional rest ...)
-                                 (theme-do theme)))
+                                 (theme-do theme)
+                                 (theme-do-all)))
 
 ;; - Set theme according to daylight
 (add-hook 'after-init-hook 'daylight-sets-color)
