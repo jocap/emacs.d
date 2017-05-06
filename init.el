@@ -1,6 +1,6 @@
-; ==============================================================================
-;                           init.el by John Ankarström
-; ==============================================================================
+;; =============================================================================
+;;                          init.el by John Ankarström
+;; =============================================================================
 
 ;; 1. init.el reload/restore {{{
 
@@ -212,9 +212,20 @@
 
 (use-package org
   :mode (("\\.org$" . org-mode))
-  ;; :ensure org-plus-contrib
+  :ensure org-plus-contrib
+  :demand
+  :init
+  ;; Open agenda in split window at launch
+  (add-hook 'after-init-hook (lambda ()
+                               (org-agenda-list)
+                               (other-window 1)))
   :config
-  ;; make windmove work in org-mode
+  ;; Make ' work in inline code
+  (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\r\n,")
+  (org-set-emph-re 'org-emphasis-regexp-components
+                   org-emphasis-regexp-components) ; reload setting
+
+  ;; Make windmove work in org-mode
   (add-hook 'org-shiftup-final-hook 'windmove-up)
   (add-hook 'org-shiftleft-final-hook 'windmove-left)
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
@@ -224,6 +235,12 @@
   (define-key org-mode-map (kbd "C-'") nil)
   (define-key org-mode-map (kbd "C-c C-m") nil)
 
+  (add-hook 'org-mode-hook 'swedish-mode) ;; Swedish letters
+
+  :bind (("C-c o a" . org-agenda)
+         ("C-c o l" . org-store-link)
+         ("C-c o c" . org-capture)
+         ("C-c o b" . org-iswitchb))
   :bind (:map org-mode-map
               ("<C-M-return>" . smart-open-line)
               ("C-c C-x C-e"  . org-html-export-to-html-open-wsl)))
@@ -320,12 +337,16 @@
     "Removes current line number background from current
     window (actually buffer) (before selecting new one)."
 
+    (face-remap-set-base 'relative-line-numbers-current-line
+                         :background (face-attribute 'default :background nil t)
+                         :foreground (face-attribute 'linum :foreground nil t)
+                         :slant (face-attribute 'linum :slant nil t)
+                         :weight (face-attribute 'linum :weight nil t))
+
+    ;; Make sure left fringe behaves correctly
     (if (and (boundp 'line-numbers-on) line-numbers-on)
-      (face-remap-set-base 'relative-line-numbers-current-line
-                           :background (face-attribute 'default :background nil t)
-                           :foreground (face-attribute 'linum :foreground nil t)
-                           :slant (face-attribute 'linum :slant nil t)
-                           :weight (face-attribute 'linum :weight nil t))))
+        (set-window-fringes nil 0)
+      (set-window-fringes nil left-fringe-default)))
 
   ;; face-remap-set-base: third argument:  frame (nil -> currently open and all new)
   ;;                      fourth argument: include inherited attributes (yes/no)
@@ -370,6 +391,10 @@
   (setq projectile-enable-caching t)
   (setq projectile-require-project-root nil)
 
+  (setq projectile-globally-ignored-directories
+        (cl-list* ".cache" ".cargo"
+                  projectile-globally-ignored-directories))
+
   (setq projectile-completion-system 'helm)
   (setq projectile-switch-project-action 'helm-projectile) ;; see http://tuhdo.github.io/helm-projectile.html#sec-5
   (helm-projectile-on))
@@ -410,7 +435,6 @@
   Note that it only works in Emacs frames attached to using
   `emacsclient -t'."
 
-  (unless terminal (setq terminal (get-device-terminal nil))) ; tty of frame
   (let ((terminal (or terminal (get-device-terminal nil))) ; tty of frame
         (tty (terminal-name terminal)))
     (progn (setq output (shell-command (concat
@@ -433,10 +457,10 @@
 ;; Desktop saving and loading
 
 (defun init-desktop (&optional arg)
-  "Load the desktop (unless C-u is provided) and enable autosaving."
+  "Load the desktop (if C-u is provided) and enable autosaving."
 
   (interactive "p")
-  (unless current-prefix-arg (desktop-read))
+  (if current-prefix-arg (desktop-read))
   (desktop-save-mode 1)
   (message "Desktop-Save mode enabled"))
 
@@ -513,7 +537,7 @@
   (beginning-of-line (or (and arg (1+ arg)) 2))
   (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
 
-(defun smarter-move-beginning-of-line (arg) ; (cy/o Emacs Redux)
+(defun smarter-move-beginning-of-line (&optional &rest args)
   "Move point back to indentation of beginning of line.
   Move point to the first non-whitespace character on this line.
   If point is already there, move to the beginning of the line.
