@@ -613,7 +613,7 @@ twice, it calls `smarter-beginning-of-line' once."
   (beginning-of-line (or (and arg (1+ arg)) 2))
   (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
 
-(defun smarter-move-beginning-of-line (arg) ; (cy/o Emacs Redux)
+(defun smarter-move-beginning-of-line (&optional &rest args)
   "Move point back to indentation of beginning of line.
   Move point to the first non-whitespace character on this line.
   If point is already there, move to the beginning of the line.
@@ -622,15 +622,15 @@ twice, it calls `smarter-beginning-of-line' once."
   If ARG is not nil or 1, move forward ARG - 1 lines first. If
   point reaches the beginning or end of the buffer, stop there."
   (interactive "^p")
-  (setq arg (or arg 1))
-  ;; Move lines first
-  (when (/= arg 1)
-    (let ((line-move-visual nil))
-      (forward-line (1- arg))))
-  (let ((orig-point (point)))
-    (back-to-indentation)
-    (when (= orig-point (point))
-      (move-beginning-of-line 1))))
+  (let ((arg (or (prefix-numeric-value current-prefix-arg) 1)))
+    ;; Move lines first
+    (when (/= arg 1)
+      (let ((line-move-visual nil))
+        (forward-line (1- arg))))
+    (let ((orig-point (point)))
+      (back-to-indentation)
+      (when (= orig-point (point))
+        (move-to-column 0))))) ; based on function from Emacs Redux
 
 ;; }}}
 
