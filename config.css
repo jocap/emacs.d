@@ -1,0 +1,278 @@
+/* STYLESHEET for ORG EXPORTS */
+/* ------------------------------ */
+
+/* Org overrides  {{{ */
+pre.src { padding-top: 8pt !important; }
+/* }}} */
+
+/* Media queries {{{ */
+
+@media (max-width: 970px) {
+    #table-of-contents { position: relative !important; }
+    #text-table-of-contents > ul {
+        position: relative !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        position: relative !important;
+        top: 0 !important;
+    }
+    h1.title, .outline-2 {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+        border-left: 0 !important;
+    }
+    body {
+        position: relative !important;
+        top: -1em !important;
+    }
+}
+
+/* }}} */
+
+/* Basic design & layout (html, body, wrapper) {{{ */
+
+/* To change size of layout, change this: */
+html { font-size: 10px; }
+
+body {
+    /* font-size: 2 * 8px (html font-size) = 16px */
+    font: 1.7rem/1.5 Georgia, 'Times New Roman', Times, serif;
+    background: #f0f0f0;
+    color: #222;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    background: #fdfdfd;
+    box-shadow: 0 0 50px #f0f0f0;
+}
+
+#content {
+    margin-top: 0;
+}
+
+#table-of-contents {
+    position: fixed;
+    top: 0;
+}
+#text-table-of-contents > ul {
+    padding-left: 0;
+    line-height: 1.7;
+    position: fixed;
+    top: 3em;
+    max-width: 25%;
+    min-width: 200px;
+    max-height: 85%;
+    overflow-y: auto;
+    text-align: left;
+}
+h1.title, .outline-2 {
+    border-left: 1px solid #ccc;
+    padding-left: 2em;
+    margin-left: 30%;
+    font-size: 1.2em;
+}
+#sec-1 {
+    margin-top: 0;
+}
+
+#postamble {
+    margin: 1em;
+    float: right;
+    color: #666;
+}
+
+/* }}} */
+
+/* Header {{{ */
+
+h1.title {
+    font-family: Georgia;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 5.2rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 1em 0;
+}
+
+p#meta {
+    font-variant: small-caps;
+    color: #555;
+}
+
+#header {
+    text-align: center;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 2rem;
+}
+body.page-index #header h1 {
+    font-variant: small-caps;
+    text-transform: capitalize;
+}
+
+/* }}} */
+
+/* Table of contents {{{ */
+
+#text-table-of-contents > ul ul {
+    padding-left: 2em;
+}
+
+#text-table-of-contents > ul > li, #text-table-of-contents > ul > li > ul > li {
+    list-style-type: none;
+}
+
+/* }}} */
+
+/* Text alignment & hyphenation {{{ */
+
+#content {
+    text-align: justify;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    -o-hyphens: auto;
+    hyphens: auto;
+}
+
+/* For paragraphs without alignment: */
+#content .left {
+    text-align: left;
+}
+
+/* For paragraphs without hyphenation: */
+#content .nohyphens {
+    word-break: normal;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    -o-hyphens: none;
+    hyphens: none;
+}
+
+/* }}} */
+
+/* Main layout {{{ */
+
+#content {
+    margin-top: 2.4rem;
+    margin-left: 3.2rem;
+    margin-right: 3.2rem;
+    padding-bottom: 1.6rem;
+}
+#content > :first-child { margin-top: 0; }
+#content > :last-child { margin-bottom: 0; }
+
+/* }}} */
+
+/* General layout & typesetting {{{ */
+
+#table-of-contents h2, h3, h4, h5, h6 {
+    font-family: 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 { text-align: left; }
+
+h2 { font-size: 2em; }
+h3 { font-size: 1.5em; }
+h4 { font-size: 1.17em; }
+h5 { font-size: 1.33em; }
+
+h5, h6 {
+    font-size: 1em;
+    font-weight: normal;
+    font-style: italic;
+}
+
+#table-of-contents h2 { font-size: 1.33em; }
+
+/* Link styling: */
+a, .link {
+    color: #1a0dab;
+    text-decoration: none;
+    cursor: pointer;
+}
+a:active, .link:active {
+    color: #c00;
+}
+
+pre, code {
+    font-family: 'Inconsolata', monospace;
+}
+
+pre, .outline-text-1 code, .outline-text-2 code, .outline-text-3 code,
+.outline-text-4 code, .outline-text-5 code {
+    font-size: 1.8rem;
+}
+
+/* Quotations: */
+blockquote {
+    font-style: italic;
+}
+blockquote i, blockquote em { font-style: normal; }
+
+/* Horizontal rule: */
+hr {
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    margin-top: 1em;
+}
+
+/* References list: */
+#references {
+    padding-left: 0;
+    list-style-type: none;
+}
+
+/* Add paragraph symbol after current heading (supplied by script): */
+#content .current-heading::after {
+    content: '\00a0\00b6';
+    font-weight: normal;
+    opacity: 0.3;
+    float: right;
+}
+
+/* }}} */
+
+/* Tables {{{ */
+#content table td, #content table th {
+    padding-right: 1em;
+}
+table {
+    display: block;
+    text-align: left;
+    overflow-y: auto;
+    margin-top: 1em;
+}
+td, tr, th {
+    white-space: nowrap;
+}
+/* }}} */
+
+/* Enumerated lists {{{ */
+ol {
+    list-style-type: none;
+    padding-left: 1em; /* should align them with quotations */
+}
+ol > li {
+    counter-increment: customlistcounter;
+}
+ol > li:before {
+    content: counter(customlistcounter) ")\00a0\00a0";
+    float: left;
+    text-align: right;
+    display: inline-block;
+    width: 3rem;
+}
+ol > li > p:not(:first-child) {
+    padding-left: 3rem;
+}
+ol:first-child {
+    counter-reset: customlistcounter;
+}
+/* }}} */
+
+/* }}} */
