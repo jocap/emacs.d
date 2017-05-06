@@ -235,6 +235,82 @@
   (define-key org-mode-map (kbd "C-'") nil)
   (define-key org-mode-map (kbd "C-c C-m") nil)
 
+  (defun org-make-wiktionary-link (string &optional from to)
+    "Wraps the word at point or selected word in a Wiktionary link to the word."
+
+    ;; (see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)
+    (interactive
+     (if (use-region-p)
+         (list nil (region-beginning) (region-end))
+       (let ((bds (bounds-of-thing-at-point 'word)) )
+         (list nil (car bds) (cdr bds)))))
+
+    (setq wiktionary-language 'russian)
+
+    (let* ((input  (or string (buffer-substring-no-properties from to)))
+           (output (concat "[[https://en.wiktionary.org/wiki/"
+                           (org-link-escape (downcase input))
+                           "#"
+                           (capitalize (symbol-name wiktionary-language))
+                           "]["
+                           input
+                           "]]")))
+      (delete-region from to)
+      (goto-char from)
+      (insert output)))
+
+  (defun org-custom-beginning-of-line (original-function &optional n)
+    "The exact same function as `org-custom-beginning-of-line',
+but with one exception: instead of calling `beginning-of-line'
+twice, it calls `smarter-beginning-of-line' once."
+    (interactive "^p")
+    (let ((origin (point))
+          (special (pcase org-special-ctrl-a/e
+                     (`(,C-a . ,_) C-a) (_ org-special-ctrl-a/e)))
+          deactivate-mark)
+      ;; First move to a visible line.
+      (if (bound-and-true-p visual-line-mode)
+          (beginning-of-visual-line n)
+        (smarter-move-beginning-of-line n))
+      (cond
+       ;; No special behavior.  Point is already at the beginning of
+       ;; a line, logical or visual.
+       ((not special))
+       ;; `beginning-of-visual-line' left point before logical beginning
+       ;; of line: point is at the beginning of a visual line.  Bail
+       ;; out.
+       ((and (bound-and-true-p visual-line-mode) (not (bolp))))
+       ((let ((case-fold-search nil)) (looking-at org-complex-heading-regexp))
+        ;; At a headline, special position is before the title, but
+        ;; after any TODO keyword or priority cookie.
+        (let ((refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
+                           (line-end-position)))
+              (bol (point)))
+          (if (eq special 'reversed)
+              (when (and (= origin bol) (eq last-command this-command))
+                (goto-char refpos))
+            (when (or (> origin refpos) (= origin bol))
+              (goto-char refpos)))))
+       ((and (looking-at org-list-full-item-re)
+             (memq (org-element-type (save-match-data (org-element-at-point)))
+                   '(item plain-list)))
+        ;; Set special position at first white space character after
+        ;; bullet, and check-box, if any.
+        (let ((after-bullet
+               (let ((box (match-end 3)))
+                 (cond ((not box) (match-end 1))
+                       ((eq (char-after box) ?\s) (1+ box))
+                       (t box)))))
+          (if (eq special 'reversed)
+              (when (and (= (point) origin) (eq last-command this-command))
+                (goto-char after-bullet))
+            (when (or (> origin after-bullet) (= (point) origin))
+              (goto-char after-bullet)))))
+       ;; No special context.  Point is already at beginning of line.
+       (t nil))))
+
+  (advice-add 'org-beginning-of-line :around #'org-custom-beginning-of-line)
+
   (add-hook 'org-mode-hook 'swedish-mode) ;; Swedish letters
 
   :bind (("C-c o a" . org-agenda)
@@ -243,7 +319,7 @@
          ("C-c o b" . org-iswitchb))
   :bind (:map org-mode-map
               ("<C-M-return>" . smart-open-line)
-              ("C-c C-x C-e"  . org-html-export-to-html-open-wsl)))
+              ("C-c L"        . org-make-wiktionary-link)))
 
 (use-package helm
   :commands helm-command-prefix
@@ -537,7 +613,7 @@
   (beginning-of-line (or (and arg (1+ arg)) 2))
   (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
 
-(defun smarter-move-beginning-of-line (&optional &rest args)
+(defun smarter-move-beginning-of-line (arg) ; (cy/o Emacs Redux)
   "Move point back to indentation of beginning of line.
   Move point to the first non-whitespace character on this line.
   If point is already there, move to the beginning of the line.
