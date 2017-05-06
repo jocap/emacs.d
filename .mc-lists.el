@@ -8,12 +8,14 @@
         indent-for-tab-command
         iy-go-to-char--command
         kill-region
+        org-self-insert-command
         paredit-backslash
         paredit-backward-kill-word
         paredit-close-round
         paredit-doublequote
         paredit-forward-delete
         paredit-forward-kill-word
+        paredit-forward-slurp-sexp
         paredit-kill
         paredit-newline
         paredit-open-round

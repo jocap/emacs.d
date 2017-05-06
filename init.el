@@ -61,15 +61,6 @@
 (use-package wrap-region
   :config (wrap-region-mode t))
 
-(use-package dashboard
-  :config (dashboard-setup-startup-hook))
-
-(use-package flx-ido ; fuzzy matching for ido
-  :config
-  (flx-ido-mode 1)
-  (setq ido-enable-flex-matching t)
-  (setq ido-use-faces nil))
-
 (use-package rainbow-delimiters
   :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
@@ -213,6 +204,11 @@
          ("M-' l" . avy-goto-line)
          ("M-' s" . avy-goto-char-timer)
          ("M-' w" . avy-goto-word-1)))
+
+(use-package ace-link
+  :ensure avy
+  :config
+  (ace-link-setup-default))
 
 (use-package org
   :mode (("\\.org$" . org-mode))
@@ -378,25 +374,10 @@
   (setq projectile-switch-project-action 'helm-projectile) ;; see http://tuhdo.github.io/helm-projectile.html#sec-5
   (helm-projectile-on))
 
-(use-package dropbox
-  :load-path (lambda () (concat user-emacs-directory "packages/dropbox"))
+(use-package openwith
   :init
-  (require 's)
-  ;; Load API key and secret from file
-  (setq dropbox-token-file (concat user-emacs-directory
-                                   "secret/dropbox/token"))
-  (setq dropbox-consumer-key
-        (s-trim
-         (with-temp-buffer (insert-file-contents
-                            (concat user-emacs-directory
-                                    "secret/dropbox/key"))
-                           (buffer-string))))
-  (setq dropbox-consumer-secret
-        (s-trim
-         (with-temp-buffer (insert-file-contents
-                            (concat user-emacs-directory
-                                    "secret/dropbox/secret"))
-                           (buffer-string)))))
+  (openwith-mode t)
+  (setq openwith-associations '(("\\.pdf\\'" "mupdf" (file)))))
 
 ;; }}}
 
@@ -430,7 +411,8 @@
   `emacsclient -t'."
 
   (unless terminal (setq terminal (get-device-terminal nil))) ; tty of frame
-  (let ((tty (terminal-name terminal)))
+  (let ((terminal (or terminal (get-device-terminal nil))) ; tty of frame
+        (tty (terminal-name terminal)))
     (progn (setq output (shell-command (concat
                                         command
                                         " >"
@@ -738,7 +720,6 @@
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 
 (global-set-key (kbd "C-c D") 'init-desktop)
-
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 (global-set-key (kbd "M-RET") 'smart-open-line)
@@ -747,6 +728,9 @@
 (global-set-key (kbd "C-c C-k") 'copy-line)
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
+
+;; Insert combining acute accent
+(global-set-key (kbd "C-c 8 '") (lambda () (interactive) (insert-char 769)))
 
 ;; }}}
 
@@ -879,19 +863,22 @@
 
 ;; Based on work by Moritz Ulrich <ulrich.moritz@googlemail.com>
 ;; Published under GNU General Public License
+
+(defvar swedish-mode-map (make-keymap) "Swedish mode keymap.")
+
+(define-key swedish-mode-map (kbd "s-[")  (lambda () (interactive) (insert ?å)))
+(define-key swedish-mode-map (kbd "s-'")  (lambda () (interactive) (insert ?ä)))
+(define-key swedish-mode-map (kbd "s-;")  (lambda () (interactive) (insert ?ö)))
+(define-key swedish-mode-map (kbd "s-{")  (lambda () (interactive) (insert ?Å)))
+(define-key swedish-mode-map (kbd "s-\"") (lambda () (interactive) (insert ?Ä)))
+(define-key swedish-mode-map (kbd "s-:")  (lambda () (interactive) (insert ?Ö)))
+
 (define-minor-mode swedish-mode
-  "A mode for conveniently using Swedish letters in Emacs.
-  Note that this rebinds several important Emacs bindings,
-  including ones used by xterm-mouse-mode. To use these bindings
-  again, be sure to toggle the submode off."
+  "A mode for conveniently using Swedish letters in Emacs."
   nil
   :lighter " åäö"
-  :keymap '(("\M-["  . (lambda () (interactive) (insert ?å)))
-            ("\M-'"  . (lambda () (interactive) (insert ?ä)))
-            ("\M-;"  . (lambda () (interactive) (insert ?ö)))
-            ("\M-{"  . (lambda () (interactive) (insert ?Å)))
-            ("\M-\"" . (lambda () (interactive) (insert ?Ä)))
-            ("\M-:"  . (lambda () (interactive) (insert ?Ö)))))
+  swedish-mode-map)
+
 (provide 'swedish-mode)
 
 ;; }}}

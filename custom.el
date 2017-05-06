@@ -46,6 +46,7 @@
    (quote
     ("#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36")))
  '(indent-tabs-mode nil)
+ '(inhibit-startup-screen t)
  '(ispell-highlight-face (quote flyspell-incorrect))
  '(ispell-local-dictionary-alist nil)
  '(linum-format "%4d │ ")
@@ -53,19 +54,29 @@
  '(nrepl-message-colors
    (quote
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
+ '(org-agenda-files
+   (quote
+    ("/mnt/c/Users/JohnAJ/Dropbox/org/index.org" "/mnt/c/Users/JohnAJ/Dropbox/org/life/services.org")))
+ '(org-cycle-separator-lines 2)
+ '(org-directory "~/dropbox/org")
  '(org-edit-src-content-indentation 0)
+ '(org-log-done (quote time))
  '(org-replace-disputed-keys t)
+ '(org-special-ctrl-a/e t)
  '(org-src-fontify-natively t)
  '(org-src-tab-acts-natively t)
+ '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (s zenity-color-picker helm-projectile term-projectile dash relative-line-numbers helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash relative-line-numbers helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)
  '(sentence-end-double-space nil)
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
+ '(solarized-scale-org-headlines nil)
+ '(solarized-use-variable-pitch nil)
  '(tab-width 4)
  '(term-default-bg-color "#002b36")
  '(term-default-fg-color "#839496")
@@ -107,6 +118,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(italic ((t (:slant italic :family "Fira Mono Medium"))))
  '(magit-diff-conflict-heading ((t (:inherit magit-diff-hunk-heading :distant-foreground "dim gray"))))
  '(magit-section-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))) nil "Made text visible.")
  '(relative-line-numbers ((t (:inherit (linum default)))))
