@@ -69,7 +69,7 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)
@@ -124,5 +124,6 @@
  '(magit-section-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))) nil "Made text visible.")
  '(relative-line-numbers ((t (:inherit (linum default)))))
  '(relative-line-numbers-current-line ((t (:inherit relative-line-numbers))))
+ '(trailing-whitespace ((t (:background "#be4848"))))
  '(variable-pitch ((t (:height 110 :family "FreeSans"))))
  '(widget-field ((t (:background "#eee8d5" :foreground "dim gray"))) nil "Made text visible."))

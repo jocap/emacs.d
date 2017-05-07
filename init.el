@@ -328,6 +328,11 @@ twice, it calls `smarter-beginning-of-line' once."
 (use-package nlinum
   :bind (("C-c l" . nlinum-mode)))
 
+(use-package popwin
+  :init
+  (require 'popwin)
+  (popwin-mode 1))
+
 ;; }}}
 
 ;; 3. Functions {{{
