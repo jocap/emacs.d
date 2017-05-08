@@ -179,6 +179,13 @@
   :mode (("\\.org$" . org-mode))
   :ensure org-plus-contrib
   :demand
+  :bind (("C-c o a" . org-agenda)
+         ("C-c o l" . org-store-link)
+         ("C-c o c" . org-capture)
+         ("C-c o b" . org-iswitchb))
+  :bind (:map org-mode-map
+              ("<C-M-return>" . smart-open-line)
+              ("C-c L"        . org-make-wiktionary-link))
   :init
   ;; Open agenda in split window at launch
   (add-hook 'after-init-hook (lambda ()
@@ -278,17 +285,7 @@ twice, it calls `smarter-beginning-of-line' once."
        ;; No special context.  Point is already at beginning of line.
        (t nil))))
 
-  (advice-add 'org-beginning-of-line :around #'org-custom-beginning-of-line)
-
-  (add-hook 'org-mode-hook 'swedish-mode) ;; Swedish letters
-
-  :bind (("C-c o a" . org-agenda)
-         ("C-c o l" . org-store-link)
-         ("C-c o c" . org-capture)
-         ("C-c o b" . org-iswitchb))
-  :bind (:map org-mode-map
-              ("<C-M-return>" . smart-open-line)
-              ("C-c L"        . org-make-wiktionary-link)))
+  (advice-add 'org-beginning-of-line :around #'org-custom-beginning-of-line))
 
 (use-package helm
   :commands helm-command-prefix
