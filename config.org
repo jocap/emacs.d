@@ -163,23 +163,21 @@ described above clearly illustrates the power of having multiple cursors.
 :CUSTOM_ID: sec:visual-regexp
 :END:
 
-*visual-regexp* is certainly worth a spot on the "interesting" packages
-list, not only because its configuration is special, but because it is
-/just so good/. Not only does it provide an incremental regex replace
-function - that means live preview (!) - but the extension
-*visual-regexp-steroids* lets you search and replace using PCRE instead of
-Emacs syntax (!).
+*visual-regexp* is certainly worth a spot on the "interesting" packages list, not
+only because its configuration is special, but because it is /just so good/. Not
+only does it provide an incremental regex replace function - that means live
+preview (!) - but the extension *visual-regexp-steroids* lets you search and
+replace using PCRE instead of Emacs syntax (!).
 
 To get this working with =use-package=, I first configure the plain old
-/visual-regexp/ package, but tell =use-package= to /defer/ its loading -
-you see, for /visual-regexp-steroids/ to work, it seems as though it needs
-to load /visual-regexp/ itself. If you load it beforehand, it won't work.
+/visual-regexp/ package, but tell =use-package= to /defer/ its loading - you see, for
+/visual-regexp-steroids/ to work, it seems as though it needs to load
+/visual-regexp/ itself. If you load it beforehand, it won't work.
 
-Because =use-package= enables lazy-loading of packages when their
-configuration includes a =:bind= option, we have to explicitly tell it to
-load /visual-regexp-steroids/ immediately, regardless of the =:bind=
-clause. This, again, so that /visual-regexp/ won't load before its muscly
-brother.
+Because =use-package= enables lazy-loading of packages when their configuration
+includes a =:bind= option, we have to explicitly tell it to load
+/visual-regexp-steroids/ immediately, regardless of the /:bind/-clause. This, again,
+so that /visual-regexp/ won't load before its muscly brother.
 
 #+NAME: pkg:config
 #+BEGIN_SRC emacs-lisp
@@ -222,12 +220,12 @@ way you write Lisp, by replacing many built-in editing commands as well as
 providing its own set of functions, for creating, re-arranging, splitting,
 convoluting and deleting s-expressions.
 
-My only problem with Paredit is that it replaces ~M-r~. I frequently use ~M-r~
-to quickly move the cursor around the screen, but Paredit overrides that
-keybinding with =paredit-raise-sexp=. To fix this, as you can see below, I have
-created a new keybinding, ~M-R~, and put it inside a =use-package=
-/:bind/-clause. This way, as long as I have Paredit installed, =use-package=
-binds ~M-R~ to the original function of ~M-r~.
+My only problem with Paredit is that it replaces ~M-r~. I frequently use ~M-r~ to
+quickly move the cursor around the screen, but Paredit overrides that keybinding
+with =paredit-raise-sexp=. To fix this, as you can see below, I have created a new
+keybinding, ~M-R~, and put it inside a =use-package= /:bind/-clause. This way, as long
+as I have Paredit installed, =use-package= binds ~M-R~ to the original function of
+~M-r~.
 
 #+NAME: pkg:config
 #+BEGIN_SRC emacs-lisp
@@ -536,7 +534,7 @@ no gaps in the line. Unfortunately, there /are/ gaps in the line, per
 default. In Emacs, a window is equipped with /fringes/, which act as a sort
 of margin. Fortunately, any fringe can be removed, so that's not a problem.
 We just have to remember to save the /old/ left fringe value before we set
-it to zero. This is achieved by a simple =setq= in the =:init= clause.
+it to zero. This is achieved by a simple =setq= in the /:init/-clause.
 
 The tricky part is the third requirement for the illusion: when the
 =hl-line= disappears, the current line number background should disappear
@@ -575,7 +573,7 @@ and then, take a pause and explain what I've done:
   (global-origami-mode t)
   (setq-local origami-fold-style 'triple-braces)
 
-  ;; I start the =:config= clause by enabling =origami-mode= globally, and
+  ;; I start the /:config/-clause by enabling =origami-mode= globally, and
   ;; setting the fold method to triple braces (that is, ={{{= and =}}}=).
 
   (defun origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
