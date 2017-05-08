@@ -200,6 +200,10 @@
   (define-key org-mode-map (kbd "C-'") nil)
   (define-key org-mode-map (kbd "C-c C-m") nil)
 
+  ;; Enable for all Org files
+  (add-hook 'org-mode-hook #'swedish-mode) ;; Swedish letters
+  (add-hook 'org-mode-hook #'org-autolist-mode)
+
   (defun org-make-wiktionary-link (string &optional from to)
     "Wraps the word at point or selected word in a Wiktionary link to the word."
 
@@ -336,6 +340,16 @@ twice, it calls `smarter-beginning-of-line' once."
 (use-package helm-org-rifle
   :bind (("C-c f" . helm-org-rifle-current-buffer)
          ("C-c F" . helm-org-rifle)))
+
+(use-package git-gutter+
+  :bind (("C-M-g C-M-g" . git-gutter+-mode))
+  :bind (:map git-gutter+-mode-map
+              ("C-M-g n" . git-gutter+-next-hunk)
+              ("C-M-g p" . git-gutter+-previous-hunk)
+              ("C-M-g d" . git-gutter+-show-hunk)
+              ("C-M-g r" . git-gutter+-revert-hunks)
+              ("C-M-g s" . git-gutter+-stage-hunks)
+              ("C-M-g c" . git-gutter+-commit)))
 
 ;; }}}
 
@@ -500,8 +514,8 @@ twice, it calls `smarter-beginning-of-line' once."
 
 ;; Themes
 
-(setq light-theme 'solarized-light)
-(setq dark-theme 'gruvbox)
+(setq light-theme 'eziam-light)
+(setq dark-theme 'eziam-dark)
 
 (defun theme-do-all (theme)
   "Actions to perform whenever a theme is loaded."
