@@ -15,12 +15,15 @@
  '(cursor-type (quote (bar . 1)))
  '(custom-safe-themes
    (quote
-    ("b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
+    ("3cddc1775f6c26573a69315dacd5fd45a6cd04df539b6354281d316985f254f3" "74dd165fb35d6605d833cb756250a95134d3bdf8342689866308e14a8891d092" "b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
  '(default-frame-alist (quote ((font . "Fira Mono Medium-10"))))
  '(default-input-method "russian-computer")
+ '(eziam-scale-headings nil)
+ '(eziam-scale-other nil)
  '(fci-rule-color "#eee8d5")
  '(fill-column 80)
  '(fringe-mode nil nil (fringe))
+ '(global-hl-line-mode t)
  '(helm-external-programs-associations (quote (("html" . "firefox"))))
  '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
  '(highlight-symbol-colors
@@ -69,10 +72,12 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)
+ '(scroll-conservatively 10000)
+ '(scroll-margin 2)
  '(sentence-end-double-space nil)
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))

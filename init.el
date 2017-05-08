@@ -26,8 +26,8 @@
 (use-package wrap-region
   :config (wrap-region-mode t))
 
-(use-package rainbow-delimiters
-  :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+;; (use-package rainbow-delimiters
+;;   :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
 (use-package expand-region
   :bind (("C-' r"  . er/expand-region)
@@ -559,8 +559,9 @@ twice, it calls `smarter-beginning-of-line' once."
          :slant (face-attribute 'default :slant))))
 
   ;; - Reset fci-mode
-  (call-interactively 'fci-mode)
-  (call-interactively 'fci-mode))
+  (let ((inhibit-message t))
+    (call-interactively 'fci-mode)
+    (call-interactively 'fci-mode)))
 
 ;; - Disable previous theme when enabling new theme
 (add-hook 'after-init-hook
