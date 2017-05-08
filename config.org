@@ -1,11 +1,12 @@
 #+TITLE: My Emacs Configuration
 #+AUTHOR: John Ankarström
+#+LANGUAGE: en
+#+OPTIONS: H:4 num:2 ':t todo:nil
 #+PROPERTY: header-args :tangle no
+
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
 #+HTML_HEAD: <link rel="stylesheet" href="file:///C:/Users/JohnAJ/AppData/Local/lxss/home/john/.config/emacs/config.css" type="text/css" />
-#+OPTIONS: H:4
-#+OPTIONS: num:2
   
 #+NAME: config-contents
 
