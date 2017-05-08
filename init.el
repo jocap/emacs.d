@@ -503,57 +503,20 @@ twice, it calls `smarter-beginning-of-line' once."
 (setq light-theme 'solarized-light)
 (setq dark-theme 'gruvbox)
 
-(defun theme-do (theme)
-  "Actions to perform when `theme' loads."
+(defun theme-do-all (theme)
+  "Actions to perform whenever a theme is loaded."
 
-  (cl-case theme
-    ('gruvbox
-     (custom-theme-set-faces
-      'gruvbox ; fix hard-to-see org-mode colors
-      '(org-verbatim ((t (:foreground "DarkGray"))))
-      '(org-document-info-keyword ((t (:foreground "DarkGoldenrod"))))))
+  (require 'color) ; for color-* functions
 
-    ('tango
-     (custom-theme-set-faces
-      'tango
-      '(hl-line ((t (:background "#dddddd"))))))
-
-    ('tango-dark
-     (custom-theme-set-faces
-      'tango-dark ; fix crazy hl-line (bright yellow per default!)
-      '(hl-line ((t (:background "#444444"))))))
-
-    ('eziam-light
-     (custom-theme-set-faces
-      'eziam-light
-      '(cursor ((t (:background "#333333")))) ; lighter cursor
-      '(helm-match ((t (:background "#e4e499")))) ; clearer helm match
-      '(show-paren-match ((t (:background "#bbbbbb"))))) ; clearer paren match
-     ;; Dynamically fading rainbow-delimiters (from black to light gray)
-     (cl-loop for n in (number-sequence 1 9)
-              do (let ((face-name (concat
-                                   "rainbow-delimiters-depth-"
-                                   (number-to-string n)
-                                   "-face"))
-                       (color (color-lighten-name
-                               (face-attribute 'default :foreground)
-                               (* n 8))))
-                   (custom-theme-set-faces
-                    'eziam-light
-                    (list (intern face-name) `((t (:foreground ,color))))))))))
-
-(defun theme-do-all ()
-  "Actions to perform when any theme loads"
-
-  ;; Dynamic colors
-
-  (require 'color)
   (let* ((bg
           (alist-get 'background-mode (frame-parameters)))
          (intensify
           (if (eq bg 'dark) 'color-darken-name 'color-lighten-name))
          (anti-intensify
           (if (eq bg 'dark) 'color-lighten-name 'color-darken-name)))
+
+    ;; Settings for all themes
+    ;; ***********************
 
     ;; * fci-rule-color -> desaturate, anti-intensity
     (setq fci-rule-color (color-desaturate-name
@@ -567,7 +530,7 @@ twice, it calls `smarter-beginning-of-line' once."
                                       (face-attribute 'default :background) 3) 20)
                         :foreground (face-attribute 'default :foreground))
 
-    ;; * org-block-begin-line, *org-block-end-line
+    ;; * org-block-begin-line, org-block-end-line
     (cl-loop
      for face in '(org-block-begin-line org-block-end-line)
      do (set-face-attribute
@@ -579,12 +542,63 @@ twice, it calls `smarter-beginning-of-line' once."
                       (funcall intensify
                                (face-attribute 'default :foreground) 20) 90)
          :weight (face-attribute 'default :weight)
-         :slant (face-attribute 'default :slant))))
+         :slant (face-attribute 'default :slant)))
 
-  ;; - Reset fci-mode
-  (let ((inhibit-message t))
-    (call-interactively 'fci-mode)
-    (call-interactively 'fci-mode)))
+    ;; * Reset fci-mode
+    (let ((inhibit-message t))
+      (call-interactively 'fci-mode)
+      (call-interactively 'fci-mode))
+
+    ;; Settings for specific themes
+    ;; ****************************
+
+    (cl-case theme
+      ;; * Gruxbox
+      ('gruvbox
+       (custom-theme-set-faces
+        'gruvbox ; fix hard-to-see org-mode colors
+        '(org-verbatim ((t (:foreground "DarkGray"))))
+        '(org-document-info-keyword ((t (:foreground "DarkGoldenrod"))))))
+
+      ;; * Tango
+      ('tango
+       (custom-theme-set-faces
+        'tango
+        '(hl-line ((t (:background "#dddddd"))))))
+
+      ;; * Tango-dark
+      ('tango-dark
+       (custom-theme-set-faces
+        'tango-dark ; fix crazy hl-line (bright yellow per default!)
+        '(hl-line ((t (:background "#444444")))))))
+
+    ;; * Eziam
+    (when (or (equal theme 'eziam-dark) (equal theme 'eziam-light))
+      (custom-theme-set-faces
+       theme
+       ;; - Less contrastive cursor
+       `(cursor ((t (:background
+                     ,(funcall
+                       anti-intensify
+                       (face-attribute 'default :foreground) 25)))))
+       ;; - More contrastive paren match
+       `(show-paren-match ((t (:background
+                               ,(funcall
+                                 anti-intensify
+                                 (face-attribute 'default :background) 25))))))
+      ;; - Fading rainbow-delimiters (from black to light gray)
+      (cl-loop for n in (number-sequence 1 9)
+               do (let ((face-name (concat
+                                    "rainbow-delimiters-depth-"
+                                    (number-to-string n)
+                                    "-face"))
+                        (color (funcall
+                                intensify
+                                (face-attribute 'default :foreground)
+                                (* n 6))))
+                    (custom-theme-set-faces
+                     theme
+                     (list (intern face-name) `((t (:foreground ,color))))))))))
 
 ;; - Disable previous theme when enabling new theme
 (add-hook 'after-init-hook
@@ -594,8 +608,7 @@ twice, it calls `smarter-beginning-of-line' once."
 
 ;; - Dynamic settings for different themes
 (advice-add 'load-theme :after (lambda (theme &optional rest ...)
-                                 (theme-do theme)
-                                 (theme-do-all)))
+                                 (theme-do-all theme)))
 
 ;; - Set theme according to daylight
 (add-hook 'after-init-hook 'daylight-sets-color)
