@@ -26,8 +26,8 @@
 (use-package wrap-region
   :config (wrap-region-mode t))
 
-;; (use-package rainbow-delimiters
-;;   :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+(use-package rainbow-delimiters
+  :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
 (use-package expand-region
   :bind (("C-' r"  . er/expand-region)
@@ -333,6 +333,9 @@ twice, it calls `smarter-beginning-of-line' once."
   (require 'popwin)
   (popwin-mode 1))
 
+(use-package helm-org-rifle
+  :bind (("C-c f" . helm-org-rifle)))
+
 ;; }}}
 
 ;; 3. Functions {{{
@@ -518,10 +521,25 @@ twice, it calls `smarter-beginning-of-line' once."
      (custom-theme-set-faces
       'tango-dark ; fix crazy hl-line (bright yellow per default!)
       '(hl-line ((t (:background "#444444"))))))
+
     ('eziam-light
      (custom-theme-set-faces
-      'eziam-light ; make cursor a little less black
-      '(cursor ((t (:background "#333333"))))))))
+      'eziam-light
+      '(cursor ((t (:background "#333333")))) ; lighter cursor
+      '(helm-match ((t (:background "#e4e499")))) ; clearer helm match
+      '(show-paren-match ((t (:background "#bbbbbb"))))) ; clearer paren match
+     ;; Dynamically fading rainbow-delimiters (from black to light gray)
+     (cl-loop for n in '(1 2 3 4 5 6 7 8 9)
+              do (let ((face-name (concat
+                                   "rainbow-delimiters-depth-"
+                                   (number-to-string n)
+                                   "-face"))
+                       (color (color-lighten-name
+                               (face-attribute 'default :foreground)
+                               (* n 8))))
+                   (custom-theme-set-faces
+                    'eziam-light
+                    (list (intern face-name) `((t (:foreground ,color))))))))))
 
 (defun theme-do-all ()
   "Actions to perform when any theme loads"
