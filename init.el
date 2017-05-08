@@ -505,7 +505,7 @@ twice, it calls `smarter-beginning-of-line' once."
   (cl-case theme
     ('gruvbox
      (custom-theme-set-faces
-      'gruvbox ; Fix hard-to-see org-mode colors
+      'gruvbox ; fix hard-to-see org-mode colors
       '(org-verbatim ((t (:foreground "DarkGray"))))
       '(org-document-info-keyword ((t (:foreground "DarkGoldenrod"))))))
 
@@ -516,8 +516,12 @@ twice, it calls `smarter-beginning-of-line' once."
 
     ('tango-dark
      (custom-theme-set-faces
-      'tango-dark ;; fix crazy hl-line (bright yellow per default!)
-      '(hl-line ((t (:background "#444444"))))))))
+      'tango-dark ; fix crazy hl-line (bright yellow per default!)
+      '(hl-line ((t (:background "#444444"))))))
+    ('eziam-light
+     (custom-theme-set-faces
+      'eziam-light ; make cursor a little less black
+      '(cursor ((t (:background "#333333"))))))))
 
 (defun theme-do-all ()
   "Actions to perform when any theme loads"
@@ -701,7 +705,7 @@ twice, it calls `smarter-beginning-of-line' once."
 
 (electric-pair-mode 1) ; auto-insert matching pairs
 (menu-bar-mode -1)     ; disable menu bar
-(global-hl-line-mode)  ; highlight current line
+;; (global-hl-line-mode)  ; highlight current line
 (save-place-mode 1)    ; save cursor position
 (xterm-mouse-mode t)   ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)     ; disable gui toolbar

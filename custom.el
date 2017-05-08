@@ -12,10 +12,11 @@
  '(cua-normal-cursor-color "#839496")
  '(cua-overwrite-cursor-color "#b58900")
  '(cua-read-only-cursor-color "#859900")
- '(cursor-type (quote (bar . 1)))
+ '(cursor-type (quote box))
  '(custom-safe-themes
    (quote
     ("3cddc1775f6c26573a69315dacd5fd45a6cd04df539b6354281d316985f254f3" "74dd165fb35d6605d833cb756250a95134d3bdf8342689866308e14a8891d092" "b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
+ '(debug-on-error t)
  '(default-frame-alist (quote ((font . "Fira Mono Medium-10"))))
  '(default-input-method "russian-computer")
  '(eziam-scale-headings nil)
@@ -23,8 +24,9 @@
  '(fci-rule-color "#eee8d5")
  '(fill-column 80)
  '(fringe-mode nil nil (fringe))
- '(global-hl-line-mode t)
+ '(global-hl-line-mode nil)
  '(helm-external-programs-associations (quote (("html" . "firefox"))))
+ '(helm-mode t)
  '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
  '(highlight-symbol-colors
    (--map
