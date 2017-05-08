@@ -334,7 +334,8 @@ twice, it calls `smarter-beginning-of-line' once."
   (popwin-mode 1))
 
 (use-package helm-org-rifle
-  :bind (("C-c f" . helm-org-rifle)))
+  :bind (("C-c f" . helm-org-rifle-current-buffer)
+         ("C-c F" . helm-org-rifle)))
 
 ;; }}}
 
@@ -529,7 +530,7 @@ twice, it calls `smarter-beginning-of-line' once."
       '(helm-match ((t (:background "#e4e499")))) ; clearer helm match
       '(show-paren-match ((t (:background "#bbbbbb"))))) ; clearer paren match
      ;; Dynamically fading rainbow-delimiters (from black to light gray)
-     (cl-loop for n in '(1 2 3 4 5 6 7 8 9)
+     (cl-loop for n in (number-sequence 1 9)
               do (let ((face-name (concat
                                    "rainbow-delimiters-depth-"
                                    (number-to-string n)

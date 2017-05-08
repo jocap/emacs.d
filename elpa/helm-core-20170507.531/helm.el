@@ -29,6 +29,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'async)
 (require 'advice) ; Shutup byte compiler about ad-deactivate.
 (require 'helm-lib)
 (require 'helm-multi-match)
@@ -251,22 +252,51 @@ vectors, so don't use strings to define them."
                `(lambda ()
                   (interactive)
                   (helm-select-nth-action ,n))))
-    ;; Bind keys to allow executing default action
-    ;; on first 9 candidates before and after selection.
-    (cl-loop for n from 1 to 9
-             for key = (format "C-c %d" n)
-             for key- = (format "C-x %d" n)
-             for fn = `(lambda ()
-                         (interactive)
-                         (helm-execute-selection-action-at-nth ,n))
-             for fn- = `(lambda ()
-                          (interactive)
-                          (helm-execute-selection-action-at-nth ,(- n)))
-             do (progn
-                  (define-key map (kbd key) fn)
-                  (define-key map (kbd key-) fn-)))
     map)
   "Keymap for helm.")
+
+(defun helm--action-at-nth-set-fn-1 (value &optional negative)
+  (cl-loop for n from 1 to 9
+        for key = (format value n)
+        for sym = (make-symbol (format "helm-execute-selection-action-at-nth-+%d" n))
+        for fn = `(lambda ()
+                     (interactive)
+                     (helm-execute-selection-action-at-nth ,(if negative (- n) n)))
+        do (progn
+             (defalias sym fn)
+             (define-key helm-map (kbd key) sym))))
+
+(defun helm--action-at-nth-set-fn- (var val)
+  (set var val)
+  (helm--action-at-nth-set-fn-1 val 'negative))
+
+(defun helm--action-at-nth-set-fn+ (var val)
+  (set var val)
+  (helm--action-at-nth-set-fn-1 val))
+
+(defcustom helm-action-at-nth-negative-prefix-key "C-x %d"
+  "The prefix key to execute default action on nth <-n> candidate.
+
+This is a format spec where %d will be replaced by the candidate
+number.
+
+NOTE: `setq' have no effect until you restart emacs, use customize for
+immediate effect."
+  :group 'helm
+  :type 'string
+  :set #'helm--action-at-nth-set-fn-)
+
+(defcustom helm-action-at-nth-positive-prefix-key "C-c %d"
+  "The prefix key to execute default action on nth <+n> candidate.
+
+This is a format spec where %d will be replaced by the candidate
+number.
+
+NOTE: `setq' have no effect until you restart emacs, use customize for
+immediate effect."
+  :group 'helm
+  :type 'string
+  :set #'helm--action-at-nth-set-fn+)
 
 
 (defgroup helm nil
@@ -985,7 +1015,7 @@ C-c <n> => executes default action on number <n> candidate after current selecte
 n is limited only to 1 through 9. For larger jumps use other
 navigation keys. Also note that Helm candidates list by default
 do not display line numbers. Line numbers can be enabled with the
-linum-relative package.
+\[[https://github.com/coldnew/linum-relative][linum-relative]] package and `helm-linum-relative-mode'.
 
 ** Using the mouse in helm
 
@@ -3413,15 +3443,20 @@ It is used for narrowing list of candidates to the
     (helm-insert-header-from-source source)
     (cl-loop with separate = nil
              with start = (point)
+             with singleline = (null (assq 'multiline source))
              for m in matches
              for count from 1
-             do (if (not (assq 'multiline source))
-                    (helm-insert-match m 'insert count source)
-                    (if separate
-                        (helm-insert-candidate-separator)
-                        (setq separate t))
-                    (helm-insert-match m 'insert count source)
-                    (put-text-property start (point) 'helm-multiline t)))))
+             if singleline
+             do (helm-insert-match m 'insert count source)
+             else
+             do (progn
+                  (if separate
+                      (helm-insert-candidate-separator)
+                    (setq separate t))
+                  (helm-insert-match m 'insert count source))
+             finally (and (null singleline)
+                          (put-text-property start (point)
+                                             'helm-multiline t)))))
 
 (defmacro helm--maybe-use-while-no-input (&rest body)
   "Wrap BODY in `helm-while-no-input' unless initializing a remote connection."
@@ -3689,9 +3724,9 @@ respectively `helm-cand-num' and `helm-cur-source'."
                          (concat it "\nmouse-1: select candidate\nmouse-3: menu actions")
                        "mouse-1: select candidate\nmouse-3: menu actions"))))
       (when num
-        (put-text-property start (point-at-eol) 'helm-cand-num num))
+        (put-text-property start end 'helm-cand-num num))
       (when source
-        (put-text-property start (point-at-eol) 'helm-cur-source source))
+        (put-text-property start end 'helm-cur-source source))
       (funcall insert-function "\n"))))
 
 (defun helm--mouse-reset-selection-help-echo ()
@@ -3735,7 +3770,8 @@ respectively `helm-cand-num' and `helm-cur-source'."
                  (goto-char (or (helm-get-previous-candidate-separator-pos)
                                 (helm-get-previous-header-pos)))
                  (forward-line 1)))
-           (helm-mark-current-line))
+           (helm-mark-current-line)
+           (helm-follow-execute-persistent-action-maybe))
       (select-window (minibuffer-window))
       (set-buffer (window-buffer window)))))
 (put 'helm-mouse-select-candidate 'helm-only t)
@@ -4731,6 +4767,8 @@ Optional argument SOURCE is a Helm source object."
     (when (helm-pos-multiline-p)
       (helm-move--beginning-of-multiline-candidate))
     (when (helm-pos-header-line-p) (forward-line 1))
+    (when helm-allow-mouse
+      (helm--mouse-reset-selection-help-echo))
     (helm-mark-current-line)
     (helm-display-mode-line (or source (helm-get-current-source)))
     (helm-log-run-hook 'helm-after-preselection-hook)))
@@ -5318,7 +5356,7 @@ Possible values are 'left 'right 'below or 'above."
          (error "Error in `helm-select-nth-action'"))))
 
 (defun helm-execute-selection-action-at-nth (linum)
-  "Allow to execute default action on candidate at LINUM."
+  "Execute default action on candidate at LINUM lines from selection."
   (let ((prefarg current-prefix-arg))
     (if (>= linum 0)
         (helm-next-line linum)
