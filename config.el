@@ -104,10 +104,11 @@
   :commands avy-isearch
   :init (global-set-key (kbd "M-'") nil) ; reset M-'
   :config (define-key isearch-mode-map (kbd "M-'") 'avy-isearch)
-  :bind (("C-M-'" . abbrev-prefix-mark) ; re-bind default M-'
-         ("M-' l" . avy-goto-line)
-         ("M-' s" . avy-goto-char-timer)
-         ("M-' w" . avy-goto-word-1)))
+  :bind (("C-M-'"   . abbrev-prefix-mark) ; re-bind default M-'
+         ("M-' M-'" . avy-goto-line)
+         ("M-' '"   . avy-goto-char)
+         ("M-' s"   . avy-goto-char-timer)
+         ("M-' w"   . avy-goto-word-1)))
 (use-package windmove
   :init (windmove-default-keybindings))
 (use-package origami
@@ -669,6 +670,10 @@
 
     ;; Settings for all themes
     ;; ***********************
+
+    ;; * Dynamic mouse pointer color
+    (set-mouse-color
+     (if (eq bg 'dark) "#ffffff" "#000000"))
 
     ;; * fci-rule-color -> desaturate, anti-intensity
     (setq fci-rule-color (color-desaturate-name
