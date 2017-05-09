@@ -8,48 +8,6 @@
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
 #+HTML_HEAD: <link rel="stylesheet" href="file:///C:/Users/JohnAJ/AppData/Local/lxss/home/john/.config/emacs/config.css" type="text/css" />
   
-#+NAME: c:config-contents
-
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle "config.el" :exports none
-;; TODO: convert to file using (org-babel-tangle-file)
-
-;; First & foremost
-;; =============================================================================
-
-<<c:first-and-foremost>>
-
-;; Packages
-;; =============================================================================
-
-<<c:pkg:management>>
-<<c:pkg:config>>
-
-;; Basic preferences
-;; =============================================================================
-
-<<c:basic-prefs>>
-
-;; Themes
-;; =============================================================================
-
-<<c:theme:config>>
-
-;; Language configuration
-;; =============================================================================
-
-<<c:lang:config>>
-
-;; Custom hooks
-;; =============================================================================
-
-<<c:custom-hooks>>
-
-;; Lastly
-;; =============================================================================
-
-(load custom-file)
-#+END_SRC
-
 * Introduction
 
 Welcome to my Emacs configuration. It is written in the style of literate
@@ -66,12 +24,10 @@ on GitHub]].
 * Packages
 
 ** Package management
-:PROPERTIES:
-:noweb-ref: pkg:management
-:END:
 
 First and foremost, I define what sources to install packages from:
 
+#+NAME: c:pkg:management
 #+BEGIN_SRC emacs-lisp
 (require 'package)
 (setq package-archives
@@ -90,6 +46,7 @@ explicitly configure with =use-package=.
 
 For that I initialize /use-package/:
 
+#+NAME: c:pkg:management
 #+BEGIN_SRC emacs-lisp
 (eval-when-compile
   (require 'use-package))
@@ -165,10 +122,11 @@ here with a short description of why I like them.
          ("C-c F" . helm-org-rifle)))
 
 (use-package buffer-move
-  :bind (("M-' <up>"    . buf-move-up)
-         ("M-' <down>"  . buf-move-down)
-         ("M-' <left>"  . buf-move-left)
-         ("M-' <right>" . buf-move-right)))
+  :init
+  :bind (("C-c <up>"    . buf-move-up)
+         ("C-c <down>"  . buf-move-down)
+         ("C-c <left>"  . buf-move-left)
+         ("C-c <right>" . buf-move-right)))
 
 #+END_SRC
 
@@ -250,12 +208,15 @@ prevent that.
 Here are a couple of keybindings that don't really fit in under any other
 headline. Most of them are based on built-in functions.
 
+#+NAME: c:keybindings
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 
+(global-set-key (kbd "C-x C-p") 'other-window)
 (global-set-key (kbd "C-x C-o") (lambda (n) (interactive "p")
                                   (other-window (* -1 n))))
-(global-set-key (kbd "C-x O") 'delete-blank-lines)
+(global-set-key (kbd "C-x P") 'mark-page)          ; defualt
+(global-set-key (kbd "C-x O") 'delete-blank-lines) ; default
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
@@ -557,6 +518,7 @@ easier to comment either the current line or the current region.
 (global-set-key (kbd "C-;") 'comment-dwim-line)
 #+END_SRC
 
+
 * Movement
 
 ** Quickly jumping around
@@ -660,6 +622,7 @@ combination with any of the arrow keys.
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
 #+END_SRC
+
 * Visual aids
 
 ** Folding with /origami/
@@ -1003,17 +966,13 @@ functions - they are defined further down.
   :bind (("C-c o a" . org-agenda)
          ("C-c o l" . org-store-link)
          ("C-c o c" . org-capture)
-         ("C-c o b" . org-iswitchb))
-  :bind (:map org-mode-map
-              ("<C-M-return>" . smart-open-line)
-              ("C-c L"        . org-make-wiktionary-link)
-              ("C-c C-t"      . org-open-tree-view)))
+         ("C-c o b" . org-iswitchb)))
 #+END_SRC
 
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp :noweb yes :exports none
 (with-eval-after-load 'org
-  <<org:fun>>
+  <<c:org:fun>>
 )
 #+END_SRC
 
@@ -1047,6 +1006,8 @@ functions - they are defined further down.
     (delete-region from to)
     (goto-char from)
     (insert output)))
+
+(define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
 #+END_SRC
 
 Above is the definition for my custom =org-make-wiktionary-link= function. Like
@@ -1124,6 +1085,7 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
 
       (read-only-mode)
       (widen)                       ; widen if possible
+      (outline-show-all)            ; make sure all headings are visible
       (outline-hide-body)           ; hide body
       (setq-local truncate-lines t) ; ensure truncated lines
       (setq-local scroll-margin 0)  ; disable scroll-margin for buffer
@@ -1155,6 +1117,7 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
     (when (get-buffer-window tree-view-buffer-name)
       (select-window (get-buffer-window tree-view-buffer-name))
       (outline-hide-body) ; refresh tree view
+      (beginning-of-line) ; scroll window all the way to the left
       (select-window (get-buffer-window buffer)))))
 
 (defun org-get-tree-view-buffer-name ()
@@ -1172,6 +1135,8 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
   (goto-char (point-min))       ; go to beginning of buffer
   (org-next-visible-heading 1)  ; go to first heading
   (recenter 0))                 ; put top of window at point
+
+(define-key org-mode-map (kbd "C-c C-t") #'org-open-tree-view)
 #+END_SRC
 
 *** Adjusting /org-beginning-of-line/
@@ -1685,13 +1650,17 @@ code, surely copied from the internet, fixes that:
 ;; Insert combining acute accent
 (global-set-key (kbd "C-c 8 '") (lambda () (interactive) (insert-char 769)))
 #+END_SRC
+
+
 * Preventing repeated strain injury
 :PROPERTIES:
 :CUSTOM_ID: rsi
 :END:
 
 
-* Windows Subsystem for Linux (WSL)
+* Non-Emacs Emacs-related configuration
+
+** Windows Subsystem for Linux (WSL)
 :PROPERTIES:
 :CUSTOM_ID: wsl
 :END:
@@ -1715,7 +1684,7 @@ configuration accordingly. Most of this configuration happens in my Zsh
 configuration files, but some of it inevitably leaks into my Emacs
 configuration.
 
-** Default programs
+*** Default programs
 :PROPERTIES:
 :CUSTOM_ID: wsl:default
 :END:
@@ -1724,12 +1693,12 @@ I use WSL for most development tools - like Emacs, Zsh and the odd local web
 server - but I use native Windows programs for things like music playing and
 web browsing.
 
-*** Web browser
+**** Web browser
 :PROPERTIES:
 :CUSTOM_ID: wsl:web-browser
 :END:
 
-**** Problem
+***** Problem
 
 My web browser of choice is Firefox, because of the extensibility and
 reliability. Emacs can be configured to use Firefox by customizing
@@ -1761,7 +1730,7 @@ This happens when Emacs tries to open /any/ file in the web browser, simply
 because =firefox.exe= won't recognize any Linux path. It needs a /Windows/
 path.
 
-**** Solution
+***** Solution
 
 To solve this once and for all, I scrapped my old symlinks and aliases and
 instead, wrote the following shell script:
@@ -1813,3 +1782,52 @@ programs will use my script instead.
 
 In Emacs, my default browser is =firefox=, so that it remains compatible
 with other systems, where I don't use my =wsl-browser= script.
+
+
+* Resulting file
+
+#+NAME: c:config-contents
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle "config.el" :exports none
+;; TODO: convert to file using (org-babel-tangle-file)
+
+;; First & foremost
+;; =============================================================================
+
+<<c:first-and-foremost>>
+
+;; Packages
+;; =============================================================================
+
+<<c:pkg:management>>
+<<c:pkg:config>>
+
+;; Basic preferences
+;; =============================================================================
+
+<<c:basic-prefs>>
+
+;; Keybindings
+;; =============================================================================
+
+<<c:keybindings>>
+
+;; Themes
+;; =============================================================================
+
+<<c:theme:config>>
+
+;; Language configuration
+;; =============================================================================
+
+<<c:lang:config>>
+
+;; Custom hooks
+;; =============================================================================
+
+<<c:custom-hooks>>
+
+;; Lastly
+;; =============================================================================
+
+(load custom-file)
+#+END_SRC
