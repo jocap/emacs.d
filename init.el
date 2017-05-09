@@ -202,7 +202,8 @@
          ("C-c o b" . org-iswitchb))
   :bind (:map org-mode-map
               ("<C-M-return>" . smart-open-line)
-              ("C-c L"        . org-make-wiktionary-link))
+              ("C-c L"        . org-make-wiktionary-link)
+              ("C-c t"        . org-open-tree-view))
   :init
   ;; Open agenda in split window at launch
   (add-hook 'after-init-hook (lambda ()
@@ -252,7 +253,7 @@
       (goto-char from)
       (insert output)))
 
-  (defun org-narrow-subtree-from-clone ()
+  (defun org-narrow-subtree-from-clone () ; based on https://emacs.stackexchange.com/a/9532
   "Switch to a cloned buffer's base buffer and narrow in on the
   selected subtree."
   (interactive)
@@ -269,6 +270,32 @@
       (goto-char pos)
       (org-narrow-to-subtree) ; narrow to org subtree
       (outline-show-all)))) ; show everything
+
+  (defun org-open-tree-view () ; based on https://emacs.stackexchange.com/a/14987
+    "Open a clone of the current buffer to the left, resize it to
+    40 columns, and bind RET to jump to the same position in
+    the base buffer."
+    (interactive)
+    (let ((new-buffer-name (concat "<tree>" (buffer-name))))
+      ;; Create tree buffer
+      (split-window-right 40)
+      (if (get-buffer new-buffer-name)
+          (switch-to-buffer new-buffer-name)  ; Use existing tree buffer
+        ;; Make new tree buffer
+        (progn (clone-indirect-buffer new-buffer-name nil t)
+               (switch-to-buffer new-buffer-name)
+               (read-only-mode)
+               (hide-body)
+               (toggle-truncate-lines)
+
+               ;; Do this twice in case the point is in a hidden line
+               (dotimes (_ 2 (forward-line 0)))
+
+               ;; Map keys
+               (use-local-map (copy-keymap org-mode-map))
+               (local-set-key (kbd "q") 'delete-window)
+               (mapc (lambda (key) (local-set-key (kbd key) 'org-narrow-subtree-from-clone))
+                     '("<mouse-1>" "RET"))))))
 
   (defun org-custom-beginning-of-line (original-function &optional n)
     "The exact same function as `org-custom-beginning-of-line',
