@@ -64,11 +64,13 @@
  '(org-agenda-files
    (quote
     ("/mnt/c/Users/JohnAJ/Dropbox/org/index.org" "/mnt/c/Users/JohnAJ/Dropbox/org/life/services.org")))
+ '(org-babel-load-languages (quote ((emacs-lisp . t) (shell . t))))
  '(org-cycle-separator-lines 2)
  '(org-directory "~/dropbox/org")
  '(org-edit-src-content-indentation 0)
  '(org-hide-emphasis-markers t)
  '(org-log-done (quote time))
+ '(org-pretty-entities t)
  '(org-replace-disputed-keys t)
  '(org-special-ctrl-a/e t)
  '(org-src-fontify-natively t)
@@ -76,7 +78,7 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (git-gutter+ buffer-move org-autolist org helm-org-rifle ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (hide-lines git-gutter+ buffer-move org-autolist org helm-org-rifle ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)
@@ -129,6 +131,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(bold-italic ((t (:slant italic :weight bold :family "Fira Mono Medium"))))
+ '(font-lock-comment-face ((t (:foreground "#888888" :slant italic :family "Fira Mono Medium"))))
  '(italic ((t (:slant italic :family "Fira Mono Medium"))))
  '(magit-diff-conflict-heading ((t (:inherit magit-diff-hunk-heading :distant-foreground "dim gray"))))
  '(magit-section-highlight ((t (:background "#eee8d5" :distant-foreground "dim gray"))) nil "Made text visible.")

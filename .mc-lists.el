@@ -8,6 +8,7 @@
         indent-for-tab-command
         iy-go-to-char--command
         kill-region
+        org-delete-char
         org-self-insert-command
         paredit-backslash
         paredit-backward-kill-word

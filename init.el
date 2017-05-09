@@ -276,26 +276,29 @@
     40 columns, and bind RET to jump to the same position in
     the base buffer."
     (interactive)
-    (let ((new-buffer-name (concat "<tree>" (buffer-name))))
-      ;; Create tree buffer
-      (split-window-right 40)
-      (if (get-buffer new-buffer-name)
-          (switch-to-buffer new-buffer-name)  ; Use existing tree buffer
-        ;; Make new tree buffer
-        (progn (clone-indirect-buffer new-buffer-name nil t)
-               (switch-to-buffer new-buffer-name)
-               (read-only-mode)
-               (hide-body)
-               (toggle-truncate-lines)
+    ;; Only proceed if the current buffer is /not/ a clone
+    (if (buffer-base-buffer) (error "Not in a base buffer!"))
+    (when (not (buffer-base-buffer))
+      (let ((new-buffer-name (concat "<tree>" (buffer-name))))
+        (if (get-buffer-window new-buffer-name)
+            ;; Use existing tree buffer
+            (select-window (get-buffer-window new-buffer-name))
+          ;; Make new tree buffer
+          (progn (split-window-right 40) ; create tree buffer
+                 (clone-indirect-buffer new-buffer-name nil t)
+                 (switch-to-buffer new-buffer-name)
+                 (read-only-mode)
+                 (hide-body)
 
-               ;; Do this twice in case the point is in a hidden line
-               (dotimes (_ 2 (forward-line 0)))
+                 ;; Do this twice in case the point is in a hidden line
+                 (dotimes (_ 2 (forward-line 0)))
 
-               ;; Map keys
-               (use-local-map (copy-keymap org-mode-map))
-               (local-set-key (kbd "q") 'delete-window)
-               (mapc (lambda (key) (local-set-key (kbd key) 'org-narrow-subtree-from-clone))
-                     '("<mouse-1>" "RET"))))))
+                 ;; Map keys
+                 (use-local-map (copy-keymap org-mode-map))
+                 (local-set-key (kbd "q") 'delete-window)
+                 (mapc (lambda (key)
+                         (local-set-key (kbd key) 'org-narrow-subtree-from-clone))
+                       '("<mouse-1>" "RET")))))))
 
   (defun org-custom-beginning-of-line (original-function &optional n)
     "The exact same function as `org-custom-beginning-of-line',
@@ -797,6 +800,10 @@
 
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 
+(global-set-key (kbd "C-x C-o") (lambda (n) (interactive "p")
+                                  (other-window (* -1 n))))
+(global-set-key (kbd "C-x O") 'delete-blank-lines)
+
 (global-set-key (kbd "C-c D") 'init-desktop)
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
@@ -816,7 +823,6 @@
 
 (electric-pair-mode 1) ; auto-insert matching pairs
 (menu-bar-mode -1)     ; disable menu bar
-;; (global-hl-line-mode)  ; highlight current line
 (save-place-mode 1)    ; save cursor position
 (xterm-mouse-mode t)   ; use mouse (somewhat) in terminal
 (tool-bar-mode -1)     ; disable gui toolbar
