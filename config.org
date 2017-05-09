@@ -421,7 +421,7 @@ as I have Paredit installed, =use-package= binds ~M-R~ to the original function 
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package paredit
-  :config
+  :init
   (autoload 'enable-paredit-mode
     "paredit" "Turn on pseudo-structural editing of Lisp code." t)
   (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
@@ -439,6 +439,7 @@ A nice related package is =paredit-everywhere=. It provides the a subset of the
 Paredit functionality for languages that aren't Lisp. I personally configure it
 to be activated in all programming modes:
 
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package paredit-everywhere
   :ensure paredit
