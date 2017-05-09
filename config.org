@@ -2,13 +2,13 @@
 #+AUTHOR: John Ankarström
 #+LANGUAGE: en
 #+OPTIONS: H:4 num:2 ':t todo:nil
-#+PROPERTY: header-args :tangle no
+#+PROPERTY: header-args :tangle no :results output silent
 
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
 #+HTML_HEAD: <link rel="stylesheet" href="file:///C:/Users/JohnAJ/AppData/Local/lxss/home/john/.config/emacs/config.css" type="text/css" />
   
-#+NAME: config-contents
+#+NAME: c:config-contents
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle "config.el" :exports none
 ;; TODO: convert to file using (org-babel-tangle-file)
@@ -16,16 +16,39 @@
 ;; First & foremost
 ;; =============================================================================
 
-<<first-and-foremost>>
+<<c:first-and-foremost>>
 
 ;; Packages
 ;; =============================================================================
 
-<<pkg:management>>
-<<pkg:config>>
-#+END_SRC
+<<c:pkg:management>>
+<<c:pkg:config>>
 
-#+RESULTS:
+;; Basic preferences
+;; =============================================================================
+
+<<c:basic-prefs>>
+
+;; Themes
+;; =============================================================================
+
+<<c:theme:config>>
+
+;; Language configuration
+;; =============================================================================
+
+<<c:lang:config>>
+
+;; Custom hooks
+;; =============================================================================
+
+<<c:custom-hooks>>
+
+;; Lastly
+;; =============================================================================
+
+(load custom-file)
+#+END_SRC
 
 * Introduction
 
@@ -82,19 +105,19 @@ respective configurations are listed elsewhere.
 
 *** Packages with configuration elsewhere
 
-- [[#sec:multiple-cursors][multiple-cursors]]
-- [[#sec:visual-regexp][visual-regexp]]
-- [[#sec:expand-region][expand-region]]
-- [[#sec:paredit][paredit]]
-- [[#sec:iy-go-to-char][iy-go-to-char]]
-- [[#sec:avy][avy]]
-- [[#sec:relative-line-numbers][relative-line-numbers]]
-- [[#sec:origami][origami]]
-- [[#sec:helm][helm]]
-- [[#sec:projectile][projectile]]
-- [[#sec:magit][magit]]
-- [[#sec:openwith][openwith]]
-- [[#sec:org-mode][org-mode]]
+- [[#multiple-cursors][multiple-cursors]]
+- [[#visual-regexp][visual-regexp]]
+- [[#expand-region][expand-region]]
+- [[#paredit][paredit]]
+- [[#iy-go-to-char][iy-go-to-char]]
+- [[#avy][avy]]
+- [[#origami][origami]]
+- [[#helm][helm]]
+- [[#projectile][projectile]]
+- [[#magit][magit]]
+- [[#git-gutter][git-gutter+]]
+- [[#openwith][openwith]]
+- [[#org-mode][org-mode]]
 
 *** Packages without interesting configuration
 
@@ -108,7 +131,18 @@ here with a short description of why I like them.
 - ace-link :: nice little extension to /avy/ that does the same thing, but for
               links in help buffers.
 
-#+NAME: pkg:config
+- nlinum :: line numbers, but faster than =linum=. I don't use this much, but it's
+            nice to have when you need it.
+
+- popwin :: makes popup windows /so/ much easier to work with - this is a
+            must-have.
+
+- helm-org-rifle :: makes it /a bit/ easier to browse through Org documents - not
+                    perfect though.
+
+- buffer-move :: lets me switch buffers between two windows - pretty handy.
+
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp :exports none
 (use-package rainbow-delimiters
   :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
@@ -117,6 +151,163 @@ here with a short description of why I like them.
   :ensure avy
   :config
   (ace-link-setup-default))
+
+(use-package nlinum
+  :bind (("C-c l" . nlinum-mode)))
+
+(use-package popwin
+  :init
+  (require 'popwin)
+  (popwin-mode 1))
+
+(use-package helm-org-rifle
+  :bind (("C-c f" . helm-org-rifle-current-buffer)
+         ("C-c F" . helm-org-rifle)))
+
+(use-package buffer-move
+  :bind (("M-' <up>"    . buf-move-up)
+         ("M-' <down>"  . buf-move-down)
+         ("M-' <left>"  . buf-move-left)
+         ("M-' <right>" . buf-move-right)))
+
+#+END_SRC
+
+
+* Basic preferences
+:PROPERTIES:
+:CUSTOM_ID: basic-preferences
+:END:
+
+In my configuration, there are some basic settings that don't really belong
+under any section in this documentation. Most of them are set using the
+/Customize/ interface, but here are the ones that aren't:
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(server-start)         ; use emacs as a server
+(electric-pair-mode 1) ; auto-insert matching pairs
+(menu-bar-mode -1)     ; disable menu bar
+(tool-bar-mode -1)     ; disable gui toolbar
+(save-place-mode 1)    ; save cursor position
+(xterm-mouse-mode t)   ; use mouse (somewhat effectively) in terminal
+
+;; Activate auto-fill-mode for all text buffers
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+
+** Directories
+:PROPERTIES:
+:CUSTOM_ID: directories
+:END:
+
+Per default, Emacs insists on making a mess inside =~/.emacs.d=. These settings
+prevent that.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(setq custom-file (concat user-emacs-directory "custom.el"))
+
+(setq emacs-state-directory (expand-file-name "state/" user-emacs-directory))
+(defun state-dir (file)
+  (concat emacs-state-directory file))
+
+;; - Various places
+
+(setq auto-save-list-file-prefix (state-dir "auto-save-list/.saves~"))
+(setq save-place-file (state-dir "save-place"))
+(setq recentf-save-file (state-dir "recentf"))
+(setq ido-save-directory-list-file (state-dir "ido.last"))
+(setq backup-directory-alist
+      `((".*" . ,(state-dir "saves"))))
+
+;; - Tramp
+(setq tramp-backup-directory-alist backup-directory-alist)
+(setq tramp-auto-save-directory (state-dir
+                                        "tramp/auto-save/"))
+(setq tramp-persistency-file-name (state-dir
+                                          "tramp/persistency.el"))
+
+;; - Projectile
+(setq projectile-cache-file (concat emacs-state-directory
+                                    "projectile/cache.el"))
+(setq projectile-known-projects-file
+      (concat emacs-state-directory
+              "projectile/known-projects.el"))
+
+;; - File for activated disabled commands
+(defadvice en/disable-command (around put-in-custom-file activate)
+  "Put declarations in `custom-file'."
+  (let ((user-init-file (concat user-emacs-directory ".commands")))
+    ad-do-it))
+(load-file (concat user-emacs-directory ".commands"))
+#+END_SRC
+
+** Keybindings
+:PROPERTIES:
+:CUSTOM_ID: keybindings
+:END:
+
+Here are a couple of keybindings that don't really fit in under any other
+headline. Most of them are based on built-in functions.
+
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "M-<f1>") 'menu-bar-mode)
+
+(global-set-key (kbd "C-x C-o") (lambda (n) (interactive "p")
+                                  (other-window (* -1 n))))
+(global-set-key (kbd "C-x O") 'delete-blank-lines)
+
+(global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
+(global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
+#+END_SRC
+
+** Session management
+:PROPERTIES:
+:CUSTOM_ID: session-management
+:END:
+
+If there is a way to save the current window configuration to a file, and I mean
+/only/ the window configuration (and, of course, the buffers that are open in
+those windows), *please tell me*.
+
+For the moment, I use =desktop-save-mode=, but I'm unhappy. It saves far too many
+irrelevant things, like the theme I'm using and all buffers. I only want to
+save the currently visible buffers and the positions of their windows. That's
+it.
+
+In the meantime, this is my configuration for =desktop-save-mode=.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(setq desktop-dirname             (concat emacs-state-directory "desktop/")
+      desktop-base-file-name      "emacs.desktop"
+      desktop-base-lock-name      "lock"
+      desktop-path                (list desktop-dirname)
+      desktop-save                t)
+#+END_SRC
+
+Furthrmore, I have a custom function that lets me easily activate the mode:
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(defun init-desktop (&optional arg)
+  "Load the desktop (if C-u is provided) and enable autosaving."
+
+  (interactive "p")
+  (if current-prefix-arg (desktop-read))
+  (desktop-save-mode 1)
+  (message "Desktop-Save mode enabled"))
+
+(global-set-key (kbd "C-c D") 'init-desktop)
+#+END_SRC
+
+** Shebang mode detection
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+;; Shebang mode detection
+(add-to-list 'interpreter-mode-alist
+             '("python3" . python-mode))
 #+END_SRC
 
 
@@ -124,7 +315,7 @@ here with a short description of why I like them.
 
 ** Multiple cursors
 :PROPERTIES:
-:CUSTOM_ID: sec:multiple-cursors
+:CUSTOM_ID: multiple-cursors
 :END:
 
 =multiple-cursors= is another indispensible part of my Emacs toolchain. This is
@@ -133,7 +324,7 @@ mostly a configuration of keys, but I also add =iy-go-to-char-start-pos= to the
 variables are, according to the =multiple-cursors= source, "a list of vars that
 need to be tracked on a per-cursor basis."
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
   :bind (("C-c c" . mc/edit-lines)
@@ -160,7 +351,7 @@ described above clearly illustrates the power of having multiple cursors.
 
 ** Search & replace: /visual-regexp/
 :PROPERTIES:
-:CUSTOM_ID: sec:visual-regexp
+:CUSTOM_ID: visual-regexp
 :END:
 
 *visual-regexp* is certainly worth a spot on the "interesting" packages list, not
@@ -179,7 +370,7 @@ includes a =:bind= option, we have to explicitly tell it to load
 /visual-regexp-steroids/ immediately, regardless of the /:bind/-clause. This, again,
 so that /visual-regexp/ won't load before its muscly brother.
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package visual-regexp
   :defer) ; prevent loading this package before visual-regexp-steroids!
@@ -207,12 +398,12 @@ every match to a regex search. Useful!
 
 ** Working with Lisp
 :PROPERTIES:
-:CUSTOM_ID: sec:lisp
+:CUSTOM_ID: lisp
 :END:
 
 *** Paredit
 :PROPERTIES:
-:custom_id: sec:paredit
+:CUSTOM_ID: paredit
 :END:
 
 Paredit is a totally indispensible tool for editing Lisp code. It changes the
@@ -227,7 +418,7 @@ keybinding, ~M-R~, and put it inside a =use-package= /:bind/-clause. This way, a
 as I have Paredit installed, =use-package= binds ~M-R~ to the original function of
 ~M-r~.
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package paredit
   :config
@@ -256,12 +447,12 @@ to be activated in all programming modes:
 
 ** Working with regions
 :PROPERTIES:
-:CUSTOM_ID: sec:regions
+:CUSTOM_ID: regions
 :END:
 
 *** /expand-region/
 :PROPERTIES:
-:CUSTOM_ID: sec:expand-region
+:CUSTOM_ID: expand-region
 :END:
 
 I spend a lot of space setting up the shortcuts for =expand-region=, because
@@ -273,7 +464,7 @@ In my configuration, I use ~C-'~ as a prefix for all =expand-region=
 keybindings, and /Shift/ as a modifier to mark outside instead of inside the
 region.
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package expand-region
   :bind (("C-' r"  . er/expand-region)
@@ -290,36 +481,98 @@ region.
 
 *** /wrap-region/
 :PROPERTIES:
-:CUSTOM_ID: sec:wrap-region
+:CUSTOM_ID: wrap-region
 :END:
 
 =wrap-region= is a handy plugin that automatically surrounds your selection with the
 corresponding pairs when typing "paired" characters, like ~'~, ~"~ and ~(~.
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp :exports none
 (use-package wrap-region
   :config (wrap-region-mode t))
 #+END_SRC
 
+** Opening line below and above
+:PROPERTIES:
+:CUSTOM_ID: smart-open-line
+:END:
+
+Every Vim user knows how useful the =o= and =O= commands are. =smart-open-line= and
+=smart-open-line-above= are two functions, borrowed from Emacs Redux, that emulate
+this behavior.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(defun smart-open-line () ; (courtesy of Emacs Redux)
+  "Insert an empty line after the current line.
+  Position the cursor at beginning, according to current mode."
+  (interactive)
+  (move-end-of-line nil)
+  (newline-and-indent))
+(defun smart-open-line-above ()
+  "Insert an empty line above the current line.
+  Position the cursor at beginning, according to current mode."
+  (interactive)
+  (move-beginning-of-line nil)
+  (newline-and-indent)
+  (forward-line -1)
+  (indent-according-to-mode))
+#+END_SRC
+
+Personally, I use the following keybindings:
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "M-o") 'smart-open-line)
+(global-set-key (kbd "M-O") 'smart-open-line-above)
+#+END_SRC
+
+Note, however, that if you use Emacs in a terminal, ~M-O~ will not work.
+
+** Commenting lines
+:PROPERTIES:
+:CUSTOM_ID: commenting-lines
+:END:
+
+What follows is a function by Jason Viers at StackExchange. It makes it a bit
+easier to comment either the current line or the current region.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(defun comment-dwim-line (&optional arg) ; (courtesy of Jason Viers @ SE)
+  "Replacement for the comment-dwim command.
+  If no region is selected and current line is not blank and we
+  are not at the end of the line, then comment current line.
+  Replaces default behaviour of comment-dwim, when it inserts
+  comment at the end of the line."
+  (interactive "*P")
+  (comment-normalize-vars)
+  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
+      (comment-or-uncomment-region (line-beginning-position)
+                                   (line-end-position))
+    (comment-dwim arg)))
+
+(global-set-key (kbd "C-;") 'comment-dwim-line)
+#+END_SRC
 
 * Movement
 
 ** Quickly jumping around
 :PROPERTIES:
-:CUSTOM_ID: sec:jumping
+:CUSTOM_ID: jumping
 :END:
 
 Moving around using ~C-n~, ~C-p~, ~C-f~ and ~C-b~ is not only tiresome, but
-probably quite [[#sec:rsi][unergonomical]] as well. Under this section, I tell you about the
+probably quite [[#rsi][unergonomical]] as well. Under this section, I tell you about the
 methods I use to quickly jump to any position in the current window.
 
 *** /iy-go-to-char/
 :PROPERTIES:
-:CUSTOM_ID: sec:iy-go-to-char
+:CUSTOM_ID: iy-go-to-char
 :END:
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package iy-go-to-char
   :bind (("M-m" . iy-go-to-char)
@@ -333,10 +586,10 @@ and =F=. Works well, without any problems.
 
 *** /avy/
 :PROPERTIES:
-:CUSTOM_ID: sec:avy
+:CUSTOM_ID: avy
 :END:
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package avy
   :commands avy-isearch
@@ -357,7 +610,7 @@ to ~M-'~ I have remapped to ~C-M-'~.
 
 ** Moving between windows: /windmove/
 :PROPERTIES:
-:custom_id: sec:windmove
+:CUSTOM_ID: windmove
 :END:
 
 For the most part, especially when using Org-mode, I use the normal ~C-x o~ to
@@ -368,196 +621,49 @@ movement between windows.
 Personally, I use the default keybindings, which make use of /Shift/ in
 combination with any of the arrow keys.
 
-** Improving =move-beginning-of-line=
-:PROPERTIES:
-:CUSTOM_ID: sec:c-a
-:END:
-
-
-* Visual aids
-
-** Relative line numbers
-:PROPERTIES:
-:CUSTOM_ID: sec:relative-line-numbers
-:END:
-
-Now we're onto the really interesting stuff. And possibly really
-complicated and unnecessary stuff. Who knows why I even use Emacs.
-
-*relative-line-numbers* is a replacement for /linum/ that displays relative
-line numbers à la Vim. It is a little barebones, though. Here is a list of
-features that are added in the following configuration:
-
-1) Displaying the absolute number on the current line (instead of 0)
-2) Automatically setting the background of the current line number to the
-   same color as =hl-line=, giving the illusion of a continuing =hl-line=
-   through the entire window
-
-That might not have sounded as impressive as I'd hoped, but when you look
-at the code, you'll see. Hold your hats.
-
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
-(use-package relative-line-numbers
-  :init
-  (setq left-fringe-default (car (window-fringes)))
-  :config
-  (defun relative-abs-line-numbers-format (offset)
-    "Custom format function for `relative-line-numbers' that
-    returns the absolute line number if the offset is zero (point
-    is on the current line) and the relative number otherwise.
-
-    Furthermore, the function adds padding as well as
-    a separating line between the line numbers and the buffer."
-
-    (concat (format "%4d " (if (= 0 offset)
-                               (line-number-at-pos)
-                             (abs offset)))
-            "\u2502 "))
-  (setq relative-line-numbers-format 'relative-abs-line-numbers-format)
-
-  (defun toggle-line-numbers (&optional arg)
-    "Toggles `relative-line-numbers-mode' and, as an added bonus,
-    also the left fringe. The old fringe is saved in a variable
-    and restored when line numbers are toggled off.
-
-    I like to disable the left fringe to create an illusion of
-    the hl-line continuing through the current line number. This,
-    of course, requires that the current line number background
-    is configured to be the same as the hl-line background. The
-    function makes this happen as well.
-
-    I only wrote this complicated function because
-    `relative-line-numbers' provides no hooks.
-
-    To force on, use C-u or provide `t' as an argument. To force
-    off, use C-u C-u or provide `-1' as an argument."
-
-    (interactive "p")
-    (require 'cl-lib)
-
-    (unless (boundp 'line-numbers-on)
-      (setq-local line-numbers-on
-                  (if relative-line-numbers-mode t nil)))
-
-    (unless (boundp 'left-fringe-default)
-      (setq left-fringe-default 8))
-
-    (cl-flet ((on (lambda ()
-                    ;; Set variable to remember state
-                    (setq-local line-numbers-on t)
-                    ;; Add current line number background as hl-line
-                    (add-current-line-num-bg)
-                    ;; Toggle relative-line-numbers-mode
-                    (relative-line-numbers-mode)))
-              (off (lambda ()
-                     ;; Reset to default left fringe
-                     (set-window-fringes nil left-fringe-default)
-                     ;; Reset state
-                     (setq-local line-numbers-on nil)
-                     ;; Remove current line number background from buffer
-                     (remove-current-line-num-bg)
-                     ;; Toggle relative-line-numbers off
-                     (relative-line-numbers--off))))
-      (if (or (eq arg 4) (eq arg t)) ;; arg = C-u or t -> force on
-          (unless line-numbers-on (on))
-        (if (or (eq arg 16) (eq arg -1)) ;; arg = C-u C-u or -1 -> force off
-            (if line-numbers-on (off))
-          (if line-numbers-on ;; no prefix -> toggle
-              (off)
-            (on))))))
-
-  (defun remove-current-line-num-bg (&rest args)
-    "Removes current line number background from current
-    window (actually buffer) (before selecting new one)."
-
-    (face-remap-set-base 'relative-line-numbers-current-line
-                         :background (face-attribute 'default :background nil t)
-                         :foreground (face-attribute 'linum :foreground nil t)
-                         :slant (face-attribute 'linum :slant nil t)
-                         :weight (face-attribute 'linum :weight nil t))
-
-    ;; Make sure left fringe behaves correctly
-    (if (and (boundp 'line-numbers-on) line-numbers-on)
-        (set-window-fringes nil 0)
-      (set-window-fringes nil left-fringe-default)))
-
-  ;; face-remap-set-base: third argument:  frame (nil -> currently open and all new)
-  ;;                      fourth argument: include inherited attributes (yes/no)
-
-  (defun add-current-line-num-bg (&rest args)
-    "Adds current line number background (as hl-line background) to
-    current window (actually buffer) (after selecting new one)."
-
-    (face-remap-set-base 'relative-line-numbers-current-line
-                         :background (face-attribute 'hl-line :background nil t)
-                         :foreground (face-attribute 'linum :foreground nil t)
-                         :slant (face-attribute 'linum :slant nil t)
-                         :weight (face-attribute 'linum :weight nil t))
-    ;; Make sure left fringe behaves correctly
-    (if (and (boundp 'line-numbers-on) line-numbers-on)
-        (set-window-fringes nil 0)
-      (set-window-fringes nil left-fringe-default)))
-
-  (add-hook 'window-focus-in-hook 'add-current-line-num-bg)
-  (add-hook 'window-focus-out-hook 'remove-current-line-num-bg)
-
-  (add-hook 'after-minibuffer-hook 'add-current-line-num-bg)
-  (add-hook 'before-minibuffer-hook 'remove-current-line-num-bg)
-
-  (add-hook 'after-helm-hook 'add-current-line-num-bg)
-  (add-hook 'before-helm-hook 'remove-current-line-num-bg) ; not strictly
-                                        ; necessary, as helm
-                                        ; uses select-window
-
-  ;; TODO: Update all buffers' current line number background on theme change
-  ;; (advice-add 'load-theme :after 'update-current-line-num-bg)
-
-  (add-hook 'prog-mode-hook (lambda ()
-                              (toggle-line-numbers t)))
-
-  :bind ("C-c l" . toggle-line-numbers))
+(use-package windmove
+  :init (windmove-default-keybindings))
 #+END_SRC
 
-Phew! That was it. Well, almost it - in the code, I make some references to
-custom hooks that I've built. Their names are fairly self-explanatory, but
-if you want to learn more, ...
+** Improving /move-beginning-of-line/
+:PROPERTIES:
+:CUSTOM_ID: c-a
+:END:
 
-This is why the above code is so long:
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(defun smarter-move-beginning-of-line (&optional &rest args)
+  "Move point back to indentation of beginning of line.
+  Move point to the first non-whitespace character on this line.
+  If point is already there, move to the beginning of the line.
+  Effectively toggle between the first non-whitespace character
+  and the beginning of the line.
+  If ARG is not nil or 1, move forward ARG - 1 lines first. If
+  point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (let ((arg (or (prefix-numeric-value current-prefix-arg) 1)))
+    ;; Move lines first
+    (when (/= arg 1)
+      (let ((line-move-visual nil))
+        (forward-line (1- arg))))
+    (let ((orig-point (point)))
+      (back-to-indentation)
+      (when (= orig-point (point))
+        (move-to-column 0))))) ; based on function from Emacs Redux
+#+END_SRC
 
-To create the illusion of a continuing =hl-line=, the background color of
-=hl-line= and =relative-line-numbers-current-line= has to be the same.
-That's the easy part.
-
-Another requirement for the continuing =hl-line= illusion is that there be
-no gaps in the line. Unfortunately, there /are/ gaps in the line, per
-default. In Emacs, a window is equipped with /fringes/, which act as a sort
-of margin. Fortunately, any fringe can be removed, so that's not a problem.
-We just have to remember to save the /old/ left fringe value before we set
-it to zero. This is achieved by a simple =setq= in the /:init/-clause.
-
-The tricky part is the third requirement for the illusion: when the
-=hl-line= disappears, the current line number background should disappear
-as well. I solved this problem by defining some custom hooks, that should,
-in theory, detect all cases of window switching and minibuffer entering
-that would remove the =hl-line= from a window.
-
-I could have done what =hl-line= does, which is to attach a function to
-=post-command-hook= that constantly checks whether the window has changed.
-I chose not to do this, because I think it would be less efficient. I only
-need my hooks to trigger when the window has changed, not when the user
-types a letter or moves around within the same window.
-
-*Anyhow*, that's a summary. I hope I don't seem crazy for wanting, and
-programming, this functionality.
-
-*** TODO Screenshots
-
-*** TODO Show custom hooks
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(global-set-key [remap move-beginning-of-line]
+                'smarter-move-beginning-of-line)
+#+END_SRC
+* Visual aids
 
 ** Folding with /origami/
 :PROPERTIES:
-:CUSTOM_ID: sec:origami
+:CUSTOM_ID: origami
 :END:
 
 Origami is a package that provides Vim-like folding. I have been an avid
@@ -566,7 +672,7 @@ Vim user, so folding is a natural part of my programming life.
 The configuration that follows is /long/. I will therefore stop every now
 and then, take a pause and explain what I've done:
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package origami
   :config
@@ -655,15 +761,74 @@ a simple feature like folding working, especially when Vim supports it
 almost perfectly from scratch. Overall, folding just doesn't seem to work
 reliably in Emacs outside of Org-mode.
 
+** Highlighting superfluous whitespace
+:PROPERTIES:
+:CUSTOM_ID: show-trailing-whitespace
+:END:
+
+With the following code, I enable highlighting of trailing whitespace in any
+buffer whose mode descends from /prog-mode/.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook (lambda ()
+                            (setq-local show-trailing-whitespace t)))
+#+END_SRC
+
+** Dynamic cursor shape
+:PROPERTIES:
+:CUSTOM_ID: dynamic-cursor-shape
+:END:
+
+One of the things I struggle with while using Emacs is identifying which window
+is currently active. Highlighting the mode line helps, but it's usually not
+enough for me. Previously, I have used =hl-line= with success, but I found that
+the package was quite unoptimized and that it didn't play nice with some modes.
+
+One of the solutions I have found is setting the cursor shape differently for
+focused and unfocused windows.
+
+I define the following functions to change the cursor shape to a hollow block
+when a window becomes unfocused, and back to the default shape (that is, the
+current cursor type when Emacs ran my configuration) when a window becomes
+focused.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(setq default-cursor-type cursor-type)
+
+(defun cursor-focused ()
+  (setq-local cursor-type default-cursor-type))
+(defun cursor-unfocused ()
+  (setq-local cursor-type 'block))
+#+END_SRC
+
+The =cursor-unfocused= function is added to a couple of my custom hooks. For the
+more important =cursor-focused=, I found myself forced to use =post-command-hook=,
+even though I know it's overkill. It is surprisingly difficult to have Emacs
+run a function whenever the window is changed.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(add-hook 'post-command-hook 'cursor-focused)
+;; Using post-command-hook because setting the cursor type is such a simple
+;; action, and because select-window is called surprisingly often and often
+;; without the suitable `norecord' argument ...
+
+(add-hook 'window-focus-out-hook  'cursor-unfocused)
+(add-hook 'before-minibuffer-hook 'cursor-unfocused)
+(add-hook 'before-helm-hook       'cursor-unfocused)
+#+END_SRC
+
 
 * Helpful tools
 
 ** Helm
 :PROPERTIES:
-:CUSTOM_ID: sec:helm
+:CUSTOM_ID: helm
 :END:
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :commands helm-command-prefix
@@ -696,10 +861,10 @@ window below the current window and keep itself to a reasonable height.
 
 ** Projectile
 :PROPERTIES:
-:CUSTOM_ID: sec:projectile
+:CUSTOM_ID: projectile
 :END:
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
   :ensure helm-projectile
@@ -722,10 +887,10 @@ and the file finder.
 
 ** Magit
 :PROPERTIES:
-:CUSTOM_ID: sec:magit
+:CUSTOM_ID: magit
 :END:
 
-#+NAME: pkg:config
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package magit
   :bind ("C-c g"   . magit-status))
@@ -736,12 +901,45 @@ incredibly useful, is a testament to good design. The only thing I could
 possibly complain about is the speed. It does run slow on my computer. I
 hope it's just because I'm running it on the Windows Subsystem for Linux.
 
-** /openwith/
+** /git-gutter+/
 :PROPERTIES:
-:CUSTOM_ID: sec:openwith
+:CUSTOM_ID: git-gutter
 :END:
 
-#+NAME: pkg:config
+As much as I love Magit, it's big, unwieldy and a bit slow. When editing my
+Emacs configuration, I find that I postpone staging and commiting my changes,
+lating having to do it all at once. It's annoying.
+
+=git-gutter+= is an excellent package that lets me stage individual hunks of
+changes without even leaving the buffer of the edited file. It works by
+displaying plus and minus signs left of the fringe, indicating what lines have
+been changed.
+
+Just because it is so useful, I dedicate the prefix ~C-M-g~ to all =git-gutter+=
+commands.
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package git-gutter+
+  :bind (("C-M-g C-M-g" . git-gutter+-mode))
+  :bind (:map git-gutter+-mode-map
+              ("C-M-g n" . git-gutter+-next-hunk)
+              ("C-M-g p" . git-gutter+-previous-hunk)
+              ("C-M-g d" . git-gutter+-show-hunk)
+              ("C-M-g r" . git-gutter+-revert-hunks)
+              ("C-M-g s" . git-gutter+-stage-hunks)
+              ("C-M-g c" . git-gutter+-commit)))
+#+END_SRC
+
+The only problem I have with the package is that it doesn't use the actual
+fringe. I have tried the extension =git-gutter+-fringe=, but I never got it to
+work. Perhaps it needs updating, I don't know. For now, =git-gutter+= works fine.
+** /openwith/
+:PROPERTIES:
+:CUSTOM_ID: openwith
+:END:
+
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package openwith
   :init
@@ -758,26 +956,36 @@ PDF reading.
 
 ** Org-mode
 :PROPERTIES:
-:CUSTOM_ID: sec:org-mode
+:CUSTOM_ID: org-mode
 :END:
 
-#+NAME: pkg:config
+Org-mode is where I spend much of my Emacs time. I use it for writing, studying,
+planning and, of course, configuring Emacs. My configuration began small but
+as I've begun to use it more it has just kept growing.
+
+This is the main configuration. You'll see a few references to custom =org-=
+functions - they are defined further down.
+
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package org
   :mode (("\\.org$" . org-mode))
   :ensure org-plus-contrib
   :demand
+
   :init
+  ;; Open agenda in split window at Emacs launch
   (add-hook 'after-init-hook (lambda ()
                                (org-agenda-list)
                                (other-window 1)))
+
   :config
-  ;; make ' work in inline code
+  ;; Make ' and " work in inline code
   (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\r\n,")
   (org-set-emph-re 'org-emphasis-regexp-components
                    org-emphasis-regexp-components) ; reload setting
 
-  ;; make windmove work in org-mode
+  ;; Make windmove work in org-mode (not very useful)
   (add-hook 'org-shiftup-final-hook 'windmove-up)
   (add-hook 'org-shiftleft-final-hook 'windmove-left)
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
@@ -787,83 +995,9 @@ PDF reading.
   (define-key org-mode-map (kbd "C-'") nil)
   (define-key org-mode-map (kbd "C-c C-m") nil)
 
-  (defun org-make-wiktionary-link (string &optional from to)
-    "Wraps the word at point or selected word in a Wiktionary link to the word."
-
-    ;; see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html
-    (interactive
-     (if (use-region-p)
-         (list nil (region-beginning) (region-end))
-       (let ((bds (bounds-of-thing-at-point 'word)) )
-         (list nil (car bds) (cdr bds)))))
-
-    (unless (boundp 'wiktionary-language) (setq wiktionary-language 'russian))
-
-    (let* ((input  (or string (buffer-substring-no-properties from to)))
-           (output (concat "[[https://en.wiktionary.org/wiki/"
-                           (org-link-escape (downcase input))
-                           "#"
-                           (capitalize (symbol-name wiktionary-language))
-                           "]["
-                           input
-                           "]]")))
-      (delete-region from to)
-      (goto-char from)
-      (insert output)))
-
-  (defun org-custom-beginning-of-line (original-function &optional n)
-    "The exact same function as `org-custom-beginning-of-line',
-but with one exception: instead of calling `beginning-of-line'
-twice, it calls `smarter-beginning-of-line' once."
-    (interactive "^p")
-    (let ((origin (point))
-          (special (pcase org-special-ctrl-a/e
-                     (`(,C-a . ,_) C-a) (_ org-special-ctrl-a/e)))
-          deactivate-mark)
-      ;; First move to a visible line.
-      (if (bound-and-true-p visual-line-mode)
-          (beginning-of-visual-line n)
-        (smarter-move-beginning-of-line n))
-      (cond
-       ;; No special behavior.  Point is already at the beginning of
-       ;; a line, logical or visual.
-       ((not special))
-       ;; `beginning-of-visual-line' left point before logical beginning
-       ;; of line: point is at the beginning of a visual line.  Bail
-       ;; out.
-       ((and (bound-and-true-p visual-line-mode) (not (bolp))))
-       ((let ((case-fold-search nil)) (looking-at org-complex-heading-regexp))
-        ;; At a headline, special position is before the title, but
-        ;; after any TODO keyword or priority cookie.
-        (let ((refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
-                           (line-end-position)))
-              (bol (point)))
-          (if (eq special 'reversed)
-              (when (and (= origin bol) (eq last-command this-command))
-                (goto-char refpos))
-            (when (or (> origin refpos) (= origin bol))
-              (goto-char refpos)))))
-       ((and (looking-at org-list-full-item-re)
-             (memq (org-element-type (save-match-data (org-element-at-point)))
-                   '(item plain-list)))
-        ;; Set special position at first white space character after
-        ;; bullet, and check-box, if any.
-        (let ((after-bullet
-               (let ((box (match-end 3)))
-                 (cond ((not box) (match-end 1))
-                       ((eq (char-after box) ?\s) (1+ box))
-                       (t box)))))
-          (if (eq special 'reversed)
-              (when (and (= (point) origin) (eq last-command this-command))
-                (goto-char after-bullet))
-            (when (or (> origin after-bullet) (= (point) origin))
-              (goto-char after-bullet)))))
-       ;; No special context.  Point is already at beginning of line.
-       (t nil))))
-
-  (advice-add 'org-beginning-of-line :around #'org-custom-beginning-of-line)
-
-  (add-hook 'org-mode-hook 'swedish-mode) ;; Swedish letters
+  ;; Enable for all Org files
+  (add-hook 'org-mode-hook #'swedish-mode) ; Swedish letters
+  (add-hook 'org-mode-hook #'org-autolist-mode) ; better list behavior
 
   :bind (("C-c o a" . org-agenda)
          ("C-c o l" . org-store-link)
@@ -871,92 +1005,694 @@ twice, it calls `smarter-beginning-of-line' once."
          ("C-c o b" . org-iswitchb))
   :bind (:map org-mode-map
               ("<C-M-return>" . smart-open-line)
-              ("C-c L"        . org-make-wiktionary-link)))
+              ("C-c L"        . org-make-wiktionary-link)
+              ("C-c C-t"      . org-open-tree-view)))
 #+END_SRC
 
-Despite the fact that I keep my Emacs configuration in an Org file, my Org
-configuration is quite short (*update:* no longer true ...) - I do have a
-couple of interesting things, though.
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp :noweb yes :exports none
+(with-eval-after-load 'org
+  <<org:fun>>
+)
+#+END_SRC
 
-#+HTML: <a name="org-make-wiktionary-link"></a>
-     
-First, there's my =org-make-wiktionary-link= function. Like the description
-says, it creates a link to the Wiktionary entry on the selected word (or,
-if no region is active, the word where the cursor is). Furthermore, I have
-set it to always bring up the Russian definition, but if you copy this
-function to your own configuration, you can just set =wiktionary-language=
-to ='english= or something, or even ='non-existent-language= if you don't
-want to look up any specific language.
+*** Automatic Wiktionary links
+:PROPERTIES:
+:CUSTOM_ID: org-make-wiktionary-link
+:END:
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-make-wiktionary-link (string &optional from to)
+  "Wraps the word at point or selected word in a Wiktionary link to the word."
+
+  ;; (see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)
+  (interactive
+   (if (use-region-p)
+       (list nil (region-beginning) (region-end))
+     (let ((bds (bounds-of-thing-at-point 'word)) )
+       (list nil (car bds) (cdr bds)))))
+
+  (setq wiktionary-language 'russian)
+
+  (let* ((input  (or string (buffer-substring-no-properties from to)))
+         (output (concat "[[https://en.wiktionary.org/wiki/"
+                         (org-link-escape (downcase input))
+                         "#"
+                         (capitalize (symbol-name wiktionary-language))
+                         "]["
+                         input
+                         "]]")))
+    (delete-region from to)
+    (goto-char from)
+    (insert output)))
+#+END_SRC
+
+Above is the definition for my custom =org-make-wiktionary-link= function. Like
+the description says, it creates a link to the Wiktionary entry on the selected
+word (or, if no region is active, the word where the cursor is). Furthermore, I
+have set it to always bring up the Russian definition, but if you copy this
+function to your own configuration, you can just set =wiktionary-language= to
+='english= or something, or even ='non-existent-language= if you don't want to look
+up any specific language.
      
 I have written it because I study Russian and write down all the words I
 learn in an Org file. For more language-related settings, see the section
-on [[#sec:lang][non-English languages]].
+on [[#lang][non-English languages]].
 
-Speaking of non-English languages, I also have a hook that enables [[#sec:swe][Swedish mode]]
-in all Org buffers.
+*** Tree view
+:PROPERTIES:
+:CUSTOM_ID: org-tree-view
+:END:
 
-Secondly, I redefine the =org-beginning-of-line= function, because I don't
-like its default behavior. You see, I like to use a function called
-=smarter-beginning-of-line=, based on the function with the same name
-[[http://emacsredux.com/blog/2013/05/22/smarter-navigation-to-the-beginning-of-a-line/][written by Bozhidar Batsov]] of Emacs Redux. For my implementation of it, see
-the section on [[#sec:c-a][making C-a smarter]]. In a nutshell, it moves to indentation
-unless the point is already at indentation, in which case it moves to the
-true beginning of line.
+Sometimes, I use to write large documents with many headings and many levels.
+Sometimes, keeping track of it all requires a substantial amount of brain power.
+Wouldn't it be great to have a small outline to the left of the text, where you
+could select a section and narrow in on it in a big window to the right?
 
-The problem is that Org-mode has its own function for moving to the
-beginning of the line, and if you set enable =org-special-ctrl-a/e=, it
-is really useful. For that reason, I want to use Org's own function, but
-modify it to use =smarter-beginning-of-line= instead of =beginning-of-line=
-when appropriate.
+That's what the following functions are for. They are heavily based on two
+answers on the Emacs StackExchange, by [[https://emacs.stackexchange.com/a/9532][Dan]] and [[https://emacs.stackexchange.com/a/14987][blujay]] respectively.
 
-Now, this /should/ be as easy as just replacing the =beginning-of-line=
-function with =smarter-beginning-of-line=, but unfortunately this doesn't
-work, because =org-beginning-of-line= stupidly calls =beginning-of-line=
-/twice/. This will not work with =smarter-beginning-of-line=, because
-calling that function twice will always move the cursor to the actual
-beginning of line, and never move to the indentation, which sort of is the
-point of the entire function.
+As you can see in my main Org configuration above, I have =org-open-tree-view= set
+to a simple keybinding. It opens a clone of the current buffer in a window split
+to the left, from which you can browse the structure of the Org file and press
+~RET~ or ~<mouse-1>~ to move to a specific heading in the base buffer on the right
+and call =org-narrow-to-subtree=. Note that I normally don't need to call
+=org-narrow-subtree-from-clone= myself.
+
+I do experience one bug with =org-open-tree-view=, namely that it doesn't
+correctly detect when a tree view buffer is already open. It always opens a new
+split, which isn't the expected behavior.
+
+I haven't gotten around to debugging the function, but if you can find the
+error, please file an issue or send me a pull request on [[https://github.com/jocap/emacs.d/][GitHub]]!
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-narrow-subtree-from-clone ()
+  "Switch to a cloned buffer's base buffer and narrow in on the
+  selected subtree."
+  (interactive)
+  (let ((buf (buffer-base-buffer)))
+    (unless buf
+      (error "You need to be in a cloned buffer!"))
+    (let ((pos (point))
+          (win (car (get-buffer-window-list buf))))
+      (if win
+          (select-window win)
+        (other-window 1)
+        (switch-to-buffer buf))
+      (widen) ; first widen any potential narrowing
+      (goto-char pos)
+      (org-narrow-to-subtree) ; narrow to org subtree
+      (outline-show-all)))) ; show everything
+
+(defun org-open-tree-view ()
+  "Open a clone of the current buffer to the left, resize it to
+   30 columns, and bind RET to jump to the same position in
+   the base buffer."
+  (interactive)
+  (let ((tree-view-buffer-name (org-get-tree-view-buffer-name)))
+    (if (get-buffer-window tree-view-buffer-name)
+        ;; Use existing tree buffer
+        (select-window (get-buffer-window tree-view-buffer-name))
+      ;; Make new tree buffer
+      (split-window-right 30) ; create tree buffer
+      (clone-indirect-buffer tree-view-buffer-name nil t)
+      (switch-to-buffer tree-view-buffer-name)
+
+      (read-only-mode)
+      (widen)                       ; widen if possible
+      (outline-hide-body)           ; hide body
+      (setq-local truncate-lines t) ; ensure truncated lines
+      (setq-local scroll-margin 0)  ; disable scroll-margin for buffer
+      (org-goto-tree-view-top)      ; go to top of tree view
+
+      ;; Do this twice in case the point is in a hidden line
+      (dotimes (_ 2 (forward-line 0)))
+
+      ;; Refresh tree view on save
+      (add-hook 'after-save-hook #'org-update-tree-view)
+
+      ;; Map keys
+      (use-local-map (copy-keymap org-mode-map))
+      (local-set-key (kbd "q") ; quit tree view
+                     (lambda (&optional &rest args)
+                       (interactive)
+                       (kill-buffer (current-buffer)) ; kill buffer
+                       (delete-window) ; delete window
+                       (remove-hook 'after-save-hook #'org-update-tree-view)))
+      (local-set-key (kbd "M-<") #'org-goto-tree-view-top)
+      (mapc (lambda (key) ; open heading in base buffer
+              (local-set-key (kbd key) 'org-narrow-subtree-from-clone))
+            '("<mouse-1>" "RET")))))
+
+(defun org-update-tree-view ()
+  "Refresh the tree view."
+  (let ((buffer                (current-buffer))
+        (tree-view-buffer-name (org-get-tree-view-buffer-name)))
+    (when (get-buffer-window tree-view-buffer-name)
+      (select-window (get-buffer-window tree-view-buffer-name))
+      (outline-hide-body) ; refresh tree view
+      (select-window (get-buffer-window buffer)))))
+
+(defun org-get-tree-view-buffer-name ()
+  "Return the the appropriate name for the current file's tree view buffer."
+  (if (buffer-base-buffer)
+      ;; If buffer is a base buffer
+      (error "Not in a base buffer!")
+    ;; If buffer is a clone
+    (concat "<tree>" (buffer-name))))
+
+(defun org-goto-tree-view-top ()
+  "Go to the first heading in the tree view."
+  (interactive)
+  (push-mark)                   ; add mark
+  (goto-char (point-min))       ; go to beginning of buffer
+  (org-next-visible-heading 1)  ; go to first heading
+  (recenter 0))                 ; put top of window at point
+#+END_SRC
+
+*** Adjusting /org-beginning-of-line/
+:PROPERTIES:
+:CUSTOM_ID: org-beginning-of-line
+:END:
+
+I know the following code will look hectic, but it's quite simple. You only need
+to pay attention to a couple of lines. You see, this is the
+=org-beginning-of-line= function, copied from the Org source, but modified to use
+a function in my Emacs configuration called =smarter-beginning-of-line=, based on
+the function with the same name [[http://emacsredux.com/blog/2013/05/22/smarter-navigation-to-the-beginning-of-a-line/][written by Bozhidar Batsov]] of Emacs Redux. For
+my implementation of it, see the section on [[#c-a][making C-a smarter]]. In a nutshell,
+it moves to indentation unless the point is already at indentation, in which
+case it moves to the true beginning of line.
+
+Let's have a look at the code and then I'll explain it.
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-smarter-beginning-of-line (original-function &optional n)
+  "The exact same function as `org-beginning-of-line',
+  but with one exception: instead of calling `beginning-of-line'
+  twice, it calls `smarter-beginning-of-line' once."
+  (interactive "^p")
+  (let ((origin (point))
+        (special (pcase org-special-ctrl-a/e
+                   (`(,C-a . ,_) C-a) (_ org-special-ctrl-a/e)))
+        deactivate-mark)
+    ;; First move to a visible line.
+    (if (bound-and-true-p visual-line-mode)
+        (beginning-of-visual-line n)
+      (smarter-move-beginning-of-line n))
+    (cond
+     ;; No special behavior.  Point is already at the beginning of
+     ;; a line, logical or visual.
+     ((not special))
+     ;; `beginning-of-visual-line' left point before logical beginning
+     ;; of line: point is at the beginning of a visual line.  Bail
+     ;; out.
+     ((and (bound-and-true-p visual-line-mode) (not (bolp))))
+     ((let ((case-fold-search nil)) (looking-at org-complex-heading-regexp))
+      ;; At a headline, special position is before the title, but
+      ;; after any TODO keyword or priority cookie.
+      (let ((refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
+                         (line-end-position)))
+            (bol (point)))
+        (if (eq special 'reversed)
+            (when (and (= origin bol) (eq last-command this-command))
+              (goto-char refpos))
+          (when (or (> origin refpos) (= origin bol))
+            (goto-char refpos)))))
+     ((and (looking-at org-list-full-item-re)
+           (memq (org-element-type (save-match-data (org-element-at-point)))
+                 '(item plain-list)))
+      ;; Set special position at first white space character after
+      ;; bullet, and check-box, if any.
+      (let ((after-bullet
+             (let ((box (match-end 3)))
+               (cond ((not box) (match-end 1))
+                     ((eq (char-after box) ?\s) (1+ box))
+                     (t box)))))
+        (if (eq special 'reversed)
+            (when (and (= (point) origin) (eq last-command this-command))
+              (goto-char after-bullet))
+          (when (or (> origin after-bullet) (= (point) origin))
+            (goto-char after-bullet)))))
+     ;; No special context.  Point is already at beginning of line.
+     (t nil))))
+
+(advice-add 'org-beginning-of-line :around #'org-smarter-beginning-of-line)
+#+END_SRC
+
+So why all this code?
+
+First of all, Org-mode has its own function for moving to the beginning of the
+line, and if you set enable =org-special-ctrl-a/e=, it is really useful. For that
+reason, I want to use Org's own function, but force it to use
+=smarter-beginning-of-line= instead of =beginning-of-line=.
+
+Now, this /should/ be as easy as just replacing the =beginning-of-line= function
+with =smarter-beginning-of-line=, but unfortunately this doesn't work, because
+=org-beginning-of-line= stupidly calls =beginning-of-line= /twice/!
+
+This will not work with =smarter-beginning-of-line=, because calling that function
+twice will always move the cursor to the actual beginning of line, and never it
+will never move to the indentation, which sort of is the point of the entire
+function.
 
 The easiest way to solve the problem is, unfortunately, copying the
 =org-beginning-of-line= function definition and modifying it to call
-=move-beginning-of-line= only /once/. Or in my case,
-=smarter-beginning-of-line=, once.
+=move-beginning-of-line= only /once/. Or in my case, =smarter-beginning-of-line=,
+once.
 
-This works well, but of course it will block any potential future changes
-to =org-beginning-of-line= by the Org developers. On the other hand, it's
-unlikely that such a basic and well-working function should recieve any
-significant updates.
+This works well, but of course it will block any potential future changes to
+=org-beginning-of-line= by the Org developers. On the other hand, it's unlikely
+that such a basic and well-working function should recieve any significant
+updates.
 
+** Python mode
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+;; python-mode
+(defun shell-compile () ; (courtesy of djangoliv @ stack interchange)
+  (interactive)
+  (shell-command (concat "python " (buffer-file-name)))
+  (if (<= (* 2 (window-height)) (frame-height))
+      (enlarge-window 20)
+    (/ (frame-height) 2)))
+(add-hook 'python-mode-hook
+          '(lambda ()
+             (define-key python-mode-map (kbd "C-c C-c") 'shell-compile)))
+#+END_SRC
+
+** (La)TeX mode
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+(defun my-latex-setup (&optional args)
+  (defun start-update-viewer ()
+    "Starts/updates PDF viewer."
+    (interactive)
+    (if (string-match "no process found"
+                      (shell-command-to-string "killall -HUP mupdf-x11"))
+        (start-process-shell-command
+         "mupdf"          ; process name
+         "mupdf"          ; process buffer
+         (concat "mupdf " ; shell command
+                 (expand-file-name
+                  (concat "output/"
+                          (file-name-base (buffer-file-name))
+                          ".pdf"))))))
+  (define-key LaTeX-mode-map (kbd "C-c C-u") 'start-update-viewer)
+
+  (defun save-run ()
+    "Saves the document and processes it."
+    (interactive)
+    (save-buffer)
+    (TeX-command-run-all nil))
+
+  (defun latex-word-count () ; (courtesy of Nicholas Riley @ SE)
+    (interactive)
+    (let* ((this-file (buffer-file-name))
+           (word-count
+            (with-output-to-string
+              (with-current-buffer standard-output
+                (call-process "texcount" nil t nil "-brief" this-file)))))
+      (string-match "\n$" word-count)
+      (message (replace-match "" nil nil word-count))))
+  (define-key LaTeX-mode-map (kbd "C-c w") 'latex-word-count)
+
+  (defun latex-write-word-count ()
+    "Writes the word count to count.txt (if it exists)."
+    (interactive)
+    (shell-command (concat "texcount -brief "
+                    (shell-quote-argument buffer-file-name)
+                    " | sed -e 's/+.*//' > count.txt; cat count.txt")))
+  (define-key LaTeX-mode-map (kbd "C-c M-w") 'latex-write-word-count))
+(add-hook 'LaTeX-mode-hook 'my-latex-setup t)
+#+END_SRC
+
+
+* Custom hooks
+:PROPERTIES:
+:CUSTOM_ID: custom-hooks
+:END:
+
+#+NAME: c:custom-hooks
+#+BEGIN_SRC emacs-lisp
+;; window-focus-out-hook, window-focus-in-hook
+
+(defun run-window-focus-out-hook (window &optional norecord)
+  (unless norecord
+    (run-hooks 'window-focus-out-hook)))
+(defun run-window-focus-in-hook (window &optional norecord)
+  (unless norecord
+    (run-hooks 'window-focus-in-hook)))
+
+(advice-add 'select-window :before 'run-window-focus-out-hook)
+(advice-add 'select-window :after 'run-window-focus-in-hook)
+
+;; NOTE: This doesn't always play nice with magit. For example, select-window
+;; seems to be run when opening the commit message buffer, but *not* when
+;; returning to the magit status buffer. I'm not quite sure why, but I suppose I
+;; could add an exception for it. I'd have to look at the magit source. Perhaps
+;; I could just run a function upon switch-to-buffer that checks whether the
+;; current-window is different from the previous-current-window (saved in a
+;; variable); that might be the most simple solution, similar to what hl-line
+;; does, but as I've said before, more efficient than attaching everything to
+;; post-command-hook ...
+
+;; TODO: Add exception for magit buffer switching.
+
+;; before-minibuffer-hook, after-minibuffer-hook
+
+(defun run-before-minibuffer-hook (&optional &rest args)
+  (run-hooks 'before-minibuffer-hook)
+  (add-hook 'post-command-hook 'run-after-minibuffer-hook))
+(defun run-after-minibuffer-hook (&optional &rest args)
+  (unless (minibufferp)
+    (run-hooks 'after-minibuffer-hook)
+    (remove-hook 'post-command-hook 'run-after-minibuffer-hook)))
+
+(advice-add 'read-from-minibuffer :before 'run-before-minibuffer-hook)
+(advice-add 'read-no-blanks-input :before 'run-before-minibuffer-hook)
+(advice-add 'read-string          :before 'run-before-minibuffer-hook)
+
+;; before-helm-hook, after-helm-hook
+
+(defun run-before-helm-hook (&optional &rest args)
+  (run-hooks 'before-helm-hook))
+(defun run-after-helm-hook (&optional &rest args)
+  (run-hooks 'after-helm-hook))
+
+(add-hook 'helm-before-initialize-hook 'run-before-helm-hook)
+(add-hook 'helm-exit-minibuffer-hook   'run-after-helm-hook)
+(advice-add 'helm-keyboard-quit :after 'run-after-helm-hook)
+#+END_SRC
 
 
 * Themes
 :PROPERTIES:
-:CUSTOM_ID: sec:themes
+:CUSTOM_ID: themes
 :END:
 
 ** Theme configuration
 
+I like to be flexible when it comes to themes. For example, I want to be able to
+switch themes in the middle of a session without any issues. I also want Emacs
+to automatically load a sensible theme depending on the amount of daylight.
+Furthermore, I want to be able to easily adjust the themes I use, because they
+aren't perfect.
+
+I believe I have succeeded in achieving my goals, and rather nicely at that.
+
+*** Daylight-dependent default theme
+:PROPERTIES:
+:CUSTOM_ID: daylight-sets-color
+:END:
+
+This is a function that I have ported from my old =vimrc=. It relies on =sun=, a
+highly personalized script of which I am /not/ particularly proud, because of how
+ugly it is ... But if you absolutely /have/ to see it, it's available at [[https://github.com/jocap/uppsala-sun][GitHub]] -
+you've been warned.
+
+#+NAME: c:theme:config
+#+BEGIN_SRC emacs-lisp
+(defun daylight-sets-color ()
+  "Sets a light theme for day and a dark theme for night.
+  Depends on the script `sun' being found in path."
+  (interactive)
+  (let ((time (string-to-number (format-time-string "%H.%M"))))
+        (if (string-match "not found" (shell-command-to-string "which sun"))
+            (if (and (> time 6.00) (< time 18.00)) ; default if `sun' not found
+                (load-theme light-theme t)
+              (load-theme dark-theme t))
+          (let ((sunrise
+                 (string-to-number (shell-command-to-string "sun _rise")))
+                (sunset
+                 (string-to-number (shell-command-to-string "sun _set"))))
+            (if (and (> time sunrise) (< time sunset))
+                (load-theme light-theme t)
+              (load-theme dark-theme t))))))
+#+END_SRC
+
+The function depends on the following variables being set:
+
+#+NAME: c:theme:config
+#+BEGIN_SRC emacs-lisp
+(setq light-theme 'eziam-light
+      dark-theme  'eziam-dark)
+#+END_SRC
+
+To set the default theme on startup, I use the following code:
+
+#+NAME: c:theme:config
+#+BEGIN_SRC emacs-lisp
+(add-hook 'after-init-hook 'daylight-sets-color)
+#+END_SRC
+
+*** Dynamic theme settings
+:PROPERTIES:
+:CUSTOM_ID: dynamic-theme-settings
+:END:
+
+Another of my goals was being able to easily adjust the colors of individual
+themes. While my solution may not be "simple", it is efficient and easy to use.
+
+The way I have it set up is that every time a theme is loaded, a function called
+=theme-do-all= is run:
+
+#+NAME: c:theme:config
+#+BEGIN_SRC emacs-lisp
+(advice-add 'load-theme :after (lambda (theme &optional rest ...)
+                                 (theme-do-all theme)))
+#+END_SRC
+
+The =theme-do-all= function contains a bunch of different settings: some for all
+themes, some only for specific themes.
+
+The more interesting aspect of the function, however, is the way it sets up
+/dynamic colors/, dependent on the colors of the loaded theme. For example, I
+don't set a custom =fci-rule-color= (that's /fill-column-indicator/) for every
+theme. Instead, I base it on the background color of the loaded theme, making it
+stick out just enough to be distinguishable. This way, I can load /any/ theme and
+the =fci-rule-color= will automatically be set to a sensible color.
+
+To achieve this, I use the =color= functions. I also define my own =intensify= and
+=anti-intensify= functions, which depend on the lightness of the theme's
+background.
+
+#+NAME: c:theme:config
+#+BEGIN_SRC emacs-lisp
+(defun theme-do-all (theme)
+  "Actions to perform whenever a theme is loaded."
+
+  (require 'color) ; for color-* functions
+
+  (let* ((bg
+          (alist-get 'background-mode (frame-parameters)))
+         (intensify
+          (if (eq bg 'dark) 'color-darken-name 'color-lighten-name))
+         (anti-intensify
+          (if (eq bg 'dark) 'color-lighten-name 'color-darken-name)))
+
+    ;; Settings for all themes
+    ;; ***********************
+
+    ;; * fci-rule-color -> desaturate, anti-intensity
+    (setq fci-rule-color (color-desaturate-name
+                          (funcall anti-intensify
+                                   (face-attribute 'default :background) 15) 50))
+
+    ;; * org-block-background -> desaturate, darken
+    (set-face-attribute 'org-block nil
+                        :background (color-desaturate-name
+                                     (color-darken-name
+                                      (face-attribute 'default :background) 3) 20)
+                        :foreground (face-attribute 'default :foreground))
+
+    ;; * org-block-begin-line, org-block-end-line
+    (cl-loop
+     for face in '(org-block-begin-line org-block-end-line)
+     do (set-face-attribute
+         face nil
+         :background (color-desaturate-name
+                      (color-darken-name
+                       (face-attribute 'default :background) 15) 50)
+         :foreground (color-desaturate-name
+                      (funcall intensify
+                               (face-attribute 'default :foreground) 20) 90)
+         :weight (face-attribute 'default :weight)
+         :slant (face-attribute 'default :slant)))
+
+    ;; * Reset fci-mode
+    (let ((inhibit-message t))
+      (call-interactively 'fci-mode)
+      (call-interactively 'fci-mode))
+
+    ;; Settings for specific themes
+    ;; ****************************
+
+    (cl-case theme
+      ;; * Gruxbox
+      ('gruvbox
+       (custom-theme-set-faces
+        'gruvbox ; fix hard-to-see org-mode colors
+        '(org-verbatim ((t (:foreground "DarkGray"))))
+        '(org-document-info-keyword ((t (:foreground "DarkGoldenrod"))))))
+
+      ;; * Tango
+      ('tango
+       (custom-theme-set-faces
+        'tango
+        '(hl-line ((t (:background "#dddddd"))))))
+
+      ;; * Tango-dark
+      ('tango-dark
+       (custom-theme-set-faces
+        'tango-dark ; fix crazy hl-line (bright yellow per default!)
+        '(hl-line ((t (:background "#444444")))))))
+
+    ;; * Eziam
+    (when (or (equal theme 'eziam-dark) (equal theme 'eziam-light))
+      (custom-theme-set-faces
+       theme
+       ;; - Less contrastive cursor
+       `(cursor ((t (:background
+                     ,(funcall
+                       anti-intensify
+                       (face-attribute 'default :foreground) 25)))))
+       ;; - More contrastive paren match
+       `(show-paren-match ((t (:background
+                               ,(funcall
+                                 anti-intensify
+                                 (face-attribute 'default :background) 25))))))
+      ;; - Fading rainbow-delimiters (from black to light gray)
+      (cl-loop for n in (number-sequence 1 9)
+               do (let ((face-name (concat
+                                    "rainbow-delimiters-depth-"
+                                    (number-to-string n)
+                                    "-face"))
+                        (color (funcall
+                                intensify
+                                (face-attribute 'default :foreground)
+                                (* n 6))))
+                    (custom-theme-set-faces
+                     theme
+                     (list (intern face-name) `((t (:foreground ,color))))))))))
+#+END_SRC
+
+It may look a bit busy, but that's because of the nature of setting face
+attributes via Emacs Lisp.
+
+Among some of the interesting settings are the custom =rainbow-delimiters= fading
+from black to light gray - or from white to dark gray, if =eziam-dark= is loaded
+instead of =eziam-light=.
+
+*** Switching between themes
+:PROPERTIES:
+:CUSTOM_ID: theme-switching
+:END:
+
+To switch themes, I simply use =load-theme=. There is one problem with that,
+though. Per default, =load-theme= doesn't unload the old theme. The following
+code, surely copied from the internet, fixes that:
+
+#+NAME: c:theme:config
+#+BEGIN_SRC emacs-lisp
+;; - Disable previous theme when enabling new theme
+(add-hook 'after-init-hook
+          (lambda () (defadvice load-theme
+                         (before theme-dont-propagate activate)
+                       (mapcar #'disable-theme custom-enabled-themes))))
+#+END_SRC
+
 
 * Language configuration
 :PROPERTIES:
-:CUSTOM_ID: sec:lang
+:CUSTOM_ID: lang
 :END:
+
+** TODO Spelling
+:PROPERTIES:
+:CUSTOM_ID: spelling
+:END:
+
+# add NAME when done
+#+BEGIN_SRC emacs-lisp
+(require 'ispell)
+(add-to-list 'ispell-dictionary-alist
+             '("swedish-hunspell"
+               "[[:alpha:]]"
+               "[^[:alpha:]]"
+               "[']"
+               t
+               ("-d" "sv_SE")
+               nil
+               utf-8))
+
+(add-to-list 'ispell-dictionary-alist
+             '("english-hunspell"
+               "[[:alpha:]]"
+               "[^[:alpha:]]"
+               "[']"
+               t
+               ("-d" "en_US")
+               nil
+               utf-8))
+(setq ispell-program-name "hunspell"
+      ispell-dictionary   "swedish-hunspell")
+#+END_SRC
 
 ** Swedish mode
 :PROPERTIES:
-:CUSTOM_ID: sec:swe
+:CUSTOM_ID: swe
 :END:
 
+#+NAME: c:lang:config
+#+BEGIN_SRC emacs-lisp
+;; Based on work by Moritz Ulrich <ulrich.moritz@googlemail.com>
+;; Published under GNU General Public License
 
+(defvar swedish-mode-map (make-keymap) "Swedish mode keymap.")
+
+(define-key swedish-mode-map (kbd "s-[")  (lambda () (interactive) (insert ?å)))
+(define-key swedish-mode-map (kbd "s-'")  (lambda () (interactive) (insert ?ä)))
+(define-key swedish-mode-map (kbd "s-;")  (lambda () (interactive) (insert ?ö)))
+(define-key swedish-mode-map (kbd "s-{")  (lambda () (interactive) (insert ?Å)))
+(define-key swedish-mode-map (kbd "s-\"") (lambda () (interactive) (insert ?Ä)))
+(define-key swedish-mode-map (kbd "s-:")  (lambda () (interactive) (insert ?Ö)))
+
+(define-minor-mode swedish-mode
+  "A mode for conveniently using Swedish letters in Emacs."
+  nil
+  :lighter " åäö"
+  swedish-mode-map)
+
+(provide 'swedish-mode)
+#+END_SRC
+
+** Combining acute accent
+:PROPERTIES:
+:CUSTOM_ID: combining-acute-accent
+:END:
+
+#+NAME: c:lang:config
+#+BEGIN_SRC emacs-lisp
+;; Insert combining acute accent
+(global-set-key (kbd "C-c 8 '") (lambda () (interactive) (insert-char 769)))
+#+END_SRC
 * Preventing repeated strain injury
 :PROPERTIES:
-:CUSTOM_ID: sec:rsi
+:CUSTOM_ID: rsi
 :END:
 
 
 * Windows Subsystem for Linux (WSL)
 :PROPERTIES:
-:CUSTOM_ID: sec:wsl
+:CUSTOM_ID: wsl
 :END:
 
 I only own Windows PCs, with Windows installed on every single one, and I do
@@ -980,7 +1716,7 @@ configuration.
 
 ** Default programs
 :PROPERTIES:
-:CUSTOM_ID: sec:wsl:default
+:CUSTOM_ID: wsl:default
 :END:
 
 I use WSL for most development tools - like Emacs, Zsh and the odd local web
@@ -989,8 +1725,10 @@ web browsing.
 
 *** Web browser
 :PROPERTIES:
-:custom_id: sec:wsl:web-browser
+:CUSTOM_ID: wsl:web-browser
 :END:
+
+**** Problem
 
 My web browser of choice is Firefox, because of the extensibility and
 reliability. Emacs can be configured to use Firefox by customizing
@@ -1019,34 +1757,58 @@ to run into some problem. A Firefox window opens, but it's empty, without
 any URL in the address bar!
 
 This happens when Emacs tries to open /any/ file in the web browser, simply
-because =Firefox.exe= won't recognize any Linux path. It needs a /Windows/
+because =firefox.exe= won't recognize any Linux path. It needs a /Windows/
 path.
+
+**** Solution
 
 To solve this once and for all, I scrapped my old symlinks and aliases and
 instead, wrote the following shell script:
 
-#+BEGIN_SRC sh :tangle no
+#+BEGIN_SRC sh :tangle ~/bin/wsl-browser
 #!/usr/bin/zsh
 
 if [[ $1 =~ ^https?:// ]]; then
     local open_path="$1"
+elif [[ $1 =~ ^/mnt/c ]]; then
+    local linux_path="/mnt/c"
+    local windows_path="file:///C:/"
+    local open_path="${1/$linux_path/$windows_path}"
 else
     local abs_path=$(readlink -f $1)
     local open_path="file:///C:/Users/JohnAJ/AppData/Local/lxss$abs_path"
 fi
 
-local abs_path=$(readlink -f $*)
-local url_path="file:///C:/Users/JohnAJ/AppData/Local/lxss$abs_path"
-
-/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe $url_path
+/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe $open_path
 #+END_SRC
 
-The script treats an argument starting with =http://= or =https://= as
-normal URLs, but any other file it converts to a Windows absolute path.
-    
-I named it =wsl-browser= and symlinked both =firefox= and =sensible-browser=
+The script treats any argument starting with =http://= or =https://= as normal URLs.
+Any other path, it tries to convert to the equivalent Windows path.
+
+At first, I didn't have the /elif/-clause, but I noticed that sometimes, Emacs
+would try to open in the web browser a file that was on the Windows-side of the
+filesystem - that is, with a path starting with =/mnt/c=.
+
+Within the Linux system, =/mnt/c= is an access point to all files on the Windows
+installation. Within the Windows system, =C:\Users\JohnAJ\AppData\Local\lxss= is
+an access point to the Linux file system. But despite that,
+=C:\Users\JohnAJ\AppData\Local\lxss\mnt\c= does /not/ resolve to =C:\=.
+
+For this reason, I couldn't just tell =firefox.exe= to open
+=file:///C:/Users/JohnAJ/AppData/Local/lxss/mnt/c/=. To Windows programs, it's an
+empty directory. I therefore added a special case for all paths starting with
+=/mnt/c=, redirecting straight to =file:///C:/=, which isn't an empty directory.
+
+I saved the script as =~/bin/wsl-browser=, the =~/bin= directory being in my =$PATH=,
+and gave myself permissions to run it:
+
+#+BEGIN_SRC sh :tangle no
+chmod +x ~/bin/wsl-browser
+#+END_SRC
+
+Additionally, I symlinked both =firefox= and =sensible-browser=
 to the file. This way, any tool on my system that tries to use one of those
 programs will use my script instead.
 
 In Emacs, my default browser is =firefox=, so that it remains compatible
-with other systems.
+with other systems, where I don't use my =wsl-browser= script.
