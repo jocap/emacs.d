@@ -76,8 +76,24 @@
   (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
   (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
 
+  (defun paredit-delete-indentation (&optional arg)
+    "Handle joining lines that end in a comment."
+    (interactive "*P")
+    (let (comt)
+      (save-excursion
+        (move-beginning-of-line (if arg 1 0))
+        (when (skip-syntax-forward "^<" (point-at-eol))
+          (setq comt (delete-and-extract-region (point) (point-at-eol)))))
+      (delete-indentation arg)
+      (when comt
+        (save-excursion
+      	  (move-end-of-line 1)
+          (insert " ")
+          (insert comt)))))
+
   ;; re-map M-r, overriden by paredit-raise-sexp
-  :bind ("M-R" . move-to-window-line-top-bottom))
+  :bind (("M-R" . move-to-window-line-top-bottom)
+         ("M-^" . paredit-delete-indentation)))
 
 (use-package paredit-everywhere
   :ensure paredit
@@ -235,10 +251,28 @@
       (goto-char from)
       (insert output)))
 
+  (defun org-narrow-subtree-from-clone ()
+  "Switch to a cloned buffer's base buffer and narrow in on the
+  selected subtree."
+  (interactive)
+  (let ((buf (buffer-base-buffer)))
+    (unless buf
+      (error "You need to be in a cloned buffer!"))
+    (let ((pos (point))
+          (win (car (get-buffer-window-list buf))))
+      (if win
+          (select-window win)
+        (other-window 1)
+        (switch-to-buffer buf))
+      (widen) ; first widen any potential narrowing
+      (goto-char pos)
+      (org-narrow-to-subtree) ; narrow to org subtree
+      (outline-show-all)))) ; show everything
+
   (defun org-custom-beginning-of-line (original-function &optional n)
     "The exact same function as `org-custom-beginning-of-line',
-but with one exception: instead of calling `beginning-of-line'
-twice, it calls `smarter-beginning-of-line' once."
+    but with one exception: instead of calling `beginning-of-line'
+    twice, it calls `smarter-beginning-of-line' once."
     (interactive "^p")
     (let ((origin (point))
           (special (pcase org-special-ctrl-a/e
@@ -347,6 +381,12 @@ twice, it calls `smarter-beginning-of-line' once."
               ("C-M-g r" . git-gutter+-revert-hunks)
               ("C-M-g s" . git-gutter+-stage-hunks)
               ("C-M-g c" . git-gutter+-commit)))
+
+(use-package buffer-move
+  :bind (("M-' <up>"    . buf-move-up)
+         ("M-' <down>"  . buf-move-down)
+         ("M-' <left>"  . buf-move-left)
+         ("M-' <right>" . buf-move-right)))
 
 ;; }}}
 
