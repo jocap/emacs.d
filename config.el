@@ -1,5 +1,3 @@
-;; TODO: convert to file using (org-babel-tangle-file)
-
 ;; First & foremost
 ;; =============================================================================
 
@@ -77,8 +75,27 @@
   (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
   (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
 
-  ;; re-map M-r, overriden by paredit-raise-sexp
-  :bind ("M-R" . move-to-window-line-top-bottom))
+  :config
+  (defun paredit-delete-indentation (&optional arg)
+    "Handle joining lines that end in a comment."
+    (interactive "*P")
+    (let (comt)
+      (save-excursion
+        (move-beginning-of-line (if arg 1 0))
+        (when (skip-syntax-forward "^<" (point-at-eol))
+          (setq comt (delete-and-extract-region (point) (point-at-eol)))))
+      (delete-indentation arg)
+      (when comt
+        (save-excursion
+      	  (move-end-of-line 1)
+          (unless (s-blank-str? comt) (insert " "))
+          (insert comt)))))
+
+  (define-key paredit-mode-map (kbd "M-q") nil)
+
+  :bind (("M-R" . move-to-window-line-top-bottom)
+         ("M-^" . paredit-delete-indentation)
+         ("M-Q" . paredit-reindent-defun)))
 (use-package paredit-everywhere
   :ensure paredit
   :config (add-hook 'prog-mode-hook 'paredit-everywhere-mode))
@@ -191,9 +208,8 @@
 (use-package helm
   :commands helm-command-prefix
   :bind (("M-x"     . helm-M-x)
-         ("C-c C-m" . helm-mini)
          ("C-x C-f" . helm-find-files)
-         ("C-x C-b" . helm-buffers-list))
+         ("C-x C-b" . helm-mini))
   :init
   (global-set-key (kbd "C-c C-h") 'helm-command-prefix)
   (global-unset-key (kbd "C-x c"))
@@ -239,13 +255,6 @@
   :mode (("\\.org$" . org-mode))
   :ensure org-plus-contrib
   :demand
-
-  :init
-  ;; Open agenda in split window at Emacs launch
-  (add-hook 'after-init-hook (lambda ()
-                               (org-agenda-list)
-                               (other-window 1)))
-
   :config
   ;; Make ' and " work in inline code
   (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\r\n,")
@@ -260,7 +269,6 @@
 
   ;; Remove keybindings that I already use
   (define-key org-mode-map (kbd "C-'") nil)
-  (define-key org-mode-map (kbd "C-c C-m") nil)
 
   ;; Enable for all Org files
   (add-hook 'org-mode-hook #'swedish-mode) ; Swedish letters
@@ -296,92 +304,159 @@
       (insert output)))
   
   (define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
-  (defun org-narrow-subtree-from-clone ()
+  (defun org-tree-view/open-heading ()
     "Switch to a cloned buffer's base buffer and narrow in on the
     selected subtree."
     (interactive)
     (let ((buf (buffer-base-buffer)))
-      (unless buf
-        (error "You need to be in a cloned buffer!"))
-      (let ((pos (point))
-            (win (car (get-buffer-window-list buf))))
-        (if win
-            (select-window win)
-          (other-window 1)
-          (switch-to-buffer buf))
-        (widen) ; first widen any potential narrowing
-        (goto-char pos)
-        (org-narrow-to-subtree) ; narrow to org subtree
-        (outline-show-all)))) ; show everything
+      (if (not buf)
+          (error "You need to be in a cloned buffer!")
+        (beginning-of-line) ; scroll tree view all the way to the left
+        (let ((pos (point))
+              (win (car (get-buffer-window-list buf))))
+          (if win
+              (select-window win) ; select window (and record it)
+            (other-window 1)
+            (switch-to-buffer buf))
+          (widen) ; first widen any potential narrowing
+          (goto-char pos)
+          (org-narrow-to-subtree) ; narrow to org subtree
+          (outline-show-all))))) ; show everything
+  (defun org-tree-view/refresh ()
+    "Refresh the tree view."
+    (let ((buffer                (current-buffer))
+          (tree-view-buffer-name (org-tree-view/buffer-name)))
+      (when (get-buffer-window tree-view-buffer-name)
+        (with-current-buffer tree-view-buffer-name
+          (outline-hide-body)     ; refresh tree view
+          (beginning-of-line))))) ; scroll window all the way to the left
+  (defun org-tree-view/exit (&optional from-base)
+    "Kill the tree view. If calling from outside the tree view, set
+    `from-base' to non-nil."
+    (interactive)
+    (if from-base
+        (select-window (get-buffer-window (org-tree-view/buffer-name)) :norecord))
   
-  (defun org-open-tree-view ()
+    (kill-buffer) ; kill buffer
+    (delete-window) ; delete window
+  
+    ;; Cleanup
+    (remove-hook 'after-save-hook #'org-tree-view/refresh)
+    (advice-remove #'org-self-insert-command
+                   #'org-tree-view-self-insert-command))
+  (defun org-tree-view/buffer-name ()
+    "Return the the appropriate name for the current file's tree view buffer."
+    (if (buffer-base-buffer)
+        ;; If buffer is a clone (i.e., if it has a base buffer)
+        (error "Not in a base buffer!")
+      ;; If buffer is a base buffer
+      (concat "<tree>" (buffer-name))))
+  
+  (defun org-tree-view/search (N)
+    (interactive "p")
+    ;; Scroll to top of window
+    (goto-char (point-min))
+    ;; Run isearch-forward with typed letter as search string
+    (let* ((char (string-to-char (this-command-keys)))
+           (unread-command-events (append unread-command-events `(,char))))
+      (isearch-forward)))
+  (defun org-tree-view/isearch-return ()
+    (interactive)
+    (when (s-starts-with? "<tree>" (buffer-name))
+      (org-tree-view/open-heading))
+    (isearch-exit))
+  (defun org-tree-view/self-insert-command (oldfun N)
+    (interactive "p")
+    (if (s-starts-with? "<tree>" (buffer-name))
+        (call-interactively #'org-tree-view/search)
+      (call-interactively oldfun)))
+  (defun org-tree-view/open ()
     "Open a clone of the current buffer to the left, resize it to
      30 columns, and bind RET to jump to the same position in
      the base buffer."
     (interactive)
-    (let ((tree-view-buffer-name (org-get-tree-view-buffer-name)))
+    (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
       (if (get-buffer-window tree-view-buffer-name)
           ;; Use existing tree buffer
           (select-window (get-buffer-window tree-view-buffer-name))
+  
         ;; Make new tree buffer
-        (split-window-right 30) ; create tree buffer
+        ;; ********************
+  
+        (split-window-right 30)
         (clone-indirect-buffer tree-view-buffer-name nil t)
         (switch-to-buffer tree-view-buffer-name)
   
-        (read-only-mode)
-        (widen)                       ; widen if possible
-        (outline-show-all)            ; make sure all headings are visible
-        (outline-hide-body)           ; hide body
-        (setq-local truncate-lines t) ; ensure truncated lines
-        (setq-local scroll-margin 0)  ; disable scroll-margin for buffer
-        (org-goto-tree-view-top)      ; go to top of tree view
+        ;; Basic settings
+        ;; **************
   
-        ;; Do this twice in case the point is in a hidden line
-        (dotimes (_ 2 (forward-line 0)))
+        (read-only-mode)
+        (widen)                           ; widen if possible
+        (outline-show-all)                ; make sure all headings are visible
+        (outline-hide-body)               ; hide body
+        (setq-local truncate-lines t)     ; ensure truncated lines
+        (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
+        (setq-local search-invisible nil) ; search only visible text
+  
+        ;; Go to top of tree view
+        (goto-char (point-min))       ; go to beginning of buffer
+        (org-next-visible-heading 1)  ; go to first heading
+        (recenter 0)                  ; put top of window at point
+  
+        ;; Hide everything above tree view
+        (narrow-to-region (window-start) (point-max))
   
         ;; Refresh tree view on save
-        (add-hook 'after-save-hook #'org-update-tree-view)
+        (add-hook 'after-save-hook #'org-tree-view/refresh)
   
-        ;; Map keys
+        ;; Automatically run isearch-forward on any key
+        (advice-add #'org-self-insert-command :around
+                    #'org-tree-view/self-insert-command)
+  
+        ;; Press <C-return> from isearch to directly open matching heading
+        (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+  
+        ;; Keybindings
+        ;; ***********
+  
+        ;; - Use org-mode-map as base
         (use-local-map (copy-keymap org-mode-map))
-        (local-set-key (kbd "q") ; quit tree view
-                       (lambda (&optional &rest args)
+  
+        ;; - Quit tree view
+        (local-set-key (kbd "Q") #'org-tree-view/exit)
+  
+        ;; - Switch back to base buffer
+        (local-set-key (kbd "C-c C-t")
+                       (lambda ()
                          (interactive)
-                         (kill-buffer (current-buffer)) ; kill buffer
-                         (delete-window) ; delete window
-                         (remove-hook 'after-save-hook #'org-update-tree-view)))
-        (local-set-key (kbd "M-<") #'org-goto-tree-view-top)
-        (mapc (lambda (key) ; open heading in base buffer
-                (local-set-key (kbd key) 'org-narrow-subtree-from-clone))
+                         (select-window (get-buffer-window (buffer-base-buffer)))))
+  
+        ;; - Open heading in base buffer
+        (mapc (lambda (key)
+                (local-set-key (kbd key) 'org-tree-view/open-heading))
               '("<mouse-1>" "RET")))))
   
-  (defun org-update-tree-view ()
-    "Refresh the tree view."
-    (let ((buffer                (current-buffer))
-          (tree-view-buffer-name (org-get-tree-view-buffer-name)))
-      (when (get-buffer-window tree-view-buffer-name)
-        (select-window (get-buffer-window tree-view-buffer-name))
-        (outline-hide-body) ; refresh tree view
-        (beginning-of-line) ; scroll window all the way to the left
-        (select-window (get-buffer-window buffer)))))
-  
-  (defun org-get-tree-view-buffer-name ()
-    "Return the the appropriate name for the current file's tree view buffer."
-    (if (buffer-base-buffer)
-        ;; If buffer is a base buffer
-        (error "Not in a base buffer!")
-      ;; If buffer is a clone
-      (concat "<tree>" (buffer-name))))
-  
-  (defun org-goto-tree-view-top ()
-    "Go to the first heading in the tree view."
+  (define-key org-mode-map (kbd "C-c C-t") #'org-tree-view-open)
+  (defun org-babel-tangle-config ()
     (interactive)
-    (push-mark)                   ; add mark
-    (goto-char (point-min))       ; go to beginning of buffer
-    (org-next-visible-heading 1)  ; go to first heading
-    (recenter 0))                 ; put top of window at point
   
-  (define-key org-mode-map (kbd "C-c C-t") #'org-open-tree-view)
+    (clone-indirect-buffer "tangle-config" nil :norecord) ; clone buffer
+    (switch-to-buffer "tangle-config")            ; switch to buffer
+    (widen)                                       ; widen if necessary
+    (setq-local search-invisible t)               ; search invisible text
+    (when (search-forward                         ; find c:config-all
+           (concat "#+NAME: "
+                   "c:config-all"))
+      (forward-line 2)                            ; go down to source block
+  
+      ;; Tangle the block at point
+      (let ((current-prefix-arg '(4)))
+        (call-interactively 'org-babel-tangle)))
+  
+    ;; Return to base buffer
+    (kill-buffer))
+  
+  (define-key org-mode-map (kbd "C-c C-v M-t") #'org-babel-tangle-config)
   (defun org-smarter-beginning-of-line (original-function &optional n)
     "The exact same function as `org-beginning-of-line',
     but with one exception: instead of calling `beginning-of-line'
@@ -459,6 +534,7 @@
 (setq save-place-file (state-dir "save-place"))
 (setq recentf-save-file (state-dir "recentf"))
 (setq ido-save-directory-list-file (state-dir "ido.last"))
+(setq eshell-directory-name (state-dir "eshell"))
 (setq backup-directory-alist
       `((".*" . ,(state-dir "saves"))))
 
@@ -557,14 +633,16 @@
   (setq-local cursor-type default-cursor-type))
 (defun cursor-unfocused ()
   (setq-local cursor-type 'block))
-(add-hook 'post-command-hook 'cursor-focused)
-;; Using post-command-hook because setting the cursor type is such a simple
-;; action, and because select-window is called surprisingly often and often
-;; without the suitable `norecord' argument ...
+(defun cursor-set-focus ()
+  (cl-loop
+   for window in (window-list)
+   do (let ((current-buffer (window-buffer)))
+        (with-current-buffer (window-buffer window)
+          (if (equal (window-buffer window) current-buffer)
+              (cursor-focused)
+            (cursor-unfocused))))))
 
-(add-hook 'window-focus-out-hook  'cursor-unfocused)
-(add-hook 'before-minibuffer-hook 'cursor-unfocused)
-(add-hook 'before-helm-hook       'cursor-unfocused)
+(add-hook 'post-command-hook 'cursor-set-focus)
 ;; python-mode
 (defun shell-compile () ; (courtesy of djangoliv @ stack interchange)
   (interactive)
@@ -623,11 +701,9 @@
 
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 
-(global-set-key (kbd "C-x C-p") 'other-window)
-(global-set-key (kbd "C-x C-o") (lambda (n) (interactive "p")
+(global-set-key (kbd "M-]") 'other-window)
+(global-set-key (kbd "M-[") (lambda (n) (interactive "p")
                                   (other-window (* -1 n))))
-(global-set-key (kbd "C-x P") 'mark-page)          ; defualt
-(global-set-key (kbd "C-x O") 'delete-blank-lines) ; default
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
@@ -793,11 +869,9 @@
 ;; window-focus-out-hook, window-focus-in-hook
 
 (defun run-window-focus-out-hook (window &optional norecord)
-  (unless norecord
-    (run-hooks 'window-focus-out-hook)))
+  (run-hooks 'window-focus-out-hook))
 (defun run-window-focus-in-hook (window &optional norecord)
-  (unless norecord
-    (run-hooks 'window-focus-in-hook)))
+  (run-hooks 'window-focus-in-hook))
 
 (advice-add 'select-window :before 'run-window-focus-out-hook)
 (advice-add 'select-window :after 'run-window-focus-in-hook)
