@@ -6,7 +6,7 @@
 
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
-#+HTML_HEAD: <link rel="stylesheet" href="file:///C:/Users/JohnAJ/AppData/Local/lxss/home/john/.config/emacs/config.css" type="text/css" />
+#+HTML_HEAD: <link rel="stylesheet" href="file:///C:/Users/JohnAJ/AppData/Local/lxss/home/john/.config/emacs/config/config.css" type="text/css" />
   
 * Introduction
 
@@ -664,6 +664,36 @@ combination with any of the arrow keys.
                 'smarter-move-beginning-of-line)
 #+END_SRC
 
+** Scrolling pleasantly
+:PROPERTIES:
+:CUSTOM_ID: scrolling-pleasantly
+:END:
+
+Sometimes, the mouse is really useful. I love text-based interfaces, but they're
+not perfect. Lucky for me, Emacs has good mouse support, at least in the GUI
+version.
+
+An annoying thing about using the mouse in Emacs, however, is scrolling. It
+works well most of the time, until you hit the beginning or end of the buffer.
+BEEP! If you haven't disabled the bell, you'll hear the bell. If you have
+disabled the bell, you'll see an annoying /visual/ bell. Yes, I know that I've
+enabled the visual bell myself, and I do like it. Just not when I'm scrolling.
+
+The following code surpresses any errors thrown by =mwheel-scroll=.
+
+#+NAME: basic-prefs
+#+BEGIN_SRC emacs-lisp
+(defun silent-mwheel-scroll (oldfun &rest r)
+  (interactive (list last-input-event))
+  (ignore-errors
+    (call-interactively oldfun)))
+
+(advice-add #'mwheel-scroll :around #'silent-mwheel-scroll)
+#+END_SRC
+
+Much better! Funny how one small change can make Emacs feel ten years more
+modern.
+
 
 * Visual aids
 
@@ -832,12 +862,21 @@ This is a pretty nice way of checking the active window. I am usually against
 using =post-command-hook=, because of how often it is run, but there isn't
 anything as reliable. Believe me, [[#custom-hooks][I've tried]].
 
+
 * Helpful tools
 
 ** Helm
 :PROPERTIES:
 :CUSTOM_ID: helm
 :END:
+
+I always feel a bit guilty when I use Helm. Which is, like, all the time,
+because of how useful it is. I know it's big, a lot bigger than
+alternatives like Ivy, and to be honest, some day I might try another
+option, but for now, Helm does its job very well.
+
+I mostly use Helm "as-is." I do have some code that implements Helm completion
+from Eshell, which is very useful.
 
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
@@ -846,28 +885,20 @@ anything as reliable. Believe me, [[#custom-hooks][I've tried]].
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
          ("C-x C-b" . helm-mini))
+
   :init
   (global-set-key (kbd "C-c C-h") 'helm-command-prefix)
   (global-unset-key (kbd "C-x c"))
   (require 'helm-config)
   (helm-mode 1)
+
   :config
-  (helm-autoresize-mode 1)
-  (setq helm-mode-fuzzy-match t
-        helm-completion-in-region-fuzzy-match t ; "fuzzy" matching
-        helm-split-window-in-side-p           t ; helm inside current window
-        helm-autoresize-max-height           40
-        helm-autoresize-min-height           0))
+  ;; Eshell completion
+  (add-hook 'eshell-mode-hook
+          (lambda ()
+            (eshell-cmpl-initialize)
+            (define-key eshell-mode-map [remap eshell-pcomplete] 'helm-esh-pcomplete))))
 #+END_SRC
-
-I always feel a bit guilty when I use Helm. Which is, like, all the time,
-because of how useful it is. I know it's big, a lot bigger than
-alternatives like Ivy, and to be honest, some day I might try another
-option, but for now, Helm does its job very well.
-
-Apart from what I think are some pretty nice
-keybindings, I configure Helm to do "fuzzy" matching, only display its
-window below the current window and keep itself to a reasonable height.
 
 ** Projectile
 :PROPERTIES:
@@ -1060,7 +1091,7 @@ I have written it because I study Russian and write down all the words I
 learn in an Org file. For more language-related settings, see the section
 on [[#lang][non-English languages]].
 
-*** Tree view
+*** /org-tree-view/
 :PROPERTIES:
 :CUSTOM_ID: org-tree-view
 :END:
@@ -1070,28 +1101,40 @@ Sometimes, keeping track of it all requires a substantial amount of brain power.
 Wouldn't it be great to have a small outline to the left of the text, where you
 could select a section and narrow in on it in a big window to the right?
 
-That's what the following functions are for. They are heavily based on two
-answers on the Emacs StackExchange, by [[https://emacs.stackexchange.com/a/9532][Dan]] and [[https://emacs.stackexchange.com/a/14987][blujay]] respectively.
+That's what the =org-tree-view= functions are for. They started out as carbon
+copies of two answers on the Emacs StackExchange, by [[https://emacs.stackexchange.com/a/9532][Dan]] and [[https://emacs.stackexchange.com/a/14987][blujay]]
+respectively, but they have developed into something quite solid.
 
-As you can see in my main Org configuration above, I have =org-open-tree-view= set
-to a simple keybinding. It opens a clone of the current buffer in a window split
-to the left, from which you can browse the structure of the Org file and press
-~RET~ or ~<mouse-1>~ to move to a specific heading in the base buffer on the right
-and call =org-narrow-to-subtree=. Note that I normally don't need to call
-=org-narrow-subtree-from-clone= myself.
+It works by opening a clone of the current Org buffer in a new window to the
+left. The cloned buffer, called the /tree view/, has the following properties:
 
-I do experience one bug with =org-open-tree-view=, namely that it doesn't
-correctly detect when a tree view buffer is already open. It always opens a new
-split, which isn't the expected behavior.
+- It is readonly
+- It displays nothing but headings
+- On ~<return>~ or ~<mouse-1>~, the heading at point is opened in the /base buffer/ and
+  the base buffer is narrowed to the subtree of the heading
+- On ~Q~, the tree view is closed and its buffer deleted
+- On any other non-modifier key, it automatically starts searching through the
+  headings (but, crucially, not the rest of the text) using =isearch=
+- Within =isearch=, ~<C-return>~ opens the currently selected matching heading in
+  the base buffer
 
-I haven't gotten around to debugging the function, but if you can find the
-error, please file an issue or send me a pull request on [[https://github.com/jocap/emacs.d/][GitHub]]!
+**** Options
 
---------------------------------------------------------------------------------
+With /org-tree-view/ looking more and more like a package, there are of course
+options that can be set.
 
-**** /org-tree-view/open-heading/
+- org-tree-view/levels :: how many levels of heading to show.
+
+**** Source
 
 #+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp :noweb yes :exports none
+<<c:org-tree-view>>
+#+END_SRC
+
+***** /org-tree-view/open-heading/
+
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/open-heading ()
   "Switch to a cloned buffer's base buffer and narrow in on the
@@ -1113,9 +1156,9 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
         (outline-show-all))))) ; show everything
 #+END_SRC
 
-**** /org-tree-view/refresh/
+***** /org-tree-view/refresh/
 
-#+NAME: c:org:fun
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/refresh ()
   "Refresh the tree view."
@@ -1124,12 +1167,13 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
     (when (get-buffer-window tree-view-buffer-name)
       (with-current-buffer tree-view-buffer-name
         (outline-hide-body)     ; refresh tree view
-        (beginning-of-line))))) ; scroll window all the way to the left
+        (beginning-of-line)     ; scroll window all the way to the left
+        (scroll-right 999)))))
 #+END_SRC
 
-**** /org-tree-view/exit/
+***** /org-tree-view/exit/
 
-#+NAME: c:org:fun
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/exit (&optional from-base)
   "Kill the tree view. If calling from outside the tree view, set
@@ -1147,9 +1191,9 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
                  #'org-tree-view-self-insert-command))
 #+END_SRC
 
-**** /org-tree-view/buffer-name/
+***** /org-tree-view/buffer-name/
 
-#+NAME: c:org:fun
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/buffer-name ()
   "Return the the appropriate name for the current file's tree view buffer."
@@ -1160,9 +1204,9 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
     (concat "<tree>" (buffer-name))))
 #+END_SRC
 
-**** /org-tree-view/search/
+***** /org-tree-view/search/
 
-#+NAME: c:org:fun
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 
 (defun org-tree-view/search (N)
@@ -1175,20 +1219,20 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
     (isearch-forward)))
 #+END_SRC
 
-**** /org-tree-view/isearch-return/
+***** /org-tree-view/isearch-return/
 
-#+NAME: c:org:fun
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/isearch-return ()
   (interactive)
   (when (s-starts-with? "<tree>" (buffer-name))
     (org-tree-view/open-heading))
-  (isearch-exit))
+  (let ((inhibit-message t)) (isearch-exit)))
 #+END_SRC
 
-**** /org-tree-view/self-insert-command/
+***** /org-tree-view/self-insert-command/
 
-#+NAME: c:org:fun
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/self-insert-command (oldfun N)
   (interactive "p")
@@ -1197,15 +1241,16 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
     (call-interactively oldfun)))
 #+END_SRC
 
-**** /org-tree-view/open/
+***** /org-tree-view/open/
 
-#+NAME: c:org:fun
+#+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/open ()
   "Open a clone of the current buffer to the left, resize it to
    30 columns, and bind RET to jump to the same position in
    the base buffer."
   (interactive)
+  (push-mark) ; in case user gets lost
   (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
     (if (get-buffer-window tree-view-buffer-name)
         ;; Use existing tree buffer
@@ -1218,12 +1263,22 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
       (clone-indirect-buffer tree-view-buffer-name nil t)
       (switch-to-buffer tree-view-buffer-name)
 
+      ;; Default options
+      ;; ***************
+
+      (unless (boundp 'org-tree-view/levels)
+        (setq org-tree-view/levels 3))  ; how many levels of heading to show
+
       ;; Basic settings
       ;; **************
 
       (read-only-mode)
       (widen)                           ; widen if possible
       (outline-show-all)                ; make sure all headings are visible
+      (let ((current-prefix-arg         ; levels of heading to show
+             org-tree-view/levels)
+            (inhibit-message t))
+        (call-interactively #'org-shifttab))
       (outline-hide-body)               ; hide body
       (setq-local truncate-lines t)     ; ensure truncated lines
       (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
@@ -1273,7 +1328,7 @@ error, please file an issue or send me a pull request on [[https://github.com/jo
 
 **** Issues
 
-*** Tangling a specific block
+*** Tangling my configuration
 
 Because I keep my Emacs configuration in an Org document, I need a quick and
 easy way to have =org-babel= /tangle/ my configuration to =config.el=, which is loaded
@@ -1599,7 +1654,7 @@ To set the default theme on startup, I use the following code:
 :END:
 
 Another of my goals was being able to easily adjust the colors of individual
-themes. While my solution may not be "simple", it is efficient and easy to use.
+themes. While my solution may not be "simple," it is efficient and easy to use.
 
 The way I have it set up is that every time a theme is loaded, a function called
 =theme-do-all= is run:
@@ -1963,7 +2018,6 @@ with other systems, where I don't use my =wsl-browser= script.
 
 
 * Credits
-
 
 #+NAME: c:config-all
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle "config.el" :exports none

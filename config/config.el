@@ -210,18 +210,19 @@
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
          ("C-x C-b" . helm-mini))
+
   :init
   (global-set-key (kbd "C-c C-h") 'helm-command-prefix)
   (global-unset-key (kbd "C-x c"))
   (require 'helm-config)
   (helm-mode 1)
+
   :config
-  (helm-autoresize-mode 1)
-  (setq helm-mode-fuzzy-match t
-        helm-completion-in-region-fuzzy-match t ; "fuzzy" matching
-        helm-split-window-in-side-p           t ; helm inside current window
-        helm-autoresize-max-height           40
-        helm-autoresize-min-height           0))
+  ;; Eshell completion
+  (add-hook 'eshell-mode-hook
+          (lambda ()
+            (eshell-cmpl-initialize)
+            (define-key eshell-mode-map [remap eshell-pcomplete] 'helm-esh-pcomplete))))
 (use-package projectile
   :ensure helm-projectile
   :config
@@ -329,7 +330,8 @@
       (when (get-buffer-window tree-view-buffer-name)
         (with-current-buffer tree-view-buffer-name
           (outline-hide-body)     ; refresh tree view
-          (beginning-of-line))))) ; scroll window all the way to the left
+          (beginning-of-line)     ; scroll window all the way to the left
+          (scroll-right 999)))))
   (defun org-tree-view/exit (&optional from-base)
     "Kill the tree view. If calling from outside the tree view, set
     `from-base' to non-nil."
@@ -364,7 +366,7 @@
     (interactive)
     (when (s-starts-with? "<tree>" (buffer-name))
       (org-tree-view/open-heading))
-    (isearch-exit))
+    (let ((inhibit-message t)) (isearch-exit)))
   (defun org-tree-view/self-insert-command (oldfun N)
     (interactive "p")
     (if (s-starts-with? "<tree>" (buffer-name))
@@ -375,6 +377,7 @@
      30 columns, and bind RET to jump to the same position in
      the base buffer."
     (interactive)
+    (push-mark) ; in case user gets lost
     (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
       (if (get-buffer-window tree-view-buffer-name)
           ;; Use existing tree buffer
@@ -387,12 +390,22 @@
         (clone-indirect-buffer tree-view-buffer-name nil t)
         (switch-to-buffer tree-view-buffer-name)
   
+        ;; Default options
+        ;; ***************
+  
+        (unless (boundp 'org-tree-view/levels)
+          (setq org-tree-view/levels 3))  ; how many levels of heading to show
+  
         ;; Basic settings
         ;; **************
   
         (read-only-mode)
         (widen)                           ; widen if possible
         (outline-show-all)                ; make sure all headings are visible
+        (let ((current-prefix-arg         ; levels of heading to show
+               org-tree-view/levels)
+              (inhibit-message t))
+          (call-interactively #'org-shifttab))
         (outline-hide-body)               ; hide body
         (setq-local truncate-lines t)     ; ensure truncated lines
         (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
@@ -412,6 +425,7 @@
         ;; Automatically run isearch-forward on any key
         (advice-add #'org-self-insert-command :around
                     #'org-tree-view/self-insert-command)
+  
   
         ;; Press <C-return> from isearch to directly open matching heading
         (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
@@ -436,7 +450,7 @@
                 (local-set-key (kbd key) 'org-tree-view/open-heading))
               '("<mouse-1>" "RET")))))
   
-  (define-key org-mode-map (kbd "C-c C-t") #'org-tree-view-open)
+  (define-key org-mode-map (kbd "C-c C-t") #'org-tree-view/open)
   (defun org-babel-tangle-config ()
     (interactive)
   

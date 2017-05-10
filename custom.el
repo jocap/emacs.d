@@ -15,8 +15,8 @@
  '(cursor-type (quote box))
  '(custom-safe-themes
    (quote
-    ("228b21af874cf3ba1df3d6a684a63e33089aa200ad2ab65df747ffaca6b43419" "d29231b2550e0d30b7d0d7fc54a7fb2aa7f47d1b110ee625c1a56b30fea3be0f" "3cddc1775f6c26573a69315dacd5fd45a6cd04df539b6354281d316985f254f3" "74dd165fb35d6605d833cb756250a95134d3bdf8342689866308e14a8891d092" "b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
- '(debug-on-error nil)
+    ("ed4f603e56aa85f6885b86de49394eda021d38f4768671b8b27bacc06f5a5fa1" "228b21af874cf3ba1df3d6a684a63e33089aa200ad2ab65df747ffaca6b43419" "d29231b2550e0d30b7d0d7fc54a7fb2aa7f47d1b110ee625c1a56b30fea3be0f" "3cddc1775f6c26573a69315dacd5fd45a6cd04df539b6354281d316985f254f3" "74dd165fb35d6605d833cb756250a95134d3bdf8342689866308e14a8891d092" "b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
+ '(debug-on-error t)
  '(default-frame-alist (quote ((font . "Fira Mono Medium-10"))))
  '(default-input-method "russian-computer")
  '(eziam-scale-headings nil)
@@ -25,8 +25,13 @@
  '(fill-column 80)
  '(fringe-mode nil nil (fringe))
  '(global-hl-line-mode nil)
+ '(helm-autoresize-min-height 0)
+ '(helm-autoresize-mode t)
+ '(helm-completion-in-region-fuzzy-match t)
  '(helm-external-programs-associations (quote (("html" . "firefox"))))
  '(helm-mode t)
+ '(helm-mode-fuzzy-match t)
+ '(helm-split-window-in-side-p t)
  '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
  '(highlight-symbol-colors
    (--map
@@ -56,6 +61,7 @@
  '(ispell-local-dictionary-alist nil)
  '(linum-format "%4d │ ")
  '(magit-diff-use-overlays nil)
+ '(mouse-wheel-scroll-amount (quote (2 ((shift) . 5) ((control)))))
  '(next-screen-context-lines 6)
  '(nlinum-format "%4d │")
  '(nrepl-message-colors
@@ -80,12 +86,13 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (git-gutter+ buffer-move org-autolist org helm-org-rifle ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (pcomplete-extension git-gutter+ buffer-move org-autolist org helm-org-rifle ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)
  '(scroll-conservatively 10000)
  '(scroll-margin 2)
+ '(scroll-preserve-screen-position 1)
  '(sentence-end-double-space nil)
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
