@@ -356,6 +356,28 @@ An interesting function provided by /visual-regexp/ is =vr/mc-mark=. This
 function integrates with the /multiple-cursors/ package to add a cursor to
 every match to a regex search. Useful!
 
+** Alignment
+:PROPERTIES:
+:CUSTOM_ID: alignment
+:END:
+
+*** Aligning comments
+
+What follows is a function [[http://stackoverflow.com/a/20278032/305047][written by the user phils]] at StackOverflow. It is a
+language-agnostic method of aligning comments. How useful!
+
+#+NAME: basic-prefs
+#+BEGIN_SRC emacs-lisp
+(defun align-comments-in-region (beginning end)
+  "Align comments within marked region."
+  (interactive "*r")
+  (let (indent-tabs-mode align-to-tab-stop)
+    (align-regexp beginning end (concat "\\(\\s-*\\)"
+                                        (regexp-quote comment-start)))))
+
+(global-set-key (kbd "C-c M-a") #'align-comments-in-region)
+#+END_SRC
+
 ** Working with Lisp
 :PROPERTIES:
 :CUSTOM_ID: lisp
