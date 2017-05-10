@@ -2,7 +2,7 @@
 #+AUTHOR: John Ankarström
 #+LANGUAGE: en
 #+OPTIONS: H:4 num:2 ':t todo:nil
-#+PROPERTY: header-args :tangle no :results output silent
+#+PROPERTY: header-args :tangle no :results value silent
 
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
@@ -175,6 +175,7 @@ prevent that.
 (setq save-place-file (state-dir "save-place"))
 (setq recentf-save-file (state-dir "recentf"))
 (setq ido-save-directory-list-file (state-dir "ido.last"))
+(setq eshell-directory-name (state-dir "eshell"))
 (setq backup-directory-alist
       `((".*" . ,(state-dir "saves"))))
 
@@ -212,11 +213,9 @@ headline. Most of them are based on built-in functions.
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "M-<f1>") 'menu-bar-mode)
 
-(global-set-key (kbd "C-x C-p") 'other-window)
-(global-set-key (kbd "C-x C-o") (lambda (n) (interactive "p")
+(global-set-key (kbd "M-]") 'other-window)
+(global-set-key (kbd "M-[") (lambda (n) (interactive "p")
                                   (other-window (* -1 n))))
-(global-set-key (kbd "C-x P") 'mark-page)          ; defualt
-(global-set-key (kbd "C-x O") 'delete-blank-lines) ; default
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
@@ -643,6 +642,7 @@ combination with any of the arrow keys.
                 'smarter-move-beginning-of-line)
 #+END_SRC
 
+
 * Visual aids
 
 ** Folding with /origami/
@@ -817,9 +817,8 @@ run a function whenever the window is changed.
 (use-package helm
   :commands helm-command-prefix
   :bind (("M-x"     . helm-M-x)
-         ("C-c C-m" . helm-mini)
          ("C-x C-f" . helm-find-files)
-         ("C-x C-b" . helm-buffers-list))
+         ("C-x C-b" . helm-mini))
   :init
   (global-set-key (kbd "C-c C-h") 'helm-command-prefix)
   (global-unset-key (kbd "C-x c"))
@@ -956,13 +955,6 @@ functions - they are defined further down.
   :mode (("\\.org$" . org-mode))
   :ensure org-plus-contrib
   :demand
-
-  :init
-  ;; Open agenda in split window at Emacs launch
-  (add-hook 'after-init-hook (lambda ()
-                               (org-agenda-list)
-                               (other-window 1)))
-
   :config
   ;; Make ' and " work in inline code
   (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\r\n,")
@@ -977,7 +969,6 @@ functions - they are defined further down.
 
   ;; Remove keybindings that I already use
   (define-key org-mode-map (kbd "C-'") nil)
-  (define-key org-mode-map (kbd "C-c C-m") nil)
 
   ;; Enable for all Org files
   (add-hook 'org-mode-hook #'swedish-mode) ; Swedish letters
@@ -1331,11 +1322,9 @@ updates.
 ;; window-focus-out-hook, window-focus-in-hook
 
 (defun run-window-focus-out-hook (window &optional norecord)
-  (unless norecord
-    (run-hooks 'window-focus-out-hook)))
+  (run-hooks 'window-focus-out-hook))
 (defun run-window-focus-in-hook (window &optional norecord)
-  (unless norecord
-    (run-hooks 'window-focus-in-hook)))
+  (run-hooks 'window-focus-in-hook))
 
 (advice-add 'select-window :before 'run-window-focus-out-hook)
 (advice-add 'select-window :after 'run-window-focus-in-hook)
@@ -1808,12 +1797,11 @@ In Emacs, my default browser is =firefox=, so that it remains compatible
 with other systems, where I don't use my =wsl-browser= script.
 
 
-* Resulting file
+* Credits
 
-#+NAME: c:config-contents
+
+#+NAME: c:config-all
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle "config.el" :exports none
-;; TODO: convert to file using (org-babel-tangle-file)
-
 ;; First & foremost
 ;; =============================================================================
 
