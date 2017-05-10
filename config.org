@@ -809,23 +809,28 @@ focused.
   (setq-local cursor-type 'block))
 #+END_SRC
 
-The =cursor-unfocused= function is added to a couple of my custom hooks. For the
-more important =cursor-focused=, I found myself forced to use =post-command-hook=,
-even though I know it's overkill. It is surprisingly difficult to have Emacs
-run a function whenever the window is changed.
+The above functions are called from a function called =cursor-set-focus=, which is
+added to =post-command-hook=. It loops through all of the frame's windows and
+calls =cursors-focused= if the window's buffer matches the current buffer.
+Otherwise it calls =cursor-unfocused=.
 
 #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
-(add-hook 'post-command-hook 'cursor-focused)
-;; Using post-command-hook because setting the cursor type is such a simple
-;; action, and because select-window is called surprisingly often and often
-;; without the suitable `norecord' argument ...
+(defun cursor-set-focus ()
+  (cl-loop
+   for window in (window-list)
+   do (let ((current-buffer (window-buffer)))
+        (with-current-buffer (window-buffer window)
+          (if (equal (window-buffer window) current-buffer)
+              (cursor-focused)
+            (cursor-unfocused))))))
 
-(add-hook 'window-focus-out-hook  'cursor-unfocused)
-(add-hook 'before-minibuffer-hook 'cursor-unfocused)
-(add-hook 'before-helm-hook       'cursor-unfocused)
+(add-hook 'post-command-hook 'cursor-set-focus)
 #+END_SRC
 
+This is a pretty nice way of checking the active window. I am usually against
+using =post-command-hook=, because of how often it is run, but there isn't
+anything as reliable. Believe me, [[#custom-hooks][I've tried]].
 
 * Helpful tools
 
