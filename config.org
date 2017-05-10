@@ -1087,94 +1087,232 @@ split, which isn't the expected behavior.
 I haven't gotten around to debugging the function, but if you can find the
 error, please file an issue or send me a pull request on [[https://github.com/jocap/emacs.d/][GitHub]]!
 
+--------------------------------------------------------------------------------
+
+**** /org-tree-view/open-heading/
+
 #+NAME: c:org:fun
 #+BEGIN_SRC emacs-lisp
-(defun org-narrow-subtree-from-clone ()
+(defun org-tree-view/open-heading ()
   "Switch to a cloned buffer's base buffer and narrow in on the
   selected subtree."
   (interactive)
   (let ((buf (buffer-base-buffer)))
-    (unless buf
-      (error "You need to be in a cloned buffer!"))
-    (let ((pos (point))
-          (win (car (get-buffer-window-list buf))))
-      (if win
-          (select-window win)
-        (other-window 1)
-        (switch-to-buffer buf))
-      (widen) ; first widen any potential narrowing
-      (goto-char pos)
-      (org-narrow-to-subtree) ; narrow to org subtree
-      (outline-show-all)))) ; show everything
+    (if (not buf)
+        (error "You need to be in a cloned buffer!")
+      (beginning-of-line) ; scroll tree view all the way to the left
+      (let ((pos (point))
+            (win (car (get-buffer-window-list buf))))
+        (if win
+            (select-window win) ; select window (and record it)
+          (other-window 1)
+          (switch-to-buffer buf))
+        (widen) ; first widen any potential narrowing
+        (goto-char pos)
+        (org-narrow-to-subtree) ; narrow to org subtree
+        (outline-show-all))))) ; show everything
+#+END_SRC
 
-(defun org-open-tree-view ()
+**** /org-tree-view/refresh/
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/refresh ()
+  "Refresh the tree view."
+  (let ((buffer                (current-buffer))
+        (tree-view-buffer-name (org-tree-view/buffer-name)))
+    (when (get-buffer-window tree-view-buffer-name)
+      (with-current-buffer tree-view-buffer-name
+        (outline-hide-body)     ; refresh tree view
+        (beginning-of-line))))) ; scroll window all the way to the left
+#+END_SRC
+
+**** /org-tree-view/exit/
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/exit (&optional from-base)
+  "Kill the tree view. If calling from outside the tree view, set
+  `from-base' to non-nil."
+  (interactive)
+  (if from-base
+      (select-window (get-buffer-window (org-tree-view/buffer-name)) :norecord))
+
+  (kill-buffer) ; kill buffer
+  (delete-window) ; delete window
+
+  ;; Cleanup
+  (remove-hook 'after-save-hook #'org-tree-view/refresh)
+  (advice-remove #'org-self-insert-command
+                 #'org-tree-view-self-insert-command))
+#+END_SRC
+
+**** /org-tree-view/buffer-name/
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/buffer-name ()
+  "Return the the appropriate name for the current file's tree view buffer."
+  (if (buffer-base-buffer)
+      ;; If buffer is a clone (i.e., if it has a base buffer)
+      (error "Not in a base buffer!")
+    ;; If buffer is a base buffer
+    (concat "<tree>" (buffer-name))))
+#+END_SRC
+
+**** /org-tree-view/search/
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+
+(defun org-tree-view/search (N)
+  (interactive "p")
+  ;; Scroll to top of window
+  (goto-char (point-min))
+  ;; Run isearch-forward with typed letter as search string
+  (let* ((char (string-to-char (this-command-keys)))
+         (unread-command-events (append unread-command-events `(,char))))
+    (isearch-forward)))
+#+END_SRC
+
+**** /org-tree-view/isearch-return/
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/isearch-return ()
+  (interactive)
+  (when (s-starts-with? "<tree>" (buffer-name))
+    (org-tree-view/open-heading))
+  (isearch-exit))
+#+END_SRC
+
+**** /org-tree-view/self-insert-command/
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/self-insert-command (oldfun N)
+  (interactive "p")
+  (if (s-starts-with? "<tree>" (buffer-name))
+      (call-interactively #'org-tree-view/search)
+    (call-interactively oldfun)))
+#+END_SRC
+
+**** /org-tree-view/open/
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/open ()
   "Open a clone of the current buffer to the left, resize it to
    30 columns, and bind RET to jump to the same position in
    the base buffer."
   (interactive)
-  (let ((tree-view-buffer-name (org-get-tree-view-buffer-name)))
+  (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
     (if (get-buffer-window tree-view-buffer-name)
         ;; Use existing tree buffer
         (select-window (get-buffer-window tree-view-buffer-name))
+
       ;; Make new tree buffer
-      (split-window-right 30) ; create tree buffer
+      ;; ********************
+
+      (split-window-right 30)
       (clone-indirect-buffer tree-view-buffer-name nil t)
       (switch-to-buffer tree-view-buffer-name)
 
-      (read-only-mode)
-      (widen)                       ; widen if possible
-      (outline-show-all)            ; make sure all headings are visible
-      (outline-hide-body)           ; hide body
-      (setq-local truncate-lines t) ; ensure truncated lines
-      (setq-local scroll-margin 0)  ; disable scroll-margin for buffer
-      (org-goto-tree-view-top)      ; go to top of tree view
+      ;; Basic settings
+      ;; **************
 
-      ;; Do this twice in case the point is in a hidden line
-      (dotimes (_ 2 (forward-line 0)))
+      (read-only-mode)
+      (widen)                           ; widen if possible
+      (outline-show-all)                ; make sure all headings are visible
+      (outline-hide-body)               ; hide body
+      (setq-local truncate-lines t)     ; ensure truncated lines
+      (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
+      (setq-local search-invisible nil) ; search only visible text
+
+      ;; Go to top of tree view
+      (goto-char (point-min))       ; go to beginning of buffer
+      (org-next-visible-heading 1)  ; go to first heading
+      (recenter 0)                  ; put top of window at point
+
+      ;; Hide everything above tree view
+      (narrow-to-region (window-start) (point-max))
 
       ;; Refresh tree view on save
-      (add-hook 'after-save-hook #'org-update-tree-view)
+      (add-hook 'after-save-hook #'org-tree-view/refresh)
 
-      ;; Map keys
+      ;; Automatically run isearch-forward on any key
+      (advice-add #'org-self-insert-command :around
+                  #'org-tree-view/self-insert-command)
+
+
+      ;; Press <C-return> from isearch to directly open matching heading
+      (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+
+      ;; Keybindings
+      ;; ***********
+
+      ;; - Use org-mode-map as base
       (use-local-map (copy-keymap org-mode-map))
-      (local-set-key (kbd "q") ; quit tree view
-                     (lambda (&optional &rest args)
+
+      ;; - Quit tree view
+      (local-set-key (kbd "Q") #'org-tree-view/exit)
+
+      ;; - Switch back to base buffer
+      (local-set-key (kbd "C-c C-t")
+                     (lambda ()
                        (interactive)
-                       (kill-buffer (current-buffer)) ; kill buffer
-                       (delete-window) ; delete window
-                       (remove-hook 'after-save-hook #'org-update-tree-view)))
-      (local-set-key (kbd "M-<") #'org-goto-tree-view-top)
-      (mapc (lambda (key) ; open heading in base buffer
-              (local-set-key (kbd key) 'org-narrow-subtree-from-clone))
+                       (select-window (get-buffer-window (buffer-base-buffer)))))
+
+      ;; - Open heading in base buffer
+      (mapc (lambda (key)
+              (local-set-key (kbd key) 'org-tree-view/open-heading))
             '("<mouse-1>" "RET")))))
 
-(defun org-update-tree-view ()
-  "Refresh the tree view."
-  (let ((buffer                (current-buffer))
-        (tree-view-buffer-name (org-get-tree-view-buffer-name)))
-    (when (get-buffer-window tree-view-buffer-name)
-      (select-window (get-buffer-window tree-view-buffer-name))
-      (outline-hide-body) ; refresh tree view
-      (beginning-of-line) ; scroll window all the way to the left
-      (select-window (get-buffer-window buffer)))))
+(define-key org-mode-map (kbd "C-c C-t") #'org-tree-view/open)
+#+END_SRC
 
-(defun org-get-tree-view-buffer-name ()
-  "Return the the appropriate name for the current file's tree view buffer."
-  (if (buffer-base-buffer)
-      ;; If buffer is a base buffer
-      (error "Not in a base buffer!")
-    ;; If buffer is a clone
-    (concat "<tree>" (buffer-name))))
+**** Issues
 
-(defun org-goto-tree-view-top ()
-  "Go to the first heading in the tree view."
+*** Tangling a specific block
+
+Because I keep my Emacs configuration in an Org document, I need a quick and
+easy way to have =org-babel= /tangle/ my configuration to =config.el=, which is loaded
+by Emacs at startup.
+
+This Org document is full of code blocks that shouldn't be tangled. It's also
+full of source blocks that /should/ be tangled, but not whenever I want to update
+my configuration.
+
+This is a problem, because there is no built-in function to tangle a source
+block by name, for example. So I wrote the following function to automatically
+do it for me.
+
+Obviously, it's highly personalized and depends on there only being one code
+block with the name =c:config-all=, so if you copy this function, you should
+probably edit that.
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(defun org-babel-tangle-config ()
   (interactive)
-  (push-mark)                   ; add mark
-  (goto-char (point-min))       ; go to beginning of buffer
-  (org-next-visible-heading 1)  ; go to first heading
-  (recenter 0))                 ; put top of window at point
 
-(define-key org-mode-map (kbd "C-c C-t") #'org-open-tree-view)
+  (clone-indirect-buffer "tangle-config" nil :norecord) ; clone buffer
+  (switch-to-buffer "tangle-config")            ; switch to buffer
+  (widen)                                       ; widen if necessary
+  (setq-local search-invisible t)               ; search invisible text
+  (when (search-forward                         ; find c:config-all
+         (concat "#+NAME: "
+                 "c:config-all"))
+    (forward-line 2)                            ; go down to source block
+
+    ;; Tangle the block at point
+    (let ((current-prefix-arg '(4)))
+      (call-interactively 'org-babel-tangle)))
+
+  ;; Return to base buffer
+  (kill-buffer))
+
+(define-key org-mode-map (kbd "C-c C-v M-t") #'org-babel-tangle-config)
 #+END_SRC
 
 *** Adjusting /org-beginning-of-line/
