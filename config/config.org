@@ -224,6 +224,20 @@ headline. Most of them are based on built-in functions.
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 #+END_SRC
 
+Apart from defining new ones, there are some keybindings that I remove. One
+problematic keybinding is ~C-z~. It suspends Emacs - useful in terminals, annoying
+in the graphical version of Emacs. The following code disables that keybinding
+for GUI Emacs, but keeps it for =emacs -nw= and =emacsclient -t=.
+
+#+NAME: c:keybindings
+#+BEGIN_SRC emacs-lisp
+(defun suspend-frame-unless-gui (oldfun &rest r)
+  (unless (display-graphic-p) (apply oldfun r)))
+
+(advice-add #'suspend-frame :around #'suspend-frame-unless-gui)
+#+END_SRC
+
+It's not strictly a keybinding, but I still felt it belonged in this section.
 ** Session management
 :PROPERTIES:
 :CUSTOM_ID: session-management
