@@ -7,6 +7,7 @@
    ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
  '(browse-url-browser-function (quote browse-url-firefox))
  '(column-number-mode t)
+ '(comment-column 0)
  '(compilation-message-face (quote default))
  '(cua-global-mark-cursor-color "#2aa198")
  '(cua-normal-cursor-color "#839496")

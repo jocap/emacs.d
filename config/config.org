@@ -434,6 +434,9 @@ as I have Paredit installed, =use-package= binds ~M-R~ to the original function 
 
   (define-key paredit-mode-map (kbd "M-q") nil)
 
+  ;; Disable comment column
+  (add-hook 'paredit-mode-hook (lambda () (setq-local comment-column 0)))
+
   :bind (("M-R" . move-to-window-line-top-bottom)
          ("M-^" . paredit-delete-indentation)
          ("M-Q" . paredit-reindent-defun)))
@@ -1172,26 +1175,6 @@ options that can be set.
         (scroll-right 999)))))
 #+END_SRC
 
-***** /org-tree-view/exit/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/exit (&optional from-base)
-  "Kill the tree view. If calling from outside the tree view, set
-  `from-base' to non-nil."
-  (interactive)
-
-  (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
-        (tree-view-window (get-buffer-window tree-view-buffer-name)))
-    (kill-buffer tree-view-buffer-name) ; kill buffer
-    (delete-window tree-view-window)) ; delete window
-
-  ;; Cleanup
-  (remove-hook 'after-save-hook #'org-tree-view/refresh)
-  (advice-remove #'org-self-insert-command
-                 #'org-tree-view-self-insert-command))
-#+END_SRC
-
 ***** /org-tree-view/buffer-name/
 
 #+NAME: c:org-tree-view
@@ -1237,6 +1220,26 @@ options that can be set.
   (if (s-starts-with? "<tree>" (buffer-name))
       (call-interactively #'org-tree-view/search)
     (call-interactively oldfun)))
+#+END_SRC
+
+***** /org-tree-view/exit/
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/exit (&optional from-base)
+  "Kill the tree view. If calling from outside the tree view, set
+  `from-base' to non-nil."
+  (interactive)
+
+  (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
+        (tree-view-window (get-buffer-window tree-view-buffer-name)))
+    (kill-buffer tree-view-buffer-name) ; kill buffer
+    (delete-window tree-view-window)) ; delete window
+
+  ;; Cleanup
+  (remove-hook 'after-save-hook #'org-tree-view/refresh)
+  (advice-remove #'org-self-insert-command
+                 #'org-tree-view-self-insert-command))
 #+END_SRC
 
 ***** /org-tree-view/open/
