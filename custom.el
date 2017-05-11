@@ -92,7 +92,7 @@
  '(scroll-bar-mode nil)
  '(scroll-conservatively 10000)
  '(scroll-margin 2)
- '(scroll-preserve-screen-position 1)
+ '(scroll-preserve-screen-position nil)
  '(sentence-end-double-space nil)
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))

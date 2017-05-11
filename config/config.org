@@ -7,6 +7,9 @@
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
 #+HTML_HEAD: <link rel="stylesheet" href="file:///C:/Users/JohnAJ/AppData/Local/lxss/home/john/.config/emacs/config/config.css" type="text/css" />
+
+# Things from old config yet to be added:
+# - tty-shell-command functions (incl. dynamic cursor shape for terminal)
   
 * Introduction
 
@@ -366,7 +369,7 @@ every match to a regex search. Useful!
 What follows is a function [[http://stackoverflow.com/a/20278032/305047][written by the user phils]] at StackOverflow. It is a
 language-agnostic method of aligning comments. How useful!
 
-#+NAME: basic-prefs
+#+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
 (defun align-comments-in-region (beginning end)
   "Align comments within marked region."
@@ -681,7 +684,7 @@ enabled the visual bell myself, and I do like it. Just not when I'm scrolling.
 
 The following code surpresses any errors thrown by =mwheel-scroll=.
 
-#+NAME: basic-prefs
+#+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
 (defun silent-mwheel-scroll (oldfun &rest r)
   (interactive (list last-input-event))
@@ -1208,14 +1211,13 @@ options that can be set.
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-
 (defun org-tree-view/search (N)
   (interactive "p")
   ;; Scroll to top of window
   (goto-char (point-min))
   ;; Run isearch-forward with typed letter as search string
   (let* ((char (string-to-char (this-command-keys)))
-         (unread-command-events (append unread-command-events `(,char))))
+         (unread-command-events (append unread-command-events (list char))))
     (isearch-forward)))
 #+END_SRC
 

@@ -309,24 +309,22 @@
     "Switch to a cloned buffer's base buffer and narrow in on the
     selected subtree."
     (interactive)
-    (let ((buf (buffer-base-buffer)))
-      (if (not buf)
-          (error "You need to be in a cloned buffer!")
-        (beginning-of-line) ; scroll tree view all the way to the left
-        (let ((pos (point))
-              (win (car (get-buffer-window-list buf))))
-          (if win
-              (select-window win) ; select window (and record it)
-            (other-window 1)
-            (switch-to-buffer buf))
-          (widen) ; first widen any potential narrowing
-          (goto-char pos)
-          (org-narrow-to-subtree) ; narrow to org subtree
-          (outline-show-all))))) ; show everything
+    (if (not (buffer-base-buffer))
+        (error "You need to be in a cloned buffer!")
+      (beginning-of-line) ; scroll tree view all the way to the left
+      (let ((heading-pos (point))
+            (base-window (get-buffer-window (buffer-base-buffer))))
+        (if base-window
+            (select-window base-window)
+          (other-window 1)
+          (switch-to-buffer (buffer-base-buffer)))
+        (widen) ; first widen any potential narrowing
+        (goto-char heading-pos)
+        (org-narrow-to-subtree) ; narrow to org subtree
+        (outline-show-all)))) ; show everything
   (defun org-tree-view/refresh ()
     "Refresh the tree view."
-    (let ((buffer                (current-buffer))
-          (tree-view-buffer-name (org-tree-view/buffer-name)))
+    (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
       (when (get-buffer-window tree-view-buffer-name)
         (with-current-buffer tree-view-buffer-name
           (outline-hide-body)     ; refresh tree view
@@ -336,11 +334,11 @@
     "Kill the tree view. If calling from outside the tree view, set
     `from-base' to non-nil."
     (interactive)
-    (if from-base
-        (select-window (get-buffer-window (org-tree-view/buffer-name)) :norecord))
   
-    (kill-buffer) ; kill buffer
-    (delete-window) ; delete window
+    (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
+          (tree-view-window (get-buffer-window tree-view-buffer-name)))
+      (kill-buffer tree-view-buffer-name) ; kill buffer
+      (delete-window tree-view-window)) ; delete window
   
     ;; Cleanup
     (remove-hook 'after-save-hook #'org-tree-view/refresh)
@@ -348,19 +346,16 @@
                    #'org-tree-view-self-insert-command))
   (defun org-tree-view/buffer-name ()
     "Return the the appropriate name for the current file's tree view buffer."
-    (if (buffer-base-buffer)
-        ;; If buffer is a clone (i.e., if it has a base buffer)
-        (error "Not in a base buffer!")
-      ;; If buffer is a base buffer
+    (if (s-starts-with? "<tree>" (buffer-name))
+        (buffer-name)
       (concat "<tree>" (buffer-name))))
-  
   (defun org-tree-view/search (N)
     (interactive "p")
     ;; Scroll to top of window
     (goto-char (point-min))
     ;; Run isearch-forward with typed letter as search string
     (let* ((char (string-to-char (this-command-keys)))
-           (unread-command-events (append unread-command-events `(,char))))
+           (unread-command-events (append unread-command-events (list char))))
       (isearch-forward)))
   (defun org-tree-view/isearch-return ()
     (interactive)
@@ -589,6 +584,14 @@
 ;; Shebang mode detection
 (add-to-list 'interpreter-mode-alist
              '("python3" . python-mode))
+(defun align-comments-in-region (beginning end)
+  "Align comments within marked region."
+  (interactive "*r")
+  (let (indent-tabs-mode align-to-tab-stop)
+    (align-regexp beginning end (concat "\\(\\s-*\\)"
+                                        (regexp-quote comment-start)))))
+
+(global-set-key (kbd "C-c M-a") #'align-comments-in-region)
 (defun smart-open-line () ; (courtesy of Emacs Redux)
   "Insert an empty line after the current line.
   Position the cursor at beginning, according to current mode."
@@ -639,6 +642,12 @@
         (move-to-column 0))))) ; based on function from Emacs Redux
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
+(defun silent-mwheel-scroll (oldfun &rest r)
+  (interactive (list last-input-event))
+  (ignore-errors
+    (call-interactively oldfun)))
+
+(advice-add #'mwheel-scroll :around #'silent-mwheel-scroll)
 (add-hook 'prog-mode-hook (lambda ()
                             (setq-local show-trailing-whitespace t)))
 (setq default-cursor-type cursor-type)
