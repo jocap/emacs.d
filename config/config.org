@@ -1125,6 +1125,10 @@ That's what the =org-tree-view= functions are for. They started out as carbon
 copies of two answers on the Emacs StackExchange, by [[https://emacs.stackexchange.com/a/9532][Dan]] and [[https://emacs.stackexchange.com/a/14987][blujay]]
 respectively, but they have developed into something quite solid.
 
+#+CAPTION: /org-tree-view/ in combination with the theme /leuven/
+#+NAME: fig:org-tree-view
+[[./resources/org-tree-view.png]]
+
 It works by opening a clone of the current Org buffer in a new window to the
 left. The cloned buffer, called the /tree view/, has the following properties:
 
