@@ -1130,6 +1130,9 @@ With /org-tree-view/ looking more and more like a package, there are of course
 options that can be set.
 
 - org-tree-view/levels :: how many levels of heading to show.
+- org-tree-view/width :: the width of the tree view.
+- org-tree-view/split-right :: create the tree view window on the right side
+     instead of the default left.
 
 **** Source
 
@@ -1148,7 +1151,9 @@ options that can be set.
   (interactive)
   (if (not (buffer-base-buffer))
       (error "You need to be in a cloned buffer!")
-    (beginning-of-line) ; scroll tree view all the way to the left
+    ;; Scroll tree view all the way to the left
+    (org-end-of-line)
+    (beginning-of-line)
     (let ((heading-pos (point))
           (base-window (get-buffer-window (buffer-base-buffer))))
       (if base-window
@@ -1252,6 +1257,16 @@ options that can be set.
    the base buffer."
   (interactive)
   (push-mark) ; in case user gets lost
+
+  ;; Default options
+
+  (unless (boundp 'org-tree-view/levels)
+    (setq org-tree-view/levels 3))
+  (unless (boundp 'org-tree-view/width)
+    (setq org-tree-view/width 30))
+  (unless (boundp 'org-tree-view/right-side)
+    (setq org-tree-view/right-side nil)) ; default: left side
+
   (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
     (if (get-buffer-window tree-view-buffer-name)
         ;; Use existing tree buffer
@@ -1260,18 +1275,15 @@ options that can be set.
       ;; Make new tree buffer
       ;; ********************
 
-      (split-window-right 30)
-      (clone-indirect-buffer tree-view-buffer-name nil t)
+      (if (not org-tree-view/right-side)
+          (split-window-right org-tree-view/width) ; left
+        (split-window-right (- (frame-width) org-tree-view/width)) ; right
+        (other-window 1))
+      (clone-indirect-buffer tree-view-buffer-name nil :norecord)
       (switch-to-buffer tree-view-buffer-name)
 
-      ;; Default options
-      ;; ***************
-
-      (unless (boundp 'org-tree-view/levels)
-        (setq org-tree-view/levels 3))  ; how many levels of heading to show
-
-      ;; Basic settings
-      ;; **************
+      ;; Basic setup
+      ;; ***********
 
       (read-only-mode)
       (widen)                           ; widen if possible
@@ -1285,10 +1297,30 @@ options that can be set.
       (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
       (setq-local search-invisible nil) ; search only visible text
 
+      ;; Hide fringe truncation indicators
+      (set-window-fringes nil 8 1) ; don't set to 0 unless you want to see $'s
+
+      ;; Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815
+      (let ((display-table
+             (if buffer-display-table
+                 buffer-display-table
+               (make-display-table))))
+        (unless buffer-display-table
+          (setq buffer-display-table display-table))
+        (set-display-table-slot
+         display-table 4
+         (vconcat (mapcar
+                   (lambda (c)
+                     (make-glyph-code c 'font-lock-keyword-face))
+                   (apply #'concat (make-list org-tree-view/width " "))))))
+      ;; The above code replaces the ellipsis with a string of spaces as long as
+      ;; org-tree-view/width. If Org headings are themed with a background, this
+      ;; creates a nice, unified look.
+
       ;; Go to top of tree view
-      (goto-char (point-min))       ; go to beginning of buffer
-      (org-next-visible-heading 1)  ; go to first heading
-      (recenter 0)                  ; put top of window at point
+      (goto-char (point-min))      ; go to beginning of buffer
+      (org-next-visible-heading 1) ; go to first heading
+      (recenter 0)                 ; put top of window at point
 
       ;; Hide everything above tree view
       (narrow-to-region (window-start) (point-max))

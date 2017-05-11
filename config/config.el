@@ -93,6 +93,9 @@
 
   (define-key paredit-mode-map (kbd "M-q") nil)
 
+  ;; Disable comment column
+  (add-hook 'paredit-mode-hook (lambda () (setq-local comment-column 0)))
+
   :bind (("M-R" . move-to-window-line-top-bottom)
          ("M-^" . paredit-delete-indentation)
          ("M-Q" . paredit-reindent-defun)))
@@ -311,7 +314,9 @@
     (interactive)
     (if (not (buffer-base-buffer))
         (error "You need to be in a cloned buffer!")
-      (beginning-of-line) ; scroll tree view all the way to the left
+      ;; Scroll tree view all the way to the left
+      (org-end-of-line)
+      (beginning-of-line)
       (let ((heading-pos (point))
             (base-window (get-buffer-window (buffer-base-buffer))))
         (if base-window
@@ -330,20 +335,6 @@
           (outline-hide-body)     ; refresh tree view
           (beginning-of-line)     ; scroll window all the way to the left
           (scroll-right 999)))))
-  (defun org-tree-view/exit (&optional from-base)
-    "Kill the tree view. If calling from outside the tree view, set
-    `from-base' to non-nil."
-    (interactive)
-  
-    (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
-          (tree-view-window (get-buffer-window tree-view-buffer-name)))
-      (kill-buffer tree-view-buffer-name) ; kill buffer
-      (delete-window tree-view-window)) ; delete window
-  
-    ;; Cleanup
-    (remove-hook 'after-save-hook #'org-tree-view/refresh)
-    (advice-remove #'org-self-insert-command
-                   #'org-tree-view-self-insert-command))
   (defun org-tree-view/buffer-name ()
     "Return the the appropriate name for the current file's tree view buffer."
     (if (s-starts-with? "<tree>" (buffer-name))
@@ -367,12 +358,36 @@
     (if (s-starts-with? "<tree>" (buffer-name))
         (call-interactively #'org-tree-view/search)
       (call-interactively oldfun)))
+  (defun org-tree-view/exit (&optional from-base)
+    "Kill the tree view. If calling from outside the tree view, set
+    `from-base' to non-nil."
+    (interactive)
+  
+    (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
+          (tree-view-window (get-buffer-window tree-view-buffer-name)))
+      (kill-buffer tree-view-buffer-name) ; kill buffer
+      (delete-window tree-view-window)) ; delete window
+  
+    ;; Cleanup
+    (remove-hook 'after-save-hook #'org-tree-view/refresh)
+    (advice-remove #'org-self-insert-command
+                   #'org-tree-view-self-insert-command))
   (defun org-tree-view/open ()
     "Open a clone of the current buffer to the left, resize it to
      30 columns, and bind RET to jump to the same position in
      the base buffer."
     (interactive)
     (push-mark) ; in case user gets lost
+  
+    ;; Default options
+  
+    (unless (boundp 'org-tree-view/levels)
+      (setq org-tree-view/levels 3))
+    (unless (boundp 'org-tree-view/width)
+      (setq org-tree-view/width 30))
+    (unless (boundp 'org-tree-view/right-side)
+      (setq org-tree-view/right-side nil)) ; default: left side
+  
     (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
       (if (get-buffer-window tree-view-buffer-name)
           ;; Use existing tree buffer
@@ -381,18 +396,15 @@
         ;; Make new tree buffer
         ;; ********************
   
-        (split-window-right 30)
-        (clone-indirect-buffer tree-view-buffer-name nil t)
+        (if (not org-tree-view/right-side)
+            (split-window-right org-tree-view/width) ; left
+          (split-window-right (- (frame-width) org-tree-view/width)) ; right
+          (other-window 1))
+        (clone-indirect-buffer tree-view-buffer-name nil :norecord)
         (switch-to-buffer tree-view-buffer-name)
   
-        ;; Default options
-        ;; ***************
-  
-        (unless (boundp 'org-tree-view/levels)
-          (setq org-tree-view/levels 3))  ; how many levels of heading to show
-  
-        ;; Basic settings
-        ;; **************
+        ;; Basic setup
+        ;; ***********
   
         (read-only-mode)
         (widen)                           ; widen if possible
@@ -406,10 +418,30 @@
         (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
         (setq-local search-invisible nil) ; search only visible text
   
+        ;; Hide fringe truncation indicators
+        (set-window-fringes nil 8 1) ; don't set to 0 unless you want to see $'s
+  
+        ;; Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815
+        (let ((display-table
+               (if buffer-display-table
+                   buffer-display-table
+                 (make-display-table))))
+          (unless buffer-display-table
+            (setq buffer-display-table display-table))
+          (set-display-table-slot
+           display-table 4
+           (vconcat (mapcar
+                     (lambda (c)
+                       (make-glyph-code c 'font-lock-keyword-face))
+                     (apply #'concat (make-list org-tree-view/width " "))))))
+        ;; The above code replaces the ellipsis with a string of spaces as long as
+        ;; org-tree-view/width. If Org headings are themed with a background, this
+        ;; creates a nice, unified look.
+  
         ;; Go to top of tree view
-        (goto-char (point-min))       ; go to beginning of buffer
-        (org-next-visible-heading 1)  ; go to first heading
-        (recenter 0)                  ; put top of window at point
+        (goto-char (point-min))      ; go to beginning of buffer
+        (org-next-visible-heading 1) ; go to first heading
+        (recenter 0)                 ; put top of window at point
   
         ;; Hide everything above tree view
         (narrow-to-region (window-start) (point-max))
@@ -730,6 +762,10 @@
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
+(defun suspend-frame-unless-gui (oldfun &rest r)
+  (unless (display-graphic-p) (apply oldfun r)))
+
+(advice-add #'suspend-frame :around #'suspend-frame-unless-gui)
 
 ;; Themes
 ;; =============================================================================

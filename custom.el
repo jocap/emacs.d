@@ -73,6 +73,7 @@
     ("/mnt/c/Users/JohnAJ/Dropbox/org/index.org" "/mnt/c/Users/JohnAJ/Dropbox/org/life/services.org")))
  '(org-babel-load-languages (quote ((emacs-lisp . t) (shell . t))))
  '(org-babel-no-eval-on-ctrl-c-ctrl-c t)
+ '(org-bullets-bullet-list (quote ("◉" "○" "⚫" "◇" "►")))
  '(org-confirm-babel-evaluate nil)
  '(org-cycle-separator-lines 2)
  '(org-directory "~/dropbox/org")
