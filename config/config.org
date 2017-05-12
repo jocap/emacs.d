@@ -1125,7 +1125,6 @@ respectively, but they have developed into something quite solid.
 It works by opening a clone of the current Org buffer in a new window to the
 left. The cloned buffer, called the /tree view/, has the following properties:
 
-- It is readonly
 - It displays nothing but headings
 - On ~<return>~ or ~<mouse-1>~, the heading at point is opened in the /base buffer/ and
   the base buffer is narrowed to the subtree of the heading
@@ -1160,11 +1159,9 @@ options that can be set.
   "Switch to a cloned buffer's base buffer and narrow in on the
   selected subtree."
   (interactive)
+  (org-tree-view/beginning-of-line)
   (if (not (buffer-base-buffer))
       (error "You need to be in a cloned buffer!")
-    ;; Scroll tree view all the way to the left
-    (org-end-of-line)
-    (beginning-of-line)
     (let ((heading-pos (point))
           (base-window (get-buffer-window (buffer-base-buffer))))
       (if base-window
@@ -1181,13 +1178,18 @@ options that can be set.
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-(defun org-tree-view/refresh ()
+(defun org-tree-view/refresh (&optional &rest r)
   "Refresh the tree view."
   (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
     (when (get-buffer-window tree-view-buffer-name)
       (with-current-buffer tree-view-buffer-name
-        (outline-hide-body)     ; refresh tree view
-        (beginning-of-line)     ; scroll window all the way to the left
+        (outline-show-all)        ; make sure all headings are visible
+        (let ((current-prefix-arg ; levels of heading to show
+               org-tree-view/levels)
+              (inhibit-message t))
+          (call-interactively #'org-shifttab))
+        (outline-hide-body) ; hide body
+        (org-tree-view/beginning-of-line)
         (scroll-right 999)))))
 #+END_SRC
 
@@ -1200,6 +1202,16 @@ options that can be set.
   (if (s-starts-with? "<tree>" (buffer-name))
       (buffer-name)
     (concat "<tree>" (buffer-name))))
+#+END_SRC
+
+***** /org-tree-view/beginning-of-line/
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/beginning-of-line (&optional &rest r)
+  "Go to the beginning of the current heading and be smart about it."
+  (org-end-of-line)
+  (org-beginning-of-line))
 #+END_SRC
 
 ***** /org-tree-view/search/
@@ -1242,9 +1254,8 @@ options that can be set.
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-(defun org-tree-view/exit (&optional from-base)
-  "Kill the tree view. If calling from outside the tree view, set
-  `from-base' to non-nil."
+(defun org-tree-view/exit ()
+  "Kill the tree view."
   (interactive)
 
   (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
@@ -1255,7 +1266,9 @@ options that can be set.
   ;; Cleanup
   (remove-hook 'after-save-hook #'org-tree-view/refresh)
   (advice-remove #'org-self-insert-command
-                 #'org-tree-view-self-insert-command))
+                 #'org-tree-view-self-insert-command)
+  (advice-remove #'org-move-subtree-up #'org-tree-view/refresh)
+  (advice-remove #'org-move-subtree-down #'org-tree-view/refresh))
 #+END_SRC
 
 ***** /org-tree-view/open/
@@ -1264,8 +1277,8 @@ options that can be set.
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/open ()
   "Open a clone of the current buffer to the left, resize it to
-   30 columns, and bind RET to jump to the same position in
-   the base buffer."
+   30 columns, and bind RET to jump to the same position in the
+   base buffer."
   (interactive)
   (push-mark) ; in case user gets lost
 
@@ -1296,14 +1309,8 @@ options that can be set.
       ;; Basic setup
       ;; ***********
 
-      (read-only-mode)
       (widen)                           ; widen if possible
-      (outline-show-all)                ; make sure all headings are visible
-      (let ((current-prefix-arg         ; levels of heading to show
-             org-tree-view/levels)
-            (inhibit-message t))
-        (call-interactively #'org-shifttab))
-      (outline-hide-body)               ; hide body
+      (org-tree-view/refresh)           ; show only headings
       (setq-local truncate-lines t)     ; ensure truncated lines
       (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
       (setq-local search-invisible nil) ; search only visible text
@@ -1336,6 +1343,9 @@ options that can be set.
       ;; Hide everything above tree view
       (narrow-to-region (window-start) (point-max))
 
+      ;; Go to smart beginning of line, if enabled
+      (org-tree-view/beginning-of-line)
+
       ;; Refresh tree view on save
       (add-hook 'after-save-hook #'org-tree-view/refresh)
 
@@ -1343,26 +1353,41 @@ options that can be set.
       (advice-add #'org-self-insert-command :around
                   #'org-tree-view/self-insert-command)
 
+      ;; Make sure to be at the beginning of line before moving subtrees
+      (advice-add #'org-move-subtree-up   :before #'org-tree-view/beginning-of-line)
+      (advice-add #'org-move-subtree-down :before #'org-tree-view/beginning-of-line)
 
-      ;; Press <C-return> from isearch to directly open matching heading
-      (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+      ;; Automatically refresh tree view after moving subtrees
+      (advice-add #'org-move-subtree-up   :after #'org-tree-view/refresh)
+      (advice-add #'org-move-subtree-down :after #'org-tree-view/refresh)
+
+      ;; Go to smart beginning of line after jumping between headings
+      (advice-add #'org-forward-heading-same-level :after #'org-tree-view/beginning-of-line)
+      (advice-add #'org-backward-heading-same-level :after #'org-tree-view/beginning-of-line)
 
       ;; Keybindings
       ;; ***********
 
-      ;; - Use org-mode-map as base
+      ;; Use org-mode-map as base
       (use-local-map (copy-keymap org-mode-map))
 
-      ;; - Quit tree view
+      ;; Press <C-return> from isearch to directly open matching heading
+      (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+
+      ;; Browse headings more easily
+      (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
+      (local-set-key (kbd "C-M-p") #'org-backward-heading-same-level)
+
+      ;; Quit tree view
       (local-set-key (kbd "Q") #'org-tree-view/exit)
 
-      ;; - Switch back to base buffer
+      ;; Switch back to base buffer
       (local-set-key (kbd "C-c C-t")
                      (lambda ()
                        (interactive)
                        (select-window (get-buffer-window (buffer-base-buffer)))))
 
-      ;; - Open heading in base buffer
+      ;; Open heading in base buffer
       (mapc (lambda (key)
               (local-set-key (kbd key) 'org-tree-view/open-heading))
             '("<mouse-1>" "RET")))))

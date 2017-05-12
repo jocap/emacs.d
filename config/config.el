@@ -91,17 +91,15 @@
           (unless (s-blank-str? comt) (insert " "))
           (insert comt)))))
 
-  (define-key paredit-mode-map (kbd "M-q") nil)
-
   ;; Disable comment column
   (add-hook 'paredit-mode-hook (lambda () (setq-local comment-column 0)))
 
+  ;; Disable keybindings already used
+  (define-key paredit-mode-map (kbd "M-q") nil)
+  
   :bind (("M-R" . move-to-window-line-top-bottom)
          ("M-^" . paredit-delete-indentation)
          ("M-Q" . paredit-reindent-defun)))
-(use-package paredit-everywhere
-  :ensure paredit
-  :config (add-hook 'prog-mode-hook 'paredit-everywhere-mode))
 (use-package expand-region
   :bind (("C-' r"  . er/expand-region)
          ("C-' w"  . er/mark-word)
@@ -312,11 +310,9 @@
     "Switch to a cloned buffer's base buffer and narrow in on the
     selected subtree."
     (interactive)
+    (org-tree-view/beginning-of-line)
     (if (not (buffer-base-buffer))
         (error "You need to be in a cloned buffer!")
-      ;; Scroll tree view all the way to the left
-      (org-end-of-line)
-      (beginning-of-line)
       (let ((heading-pos (point))
             (base-window (get-buffer-window (buffer-base-buffer))))
         (if base-window
@@ -327,19 +323,28 @@
         (goto-char heading-pos)
         (org-narrow-to-subtree) ; narrow to org subtree
         (outline-show-all)))) ; show everything
-  (defun org-tree-view/refresh ()
+  (defun org-tree-view/refresh (&optional &rest r)
     "Refresh the tree view."
     (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
       (when (get-buffer-window tree-view-buffer-name)
         (with-current-buffer tree-view-buffer-name
-          (outline-hide-body)     ; refresh tree view
-          (beginning-of-line)     ; scroll window all the way to the left
+          (outline-show-all)        ; make sure all headings are visible
+          (let ((current-prefix-arg ; levels of heading to show
+                 org-tree-view/levels)
+                (inhibit-message t))
+            (call-interactively #'org-shifttab))
+          (outline-hide-body) ; hide body
+          (org-tree-view/beginning-of-line)
           (scroll-right 999)))))
   (defun org-tree-view/buffer-name ()
     "Return the the appropriate name for the current file's tree view buffer."
     (if (s-starts-with? "<tree>" (buffer-name))
         (buffer-name)
       (concat "<tree>" (buffer-name))))
+  (defun org-tree-view/beginning-of-line (&optional &rest r)
+    "Go to the beginning of the current heading and be smart about it."
+    (org-end-of-line)
+    (org-beginning-of-line))
   (defun org-tree-view/search (N)
     (interactive "p")
     ;; Scroll to top of window
@@ -358,9 +363,8 @@
     (if (s-starts-with? "<tree>" (buffer-name))
         (call-interactively #'org-tree-view/search)
       (call-interactively oldfun)))
-  (defun org-tree-view/exit (&optional from-base)
-    "Kill the tree view. If calling from outside the tree view, set
-    `from-base' to non-nil."
+  (defun org-tree-view/exit ()
+    "Kill the tree view."
     (interactive)
   
     (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
@@ -371,11 +375,13 @@
     ;; Cleanup
     (remove-hook 'after-save-hook #'org-tree-view/refresh)
     (advice-remove #'org-self-insert-command
-                   #'org-tree-view-self-insert-command))
+                   #'org-tree-view-self-insert-command)
+    (advice-remove #'org-move-subtree-up #'org-tree-view/refresh)
+    (advice-remove #'org-move-subtree-down #'org-tree-view/refresh))
   (defun org-tree-view/open ()
     "Open a clone of the current buffer to the left, resize it to
-     30 columns, and bind RET to jump to the same position in
-     the base buffer."
+     30 columns, and bind RET to jump to the same position in the
+     base buffer."
     (interactive)
     (push-mark) ; in case user gets lost
   
@@ -406,14 +412,8 @@
         ;; Basic setup
         ;; ***********
   
-        (read-only-mode)
         (widen)                           ; widen if possible
-        (outline-show-all)                ; make sure all headings are visible
-        (let ((current-prefix-arg         ; levels of heading to show
-               org-tree-view/levels)
-              (inhibit-message t))
-          (call-interactively #'org-shifttab))
-        (outline-hide-body)               ; hide body
+        (org-tree-view/refresh)           ; show only headings
         (setq-local truncate-lines t)     ; ensure truncated lines
         (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
         (setq-local search-invisible nil) ; search only visible text
@@ -446,6 +446,9 @@
         ;; Hide everything above tree view
         (narrow-to-region (window-start) (point-max))
   
+        ;; Go to smart beginning of line, if enabled
+        (org-tree-view/beginning-of-line)
+  
         ;; Refresh tree view on save
         (add-hook 'after-save-hook #'org-tree-view/refresh)
   
@@ -453,26 +456,41 @@
         (advice-add #'org-self-insert-command :around
                     #'org-tree-view/self-insert-command)
   
+        ;; Make sure to be at the beginning of line before moving subtrees
+        (advice-add #'org-move-subtree-up   :before #'org-tree-view/beginning-of-line)
+        (advice-add #'org-move-subtree-down :before #'org-tree-view/beginning-of-line)
   
-        ;; Press <C-return> from isearch to directly open matching heading
-        (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+        ;; Automatically refresh tree view after moving subtrees
+        (advice-add #'org-move-subtree-up   :after #'org-tree-view/refresh)
+        (advice-add #'org-move-subtree-down :after #'org-tree-view/refresh)
+  
+        ;; Go to smart beginning of line after jumping between headings
+        (advice-add #'org-forward-heading-same-level :after #'org-tree-view/beginning-of-line)
+        (advice-add #'org-backward-heading-same-level :after #'org-tree-view/beginning-of-line)
   
         ;; Keybindings
         ;; ***********
   
-        ;; - Use org-mode-map as base
+        ;; Use org-mode-map as base
         (use-local-map (copy-keymap org-mode-map))
   
-        ;; - Quit tree view
+        ;; Press <C-return> from isearch to directly open matching heading
+        (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+  
+        ;; Browse headings more easily
+        (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
+        (local-set-key (kbd "C-M-p") #'org-backward-heading-same-level)
+  
+        ;; Quit tree view
         (local-set-key (kbd "Q") #'org-tree-view/exit)
   
-        ;; - Switch back to base buffer
+        ;; Switch back to base buffer
         (local-set-key (kbd "C-c C-t")
                        (lambda ()
                          (interactive)
                          (select-window (get-buffer-window (buffer-base-buffer)))))
   
-        ;; - Open heading in base buffer
+        ;; Open heading in base buffer
         (mapc (lambda (key)
                 (local-set-key (kbd key) 'org-tree-view/open-heading))
               '("<mouse-1>" "RET")))))
@@ -630,12 +648,15 @@
   (interactive)
   (move-end-of-line nil)
   (newline-and-indent))
+
 (defun smart-open-line-above ()
   "Insert an empty line above the current line.
   Position the cursor at beginning, according to current mode."
   (interactive)
   (move-beginning-of-line nil)
-  (newline-and-indent)
+  (newline)
+  (if (looking-at "[[:space:]]*$") ; remove indentation from old line
+      (delete-horizontal-space))
   (forward-line -1)
   (indent-according-to-mode))
 (global-set-key (kbd "M-o") 'smart-open-line)
