@@ -1961,6 +1961,46 @@ configuration accordingly. Most of this configuration happens in my Zsh
 configuration files, but some of it inevitably leaks into my Emacs
 configuration.
 
+*** Launching Emacs
+:PROPERTIES:
+:CUSTOM_ID: launching-emacs
+:END:
+
+Using the graphical version of Emacs on WSL is a bit trickier than just the
+plain old terminal verison, as you need an X server to run it. But as it turns
+out, there are X servers for Windows! Personally, I use [[https://sourceforge.net/projects/vcxsrv/][VcXsrv]], because I've
+heard it's good, but [[http://www.straightrunning.com/XmingNotes/][Xming]] seems to be a solid alternative.
+
+I use VcXsrv in its "multiple windows" mode. This means that every X window will
+behave like any other normal Windows window (that's a lot of "windows"). It will
+have a Windows title bar and be fully integrated into the native window manager.
+
+To launch Emacs without having to use a terminal, I actually use a program
+part of the Xming project (but bundled separately) called =run.exe=. It provides a
+way of launching X applications and disowning them, so you won't need to have a
+terminal open in order to run your GUI programs.
+
+I keep =run.exe= in my Windows =PATH=, and I have the following shortcut as an icon
+on my desktop:
+
+#+BEGIN_SRC
+run.exe bash.exe -c "LAUNCH_AT_START='emacs' zsh"
+#+END_SRC
+
+Now, the code above could have been simpler if I just used bash. However, my
+main shell is =zsh= and I'd like for Emacs to use that shell, along with my =zsh=
+configuration, specifically so that I can access my custom-set =$PATH=.
+
+The following code at the end of my =.zshrc= makes it work:
+
+#+BEGIN_SRC shell :tangle ~/.config/zsh/load/system/wsl/launch_at_start.zsh
+if [[ "$LAUNCH_AT_START" == 'emacs' ]]; then
+   nohup emacs &> /dev/null & disown
+fi
+#+END_SRC
+
+# TODO: paredit M-]
+
 *** Default programs
 :PROPERTIES:
 :CUSTOM_ID: wsl:default
