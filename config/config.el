@@ -79,17 +79,28 @@
   (defun paredit-delete-indentation (&optional arg)
     "Handle joining lines that end in a comment."
     (interactive "*P")
-    (let (comt)
-      (save-excursion
-        (move-beginning-of-line (if arg 1 0))
-        (when (skip-syntax-forward "^<" (point-at-eol))
-          (setq comt (delete-and-extract-region (point) (point-at-eol)))))
+    (let ((comment (delete-and-extract-comment (if arg 1 0))))
       (delete-indentation arg)
-      (when comt
+      (when comment
         (save-excursion
       	  (move-end-of-line 1)
-          (unless (s-blank-str? comt) (insert " "))
-          (insert comt)))))
+          (insert " ")
+          (insert comment)))))
+
+  (defun paredit-newline-keep-comment (&optional arg)
+    "Insert newline, but keep any potential comment on the
+current line."
+    (interactive "*P")
+    (let ((comment (delete-and-extract-comment)))
+      (paredit-newline)
+      (when comment
+        (save-excursion
+          (forward-line -1)
+      	  (move-end-of-line 1)
+          (insert " ")
+          (insert comment)))))
+
+  (global-set-key [remap paredit-newline] #'paredit-newline-keep-comment)
 
   ;; Disable comment column
   (add-hook 'paredit-mode-hook (lambda () (setq-local comment-column 0)))
@@ -149,8 +160,7 @@
 
   (defun traverse-folds (times &optional beginning)
     "Traverses through folds as many times as ordered by argument.
-    A negative argument makes it traverse backwards."
-
+A negative argument makes it traverse backwards."
     (unless beginning (setq beginning (point)))
     (if (> times 0)
         (progn
@@ -168,16 +178,15 @@
 
   (defun next-fold (times)
     "Jumps to the beginning of the next fold (or previous, on
-    negative argument)."
+negative argument)."
 
     (interactive "P")
     (unless times (setq times 1))
     (traverse-folds times))
 
   (defun previous-fold (times)
-    "Jumps to the beginning of the previous fold, as many times as
-    ordered by argument."
-
+    "Jumps to the beginning of the previous fold, as many times
+as ordered by argument."
     (interactive "P")
     (unless times (setq times 1))
     (next-fold (* times -1)))
@@ -281,44 +290,40 @@
          ("C-c o c" . org-capture)
          ("C-c o b" . org-iswitchb)))
 (with-eval-after-load 'org
-  (defun org-make-wiktionary-link (string &optional from to)
-    "Wraps the word at point or selected word in a Wiktionary link to the word."
+  (defgroup org-tree-view nil
+    "A window providing easy access to all headings in an Org document.")
   
-    ;; (see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)
-    (interactive
-     (if (use-region-p)
-         (list nil (region-beginning) (region-end))
-       (let ((bds (bounds-of-thing-at-point 'word)) )
-         (list nil (car bds) (cdr bds)))))
+  (defcustom org-tree-view/levels 3
+    "The highest level headings to show in the tree view. Think of
+  each asterisk preceding a heading as a level."
+    :group 'org-tree-view
+    :type 'integer)
   
-    (setq wiktionary-language 'russian)
+  (defcustom org-tree-view/width 30
+    "The width of the tree view window."
+    :group 'org-tree-view
+    :type 'integer)
   
-    (let* ((input  (or string (buffer-substring-no-properties from to)))
-           (output (concat "[[https://en.wiktionary.org/wiki/"
-                           (org-link-escape (downcase input))
-                           "#"
-                           (capitalize (symbol-name wiktionary-language))
-                           "]["
-                           input
-                           "]]")))
-      (delete-region from to)
-      (goto-char from)
-      (insert output)))
-  
-  (define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
+  (defcustom org-tree-view/side 'left
+    "The side on which to open the tree view window."
+    :group 'org-tree-view
+    :type '(radio
+            (const :tag "Left" left)
+            (const :tag "Right" right)))
   (defun org-tree-view/open-heading ()
     "Switch to a cloned buffer's base buffer and narrow in on the
-    selected subtree."
+  selected subtree."
     (interactive)
     (org-tree-view/beginning-of-line)
     (if (not (buffer-base-buffer))
         (error "You need to be in a cloned buffer!")
-      (let ((heading-pos (point))
-            (base-window (get-buffer-window (buffer-base-buffer))))
+      (let* ((heading-pos (point))
+             (base-buffer (buffer-base-buffer))
+             (base-window (get-buffer-window base-buffer)))
         (if base-window
             (select-window base-window)
           (other-window 1)
-          (switch-to-buffer (buffer-base-buffer)))
+          (switch-to-buffer base-buffer))
         (widen) ; first widen any potential narrowing
         (goto-char heading-pos)
         (org-narrow-to-subtree) ; narrow to org subtree
@@ -357,6 +362,7 @@
     (interactive)
     (when (s-starts-with? "<tree>" (buffer-name))
       (org-tree-view/open-heading))
+    (run-with-timer 0 nil (lambda () (org-tree-view/bind-exit)))
     (let ((inhibit-message t)) (isearch-exit)))
   (defun org-tree-view/self-insert-command (oldfun N)
     (interactive "p")
@@ -378,10 +384,22 @@
                    #'org-tree-view-self-insert-command)
     (advice-remove #'org-move-subtree-up #'org-tree-view/refresh)
     (advice-remove #'org-move-subtree-down #'org-tree-view/refresh))
+  (defun org-tree-view/bind-exit ()
+    (let* ((original-binding (local-key-binding (kbd "<S-return>")))
+           (reset-key `(local-set-key (kbd "<S-return>") (quote ,original-binding))))
+      (message "Press <S-return> again to close the tree view.")
+      (eval (macroexpand
+             `(progn
+                (local-set-key (kbd "<S-return>") (lambda () (interactive)
+                                                    ,reset-key
+                                                    (org-tree-view/exit)))
+                (run-with-timer 1 nil (lambda ()
+                                        (message " ") ; clear message
+                                        ,reset-key)))))))
   (defun org-tree-view/open ()
     "Open a clone of the current buffer to the left, resize it to
-     30 columns, and bind RET to jump to the same position in the
-     base buffer."
+  30 columns, and bind RET to jump to the same position in the base
+  buffer."
     (interactive)
     (push-mark) ; in case user gets lost
   
@@ -467,8 +485,8 @@
           ;; Use org-mode-map as base
           (use-local-map (copy-keymap org-mode-map))
   
-          ;; Press <C-return> from isearch to directly open matching heading
-          (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+          ;; Press <S-return> from isearch to directly open matching heading
+          (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return)
   
           ;; Browse headings more easily
           (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
@@ -483,32 +501,42 @@
                            (interactive)
                            (select-window (get-buffer-window (buffer-base-buffer)))))
   
+          ;; Press <S-return> to open heading, press it again to exit tree view
+          (local-set-key (kbd "<S-return>") (lambda () (interactive)
+                                              (org-tree-view/open-heading)
+                                              (org-tree-view/bind-exit)))
+  
           ;; Open heading in base buffer
           (mapc (lambda (key)
-                  (local-set-key (kbd key) 'org-tree-view/open-heading))
-                '("<mouse-1>" "RET"))))))
+                  (local-set-key (kbd key) #'org-tree-view/open-heading))
+                '("<mouse-1>" "<return>"))))))
   
   (define-key org-mode-map (kbd "C-c C-t") #'org-tree-view/open)
-  (defgroup org-tree-view nil
-    "A window providing easy access to all headings in an Org document.")
+  (defun org-make-wiktionary-link (string &optional from to)
+    "Wraps the word at point or selected word in a Wiktionary link to the word."
   
-  (defcustom org-tree-view/levels 3
-    "The highest level headings to show in the tree view. Think of
-    each asterisk preceding a heading as a level."
-    :group 'org-tree-view
-    :type 'integer)
+    ;; (see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)
+    (interactive
+     (if (use-region-p)
+         (list nil (region-beginning) (region-end))
+       (let ((bds (bounds-of-thing-at-point 'word)) )
+         (list nil (car bds) (cdr bds)))))
   
-  (defcustom org-tree-view/width 30
-    "The width of the tree view window."
-    :group 'org-tree-view
-    :type 'integer)
+    (setq wiktionary-language 'russian)
   
-  (defcustom org-tree-view/side 'left
-    "The side on which to open the tree view window."
-    :group 'org-tree-view
-    :type '(radio
-            (const :tag "Left" left)
-            (const :tag "Right" right)))
+    (let* ((input  (or string (buffer-substring-no-properties from to)))
+           (output (concat "[[https://en.wiktionary.org/wiki/"
+                           (org-link-escape (downcase input))
+                           "#"
+                           (capitalize (symbol-name wiktionary-language))
+                           "]["
+                           input
+                           "]]")))
+      (delete-region from to)
+      (goto-char from)
+      (insert output)))
+  
+  (define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
   (defun org-babel-tangle-config ()
     (interactive)
   
@@ -531,8 +559,8 @@
   (define-key org-mode-map (kbd "C-c C-v M-t") #'org-babel-tangle-config)
   (defun org-smarter-beginning-of-line (original-function &optional n)
     "The exact same function as `org-beginning-of-line',
-    but with one exception: instead of calling `beginning-of-line'
-    twice, it calls `smarter-beginning-of-line' once."
+  but with one exception: instead of calling `beginning-of-line'
+  twice, it calls `smarter-beginning-of-line' once."
     (interactive "^p")
     (let ((origin (point))
           (special (pcase org-special-ctrl-a/e
@@ -630,6 +658,16 @@
   (let ((user-init-file (concat user-emacs-directory ".commands")))
     ad-do-it))
 (load-file (concat user-emacs-directory ".commands"))
+(defun delete-and-extract-comment (&optional bol-arg)
+  "Delete and return the comment at the end of the line. If there
+is no comment, return nil."
+  (let (comment)
+    (save-excursion
+      (move-beginning-of-line (or bol-arg 1))
+      (when (skip-syntax-forward "^<" (point-at-eol))
+        (setq comment (delete-and-extract-region (point) (point-at-eol)))
+        (delete-horizontal-space)))
+    (if (s-blank-str? comment) nil comment)))
 (setq desktop-dirname             (concat emacs-state-directory "desktop/")
       desktop-base-file-name      "emacs.desktop"
       desktop-base-lock-name      "lock"
@@ -657,14 +695,14 @@
 (global-set-key (kbd "C-c M-a") #'align-comments-in-region)
 (defun smart-open-line () ; (courtesy of Emacs Redux)
   "Insert an empty line after the current line.
-  Position the cursor at beginning, according to current mode."
+Position the cursor at beginning, according to current mode."
   (interactive)
   (move-end-of-line nil)
   (newline-and-indent))
 
 (defun smart-open-line-above ()
   "Insert an empty line above the current line.
-  Position the cursor at beginning, according to current mode."
+Position the cursor at beginning, according to current mode."
   (interactive)
   (move-beginning-of-line nil)
   (newline)
@@ -676,10 +714,10 @@
 (global-set-key (kbd "M-O") 'smart-open-line-above)
 (defun comment-dwim-line (&optional arg) ; (courtesy of Jason Viers @ SE)
   "Replacement for the comment-dwim command.
-  If no region is selected and current line is not blank and we
-  are not at the end of the line, then comment current line.
-  Replaces default behaviour of comment-dwim, when it inserts
-  comment at the end of the line."
+If no region is selected and current line is not blank and we are
+not at the end of the line, then comment current line. Replaces
+default behaviour of comment-dwim, when it inserts comment at the
+end of the line."
   (interactive "*P")
   (comment-normalize-vars)
   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
@@ -690,12 +728,12 @@
 (global-set-key (kbd "C-;") 'comment-dwim-line)
 (defun smarter-move-beginning-of-line (&optional &rest args)
   "Move point back to indentation of beginning of line.
-  Move point to the first non-whitespace character on this line.
-  If point is already there, move to the beginning of the line.
-  Effectively toggle between the first non-whitespace character
-  and the beginning of the line.
-  If ARG is not nil or 1, move forward ARG - 1 lines first. If
-  point reaches the beginning or end of the buffer, stop there."
+Move point to the first non-whitespace character on this line. If
+point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line. If ARG is not nil or 1, move forward
+ARG - 1 lines first. If point reaches the beginning or end of the
+buffer, stop there."
   (interactive "^p")
   (let ((arg (or (prefix-numeric-value current-prefix-arg) 1)))
     ;; Move lines first
@@ -706,8 +744,32 @@
       (back-to-indentation)
       (when (= orig-point (point))
         (move-to-column 0))))) ; based on function from Emacs Redux
+
+(defun smarter-move-end-of-line (&optional &rest args)
+  "Move to the end of the line, but before any potential comment.
+If already at the pre-comment end of line, move to the actual end
+of line. If ARG is not nil or 1, move forward ARG - 1 lines
+first. If point reaches the beginning or end of the buffer, stop
+there."
+  (interactive "^p")
+  (let ((arg (or (prefix-numeric-value current-prefix-arg) 1)))
+    (when (/= arg 1)
+      (let ((line-move-visual nil))
+        (forward-line (1- arg))))
+    (let ((orig-point (point)))
+      (back-to-indentation)
+      (let ((bol-point (point)))
+        (skip-syntax-forward "^<" (point-at-eol))
+        (if (= bol-point (point))
+            (move-end-of-line 1)
+          (backward-char)
+          (unless (looking-at "\s") (forward-char))
+          (when (= orig-point (point))
+            (move-end-of-line 1)))))))
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
+(global-set-key [remap move-end-of-line]
+                'smarter-move-end-of-line)
 (defun silent-mwheel-scroll (oldfun &rest r)
   (interactive (list last-input-event))
   (ignore-errors
@@ -796,6 +858,13 @@
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
+
+(global-set-key (kbd "C-x 4 e") ; open eshell in split to the right
+                (lambda ()
+                  (interactive)
+                  (split-window-right)
+                  (other-window 1)
+                  (eshell)))
 (defun suspend-frame-unless-gui (oldfun &rest r)
   (unless (display-graphic-p) (apply oldfun r)))
 
@@ -806,7 +875,7 @@
 
 (defun daylight-sets-color ()
   "Sets a light theme for day and a dark theme for night.
-  Depends on the script `sun' being found in path."
+Depends on the script `sun' being found in path."
   (interactive)
   (let ((time (string-to-number (format-time-string "%H.%M"))))
         (if (string-match "not found" (shell-command-to-string "which sun"))

@@ -23,6 +23,16 @@ Emacs configuration file, it might not work. If you want to see exactly how
 the resulting code is arranged, you can look at the resulting [[https://github.com/jocap/emacs.d/blob/master/config.el][=config.el= file
 on GitHub]].
 
+** "Best of"
+
+My Emacs configuration is very long. I understand if nobody will ever read
+it all, but I do think there are parts of it /worth/ reading. Following is a list
+of quick links to the most interesting sections of this document.
+
+- [[#org-tree-view][org-tree-view]] :: A sidebar for conveniently browsing all the headings in an
+     Org document. The resulting package is as interesting, I would say, as some
+     of the underlying code.
+
 
 * Packages
 
@@ -86,21 +96,21 @@ Emacs configuration, but do not need to be further configured. For that reason,
 I probably won't mention these packages elsewhere, and instead just list them
 here with a short description of why I like them.
 
-- rainbow-delimiters :: paints matching parentheses with the same color.
+- rainbow-delimiters :: Paints matching parentheses with the same color.
 
-- ace-link :: nice little extension to /avy/ that does the same thing, but for
+- ace-link :: Nice little extension to /avy/ that does the same thing, but for
               links in help buffers.
 
-- nlinum :: line numbers, but faster than =linum=. I don't use this much, but it's
+- nlinum :: Line numbers, but faster than =linum=. I don't use this much, but it's
             nice to have when you need it.
 
-- popwin :: makes popup windows /so/ much easier to work with - this is a
+- popwin :: Makes popup windows /so/ much easier to work with - this is a
             must-have.
 
-- helm-org-rifle :: makes it /a bit/ easier to browse through Org documents - not
+- helm-org-rifle :: Makes it /a bit/ easier to browse through Org documents - not
                     perfect though.
 
-- buffer-move :: lets me switch buffers between two windows - pretty handy.
+- buffer-move :: Lets me switch buffers between two windows - pretty handy.
 
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp :exports none
@@ -222,6 +232,13 @@ headline. Most of them are based on built-in functions.
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
+
+(global-set-key (kbd "C-x 4 e") ; open eshell in split to the right
+                (lambda ()
+                  (interactive)
+                  (split-window-right)
+                  (other-window 1)
+                  (eshell)))
 #+END_SRC
 
 Apart from defining new ones, there are some keybindings that I remove. One
@@ -238,6 +255,29 @@ for GUI Emacs, but keeps it for =emacs -nw= and =emacsclient -t=.
 #+END_SRC
 
 It's not strictly a keybinding, but I still felt it belonged in this section.
+
+** Helper functions
+:PROPERTIES:
+:CUSTOM_ID: functions
+:END:
+
+Here is a collection of useful helper functions that I use in my Emacs
+configuration.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(defun delete-and-extract-comment (&optional bol-arg)
+  "Delete and return the comment at the end of the line. If there
+is no comment, return nil."
+  (let (comment)
+    (save-excursion
+      (move-beginning-of-line (or bol-arg 1))
+      (when (skip-syntax-forward "^<" (point-at-eol))
+        (setq comment (delete-and-extract-region (point) (point-at-eol)))
+        (delete-horizontal-space)))
+    (if (s-blank-str? comment) nil comment)))
+#+END_SRC
+
 ** Session management
 :PROPERTIES:
 :CUSTOM_ID: session-management
@@ -434,17 +474,28 @@ as I have Paredit installed, =use-package= binds ~M-R~ to the original function 
   (defun paredit-delete-indentation (&optional arg)
     "Handle joining lines that end in a comment."
     (interactive "*P")
-    (let (comt)
-      (save-excursion
-        (move-beginning-of-line (if arg 1 0))
-        (when (skip-syntax-forward "^<" (point-at-eol))
-          (setq comt (delete-and-extract-region (point) (point-at-eol)))))
+    (let ((comment (delete-and-extract-comment (if arg 1 0))))
       (delete-indentation arg)
-      (when comt
+      (when comment
         (save-excursion
       	  (move-end-of-line 1)
-          (unless (s-blank-str? comt) (insert " "))
-          (insert comt)))))
+          (insert " ")
+          (insert comment)))))
+
+  (defun paredit-newline-keep-comment (&optional arg)
+    "Insert newline, but keep any potential comment on the
+current line."
+    (interactive "*P")
+    (let ((comment (delete-and-extract-comment)))
+      (paredit-newline)
+      (when comment
+        (save-excursion
+          (forward-line -1)
+      	  (move-end-of-line 1)
+          (insert " ")
+          (insert comment)))))
+
+  (global-set-key [remap paredit-newline] #'paredit-newline-keep-comment)
 
   ;; Disable comment column
   (add-hook 'paredit-mode-hook (lambda () (setq-local comment-column 0)))
@@ -518,14 +569,14 @@ this behavior.
 #+BEGIN_SRC emacs-lisp
 (defun smart-open-line () ; (courtesy of Emacs Redux)
   "Insert an empty line after the current line.
-  Position the cursor at beginning, according to current mode."
+Position the cursor at beginning, according to current mode."
   (interactive)
   (move-end-of-line nil)
   (newline-and-indent))
 
 (defun smart-open-line-above ()
   "Insert an empty line above the current line.
-  Position the cursor at beginning, according to current mode."
+Position the cursor at beginning, according to current mode."
   (interactive)
   (move-beginning-of-line nil)
   (newline)
@@ -557,10 +608,10 @@ easier to comment either the current line or the current region.
 #+BEGIN_SRC emacs-lisp
 (defun comment-dwim-line (&optional arg) ; (courtesy of Jason Viers @ SE)
   "Replacement for the comment-dwim command.
-  If no region is selected and current line is not blank and we
-  are not at the end of the line, then comment current line.
-  Replaces default behaviour of comment-dwim, when it inserts
-  comment at the end of the line."
+If no region is selected and current line is not blank and we are
+not at the end of the line, then comment current line. Replaces
+default behaviour of comment-dwim, when it inserts comment at the
+end of the line."
   (interactive "*P")
   (comment-normalize-vars)
   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
@@ -644,21 +695,21 @@ combination with any of the arrow keys.
   :init (windmove-default-keybindings))
 #+END_SRC
 
-** Improving /move-beginning-of-line/
+** Moving to the beginning and end of a line
 :PROPERTIES:
-:CUSTOM_ID: c-a
+:CUSTOM_ID: beginning-end-of-line
 :END:
 
 #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
 (defun smarter-move-beginning-of-line (&optional &rest args)
   "Move point back to indentation of beginning of line.
-  Move point to the first non-whitespace character on this line.
-  If point is already there, move to the beginning of the line.
-  Effectively toggle between the first non-whitespace character
-  and the beginning of the line.
-  If ARG is not nil or 1, move forward ARG - 1 lines first. If
-  point reaches the beginning or end of the buffer, stop there."
+Move point to the first non-whitespace character on this line. If
+point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line. If ARG is not nil or 1, move forward
+ARG - 1 lines first. If point reaches the beginning or end of the
+buffer, stop there."
   (interactive "^p")
   (let ((arg (or (prefix-numeric-value current-prefix-arg) 1)))
     ;; Move lines first
@@ -669,12 +720,36 @@ combination with any of the arrow keys.
       (back-to-indentation)
       (when (= orig-point (point))
         (move-to-column 0))))) ; based on function from Emacs Redux
+
+(defun smarter-move-end-of-line (&optional &rest args)
+  "Move to the end of the line, but before any potential comment.
+If already at the pre-comment end of line, move to the actual end
+of line. If ARG is not nil or 1, move forward ARG - 1 lines
+first. If point reaches the beginning or end of the buffer, stop
+there."
+  (interactive "^p")
+  (let ((arg (or (prefix-numeric-value current-prefix-arg) 1)))
+    (when (/= arg 1)
+      (let ((line-move-visual nil))
+        (forward-line (1- arg))))
+    (let ((orig-point (point)))
+      (back-to-indentation)
+      (let ((bol-point (point)))
+        (skip-syntax-forward "^<" (point-at-eol))
+        (if (= bol-point (point))
+            (move-end-of-line 1)
+          (backward-char)
+          (unless (looking-at "\s") (forward-char))
+          (when (= orig-point (point))
+            (move-end-of-line 1)))))))
 #+END_SRC
 
 #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
+(global-set-key [remap move-end-of-line]
+                'smarter-move-end-of-line)
 #+END_SRC
 
 ** Scrolling pleasantly
@@ -743,8 +818,7 @@ and then, take a pause and explain what I've done:
 
   (defun traverse-folds (times &optional beginning)
     "Traverses through folds as many times as ordered by argument.
-    A negative argument makes it traverse backwards."
-
+A negative argument makes it traverse backwards."
     (unless beginning (setq beginning (point)))
     (if (> times 0)
         (progn
@@ -762,16 +836,15 @@ and then, take a pause and explain what I've done:
 
   (defun next-fold (times)
     "Jumps to the beginning of the next fold (or previous, on
-    negative argument)."
+negative argument)."
 
     (interactive "P")
     (unless times (setq times 1))
     (traverse-folds times))
 
   (defun previous-fold (times)
-    "Jumps to the beginning of the previous fold, as many times as
-    ordered by argument."
-
+    "Jumps to the beginning of the previous fold, as many times
+as ordered by argument."
     (interactive "P")
     (unless times (setq times 1))
     (next-fold (* times -1)))
@@ -1058,52 +1131,6 @@ functions - they are defined further down.
 )
 #+END_SRC
 
-*** Automatic Wiktionary links
-:PROPERTIES:
-:CUSTOM_ID: org-make-wiktionary-link
-:END:
-
-#+NAME: c:org:fun
-#+BEGIN_SRC emacs-lisp
-(defun org-make-wiktionary-link (string &optional from to)
-  "Wraps the word at point or selected word in a Wiktionary link to the word."
-
-  ;; (see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)
-  (interactive
-   (if (use-region-p)
-       (list nil (region-beginning) (region-end))
-     (let ((bds (bounds-of-thing-at-point 'word)) )
-       (list nil (car bds) (cdr bds)))))
-
-  (setq wiktionary-language 'russian)
-
-  (let* ((input  (or string (buffer-substring-no-properties from to)))
-         (output (concat "[[https://en.wiktionary.org/wiki/"
-                         (org-link-escape (downcase input))
-                         "#"
-                         (capitalize (symbol-name wiktionary-language))
-                         "]["
-                         input
-                         "]]")))
-    (delete-region from to)
-    (goto-char from)
-    (insert output)))
-
-(define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
-#+END_SRC
-
-Above is the definition for my custom =org-make-wiktionary-link= function. Like
-the description says, it creates a link to the Wiktionary entry on the selected
-word (or, if no region is active, the word where the cursor is). Furthermore, I
-have set it to always bring up the Russian definition, but if you copy this
-function to your own configuration, you can just set =wiktionary-language= to
-='english= or something, or even ='non-existent-language= if you don't want to look
-up any specific language.
-     
-I have written it because I study Russian and write down all the words I
-learn in an Org file. For more language-related settings, see the section
-on [[#lang][non-English languages]].
-
 *** /org-tree-view/
 :PROPERTIES:
 :CUSTOM_ID: org-tree-view
@@ -1128,28 +1155,50 @@ left. The cloned buffer, called the /tree view/, has the following properties:
 - It displays nothing but headings
 - On ~<return>~ or ~<mouse-1>~, the heading at point is opened in the /base buffer/ and
   the base buffer is narrowed to the subtree of the heading
+- On ~<S-return>~, the heading is opened in the same way, but if you press
+  ~<S-return>~ again within one second of delay, the tree view is closed
 - On ~Q~, the tree view is closed and its buffer deleted
 - On any other non-modifier key, it automatically starts searching through the
   headings (but, crucially, not the rest of the text) using =isearch=
-- Within =isearch=, ~<C-return>~ opens the currently selected matching heading in
+- Within =isearch=, ~<S-return>~ opens the currently selected matching heading in
   the base buffer
-
-**** Options
-
-With /org-tree-view/ looking more and more like a package, there are of course
-options that can be set.
-
-- org-tree-view/levels :: how many levels of heading to show.
-- org-tree-view/width :: the width of the tree view.
-- org-tree-view/split :: at what side of the base buffer the tree view should be
-     opened.
-
-**** Source
 
 #+NAME: c:org:fun
 #+BEGIN_SRC emacs-lisp :noweb yes :exports none
 <<c:org-tree-view>>
 #+END_SRC
+
+**** Customizable options
+
+With /org-tree-view/ looking more and more like a package, there are of course
+options that can be set:
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defgroup org-tree-view nil
+  "A window providing easy access to all headings in an Org document.")
+
+(defcustom org-tree-view/levels 3
+  "The highest level headings to show in the tree view. Think of
+each asterisk preceding a heading as a level."
+  :group 'org-tree-view
+  :type 'integer)
+
+(defcustom org-tree-view/width 30
+  "The width of the tree view window."
+  :group 'org-tree-view
+  :type 'integer)
+
+(defcustom org-tree-view/side 'left
+  "The side on which to open the tree view window."
+  :group 'org-tree-view
+  :type '(radio
+          (const :tag "Left" left)
+          (const :tag "Right" right)))
+#+END_SRC
+
+
+**** Source
 
 ***** /org-tree-view/open-heading/
 
@@ -1157,17 +1206,18 @@ options that can be set.
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/open-heading ()
   "Switch to a cloned buffer's base buffer and narrow in on the
-  selected subtree."
+selected subtree."
   (interactive)
   (org-tree-view/beginning-of-line)
   (if (not (buffer-base-buffer))
       (error "You need to be in a cloned buffer!")
-    (let ((heading-pos (point))
-          (base-window (get-buffer-window (buffer-base-buffer))))
+    (let* ((heading-pos (point))
+           (base-buffer (buffer-base-buffer))
+           (base-window (get-buffer-window base-buffer)))
       (if base-window
           (select-window base-window)
         (other-window 1)
-        (switch-to-buffer (buffer-base-buffer)))
+        (switch-to-buffer base-buffer))
       (widen) ; first widen any potential narrowing
       (goto-char heading-pos)
       (org-narrow-to-subtree) ; narrow to org subtree
@@ -1236,8 +1286,13 @@ options that can be set.
   (interactive)
   (when (s-starts-with? "<tree>" (buffer-name))
     (org-tree-view/open-heading))
+  (run-with-timer 0 nil (lambda () (org-tree-view/bind-exit)))
   (let ((inhibit-message t)) (isearch-exit)))
 #+END_SRC
+
+The =run-with-timer= call is a hack to make =org-tree-view/bind-exit= be called
+normally, because normally, =isearch-exit= seems to interfere with it. I tell you,
+there's something weird going on with =isearch-exit=.
 
 ***** /org-tree-view/self-insert-command/
 
@@ -1271,14 +1326,35 @@ options that can be set.
   (advice-remove #'org-move-subtree-down #'org-tree-view/refresh))
 #+END_SRC
 
+***** /org-tree-view/bind-exit/
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/bind-exit ()
+  (let* ((original-binding (local-key-binding (kbd "<S-return>")))
+         (reset-key `(local-set-key (kbd "<S-return>") (quote ,original-binding))))
+    (message "Press <S-return> again to close the tree view.")
+    (eval (macroexpand
+           `(progn
+              (local-set-key (kbd "<S-return>") (lambda () (interactive)
+                                                  ,reset-key
+                                                  (org-tree-view/exit)))
+              (run-with-timer 1 nil (lambda ()
+                                      (message " ") ; clear message
+                                      ,reset-key)))))))
+#+END_SRC
+
+This function binds ~S-return~ to =org-tree-view/exit= for 1 second, after which it
+returns ~S-return~ to its previous function. Flexible!
+
 ***** /org-tree-view/open/
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/open ()
   "Open a clone of the current buffer to the left, resize it to
-   30 columns, and bind RET to jump to the same position in the
-   base buffer."
+30 columns, and bind RET to jump to the same position in the base
+buffer."
   (interactive)
   (push-mark) ; in case user gets lost
 
@@ -1364,8 +1440,8 @@ options that can be set.
         ;; Use org-mode-map as base
         (use-local-map (copy-keymap org-mode-map))
 
-        ;; Press <C-return> from isearch to directly open matching heading
-        (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+        ;; Press <S-return> from isearch to directly open matching heading
+        (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return)
 
         ;; Browse headings more easily
         (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
@@ -1380,41 +1456,66 @@ options that can be set.
                          (interactive)
                          (select-window (get-buffer-window (buffer-base-buffer)))))
 
+        ;; Press <S-return> to open heading, press it again to exit tree view
+        (local-set-key (kbd "<S-return>") (lambda () (interactive)
+                                            (org-tree-view/open-heading)
+                                            (org-tree-view/bind-exit)))
+
         ;; Open heading in base buffer
         (mapc (lambda (key)
-                (local-set-key (kbd key) 'org-tree-view/open-heading))
-              '("<mouse-1>" "RET"))))))
+                (local-set-key (kbd key) #'org-tree-view/open-heading))
+              '("<mouse-1>" "<return>"))))))
 
 (define-key org-mode-map (kbd "C-c C-t") #'org-tree-view/open)
 #+END_SRC
 
-***** Customizable options
+**** Issues
 
-#+NAME: c:org-tree-view
+*** Automatic Wiktionary links
+:PROPERTIES:
+:CUSTOM_ID: org-make-wiktionary-link
+:END:
+
+#+NAME: c:org:fun
 #+BEGIN_SRC emacs-lisp
-(defgroup org-tree-view nil
-  "A window providing easy access to all headings in an Org document.")
+(defun org-make-wiktionary-link (string &optional from to)
+  "Wraps the word at point or selected word in a Wiktionary link to the word."
 
-(defcustom org-tree-view/levels 3
-  "The highest level headings to show in the tree view. Think of
-  each asterisk preceding a heading as a level."
-  :group 'org-tree-view
-  :type 'integer)
+  ;; (see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)
+  (interactive
+   (if (use-region-p)
+       (list nil (region-beginning) (region-end))
+     (let ((bds (bounds-of-thing-at-point 'word)) )
+       (list nil (car bds) (cdr bds)))))
 
-(defcustom org-tree-view/width 30
-  "The width of the tree view window."
-  :group 'org-tree-view
-  :type 'integer)
+  (setq wiktionary-language 'russian)
 
-(defcustom org-tree-view/side 'left
-  "The side on which to open the tree view window."
-  :group 'org-tree-view
-  :type '(radio
-          (const :tag "Left" left)
-          (const :tag "Right" right)))
+  (let* ((input  (or string (buffer-substring-no-properties from to)))
+         (output (concat "[[https://en.wiktionary.org/wiki/"
+                         (org-link-escape (downcase input))
+                         "#"
+                         (capitalize (symbol-name wiktionary-language))
+                         "]["
+                         input
+                         "]]")))
+    (delete-region from to)
+    (goto-char from)
+    (insert output)))
+
+(define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
 #+END_SRC
 
-**** Issues
+Above is the definition for my custom =org-make-wiktionary-link= function. Like
+the description says, it creates a link to the Wiktionary entry on the selected
+word (or, if no region is active, the word where the cursor is). Furthermore, I
+have set it to always bring up the Russian definition, but if you copy this
+function to your own configuration, you can just set =wiktionary-language= to
+='english= or something, or even ='non-existent-language= if you don't want to look
+up any specific language.
+     
+I have written it because I study Russian and write down all the words I
+learn in an Org file. For more language-related settings, see the section
+on [[#lang][non-English languages]].
 
 *** Tangling my configuration
 
@@ -1468,7 +1569,7 @@ to pay attention to a couple of lines. You see, this is the
 =org-beginning-of-line= function, copied from the Org source, but modified to use
 a function in my Emacs configuration called =smarter-beginning-of-line=, based on
 the function with the same name [[http://emacsredux.com/blog/2013/05/22/smarter-navigation-to-the-beginning-of-a-line/][written by Bozhidar Batsov]] of Emacs Redux. For
-my implementation of it, see the section on [[#c-a][making C-a smarter]]. In a nutshell,
+my implementation of it, see the section on [[#beginning-end-of-line][making C-a smarter]]. In a nutshell,
 it moves to indentation unless the point is already at indentation, in which
 case it moves to the true beginning of line.
 
@@ -1478,8 +1579,8 @@ Let's have a look at the code and then I'll explain it.
 #+BEGIN_SRC emacs-lisp
 (defun org-smarter-beginning-of-line (original-function &optional n)
   "The exact same function as `org-beginning-of-line',
-  but with one exception: instead of calling `beginning-of-line'
-  twice, it calls `smarter-beginning-of-line' once."
+but with one exception: instead of calling `beginning-of-line'
+twice, it calls `smarter-beginning-of-line' once."
   (interactive "^p")
   (let ((origin (point))
         (special (pcase org-special-ctrl-a/e
@@ -1705,7 +1806,7 @@ you've been warned.
 #+BEGIN_SRC emacs-lisp
 (defun daylight-sets-color ()
   "Sets a light theme for day and a dark theme for night.
-  Depends on the script `sun' being found in path."
+Depends on the script `sun' being found in path."
   (interactive)
   (let ((time (string-to-number (format-time-string "%H.%M"))))
         (if (string-match "not found" (shell-command-to-string "which sun"))

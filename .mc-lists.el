@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         Buffer-menu-delete
+        delete-horizontal-space
         electric-pair-delete-pair
         indent-for-tab-command
         iy-go-to-char--command
