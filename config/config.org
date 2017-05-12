@@ -446,25 +446,15 @@ as I have Paredit installed, =use-package= binds ~M-R~ to the original function 
           (unless (s-blank-str? comt) (insert " "))
           (insert comt)))))
 
-  (define-key paredit-mode-map (kbd "M-q") nil)
-
   ;; Disable comment column
   (add-hook 'paredit-mode-hook (lambda () (setq-local comment-column 0)))
+
+  ;; Disable keybindings already used
+  (define-key paredit-mode-map (kbd "M-q") nil)
 
   :bind (("M-R" . move-to-window-line-top-bottom)
          ("M-^" . paredit-delete-indentation)
          ("M-Q" . paredit-reindent-defun)))
-#+END_SRC
-
-A nice related package is =paredit-everywhere=. It provides the a subset of the
-Paredit functionality for languages that aren't Lisp. I personally configure it
-to be activated in all programming modes:
-
-#+NAME: c:pkg:config
-#+BEGIN_SRC emacs-lisp
-(use-package paredit-everywhere
-  :ensure paredit
-  :config (add-hook 'prog-mode-hook 'paredit-everywhere-mode))
 #+END_SRC
 
 ** Working with regions
@@ -532,12 +522,15 @@ this behavior.
   (interactive)
   (move-end-of-line nil)
   (newline-and-indent))
+
 (defun smart-open-line-above ()
   "Insert an empty line above the current line.
   Position the cursor at beginning, according to current mode."
   (interactive)
   (move-beginning-of-line nil)
-  (newline-and-indent)
+  (newline)
+  (if (looking-at "[[:space:]]*$") ; remove indentation from old line
+      (delete-horizontal-space))
   (forward-line -1)
   (indent-according-to-mode))
 #+END_SRC
