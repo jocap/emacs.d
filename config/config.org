@@ -1141,8 +1141,8 @@ options that can be set.
 
 - org-tree-view/levels :: how many levels of heading to show.
 - org-tree-view/width :: the width of the tree view.
-- org-tree-view/split-right :: create the tree view window on the right side
-     instead of the default left.
+- org-tree-view/split :: at what side of the base buffer the tree view should be
+     opened.
 
 **** Source
 
@@ -1282,117 +1282,136 @@ options that can be set.
   (interactive)
   (push-mark) ; in case user gets lost
 
-  ;; Default options
+  (if (buffer-base-buffer)
+      (error "Tree view can only be opened from a base buffer!")
+    (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
+      (if (get-buffer-window tree-view-buffer-name)
+          ;; Use existing tree buffer
+          (select-window (get-buffer-window tree-view-buffer-name))
 
-  (unless (boundp 'org-tree-view/levels)
-    (setq org-tree-view/levels 3))
-  (unless (boundp 'org-tree-view/width)
-    (setq org-tree-view/width 30))
-  (unless (boundp 'org-tree-view/right-side)
-    (setq org-tree-view/right-side nil)) ; default: left side
+        ;; Make new tree buffer
+        ;; ********************
 
-  (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
-    (if (get-buffer-window tree-view-buffer-name)
-        ;; Use existing tree buffer
-        (select-window (get-buffer-window tree-view-buffer-name))
+        (if (equal org-tree-view/side 'left)
+            (split-window-right org-tree-view/width) ; left
+          (split-window-right (- (frame-width) org-tree-view/width)) ; right
+          (other-window 1))
+        (clone-indirect-buffer tree-view-buffer-name nil :norecord)
+        (switch-to-buffer tree-view-buffer-name)
 
-      ;; Make new tree buffer
-      ;; ********************
+        ;; Basic setup
+        ;; ***********
 
-      (if (not org-tree-view/right-side)
-          (split-window-right org-tree-view/width) ; left
-        (split-window-right (- (frame-width) org-tree-view/width)) ; right
-        (other-window 1))
-      (clone-indirect-buffer tree-view-buffer-name nil :norecord)
-      (switch-to-buffer tree-view-buffer-name)
+        (widen)                           ; widen if possible
+        (org-tree-view/refresh)           ; show only headings
+        (setq-local truncate-lines t)     ; ensure truncated lines
+        (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
+        (setq-local search-invisible nil) ; search only visible text
 
-      ;; Basic setup
-      ;; ***********
+        ;; Hide fringe truncation indicators
+        (set-window-fringes nil 8 1) ; don't set to 0 unless you want to see $'s
 
-      (widen)                           ; widen if possible
-      (org-tree-view/refresh)           ; show only headings
-      (setq-local truncate-lines t)     ; ensure truncated lines
-      (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
-      (setq-local search-invisible nil) ; search only visible text
+        ;; Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815
+        (let ((display-table
+               (if buffer-display-table
+                   buffer-display-table
+                 (make-display-table))))
+          (unless buffer-display-table
+            (setq buffer-display-table display-table))
+          (set-display-table-slot
+           display-table 4
+           (vconcat (mapcar
+                     (lambda (c)
+                       (make-glyph-code c 'font-lock-keyword-face))
+                     (apply #'concat (make-list org-tree-view/width " "))))))
+        ;; The above code replaces the ellipsis with a string of spaces as long as
+        ;; org-tree-view/width. If Org headings are themed with a background, this
+        ;; creates a nice, unified look.
 
-      ;; Hide fringe truncation indicators
-      (set-window-fringes nil 8 1) ; don't set to 0 unless you want to see $'s
+        ;; Go to top of tree view
+        (goto-char (point-min))      ; go to beginning of buffer
+        (org-next-visible-heading 1) ; go to first heading
+        (recenter 0)                 ; put top of window at point
 
-      ;; Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815
-      (let ((display-table
-             (if buffer-display-table
-                 buffer-display-table
-               (make-display-table))))
-        (unless buffer-display-table
-          (setq buffer-display-table display-table))
-        (set-display-table-slot
-         display-table 4
-         (vconcat (mapcar
-                   (lambda (c)
-                     (make-glyph-code c 'font-lock-keyword-face))
-                   (apply #'concat (make-list org-tree-view/width " "))))))
-      ;; The above code replaces the ellipsis with a string of spaces as long as
-      ;; org-tree-view/width. If Org headings are themed with a background, this
-      ;; creates a nice, unified look.
+        ;; Hide everything above tree view
+        (narrow-to-region (window-start) (point-max))
 
-      ;; Go to top of tree view
-      (goto-char (point-min))      ; go to beginning of buffer
-      (org-next-visible-heading 1) ; go to first heading
-      (recenter 0)                 ; put top of window at point
+        ;; Go to smart beginning of line, if enabled
+        (org-tree-view/beginning-of-line)
 
-      ;; Hide everything above tree view
-      (narrow-to-region (window-start) (point-max))
+        ;; Refresh tree view on save
+        (add-hook 'after-save-hook #'org-tree-view/refresh)
 
-      ;; Go to smart beginning of line, if enabled
-      (org-tree-view/beginning-of-line)
+        ;; Automatically run isearch-forward on any key
+        (advice-add #'org-self-insert-command :around
+                    #'org-tree-view/self-insert-command)
 
-      ;; Refresh tree view on save
-      (add-hook 'after-save-hook #'org-tree-view/refresh)
+        ;; Make sure to be at the beginning of line before moving subtrees
+        (advice-add #'org-move-subtree-up   :before #'org-tree-view/beginning-of-line)
+        (advice-add #'org-move-subtree-down :before #'org-tree-view/beginning-of-line)
 
-      ;; Automatically run isearch-forward on any key
-      (advice-add #'org-self-insert-command :around
-                  #'org-tree-view/self-insert-command)
+        ;; Automatically refresh tree view after moving subtrees
+        (advice-add #'org-move-subtree-up   :after #'org-tree-view/refresh)
+        (advice-add #'org-move-subtree-down :after #'org-tree-view/refresh)
 
-      ;; Make sure to be at the beginning of line before moving subtrees
-      (advice-add #'org-move-subtree-up   :before #'org-tree-view/beginning-of-line)
-      (advice-add #'org-move-subtree-down :before #'org-tree-view/beginning-of-line)
+        ;; Go to smart beginning of line after jumping between headings
+        (advice-add #'org-forward-heading-same-level :after #'org-tree-view/beginning-of-line)
+        (advice-add #'org-backward-heading-same-level :after #'org-tree-view/beginning-of-line)
 
-      ;; Automatically refresh tree view after moving subtrees
-      (advice-add #'org-move-subtree-up   :after #'org-tree-view/refresh)
-      (advice-add #'org-move-subtree-down :after #'org-tree-view/refresh)
+        ;; Keybindings
+        ;; ***********
 
-      ;; Go to smart beginning of line after jumping between headings
-      (advice-add #'org-forward-heading-same-level :after #'org-tree-view/beginning-of-line)
-      (advice-add #'org-backward-heading-same-level :after #'org-tree-view/beginning-of-line)
+        ;; Use org-mode-map as base
+        (use-local-map (copy-keymap org-mode-map))
 
-      ;; Keybindings
-      ;; ***********
+        ;; Press <C-return> from isearch to directly open matching heading
+        (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
 
-      ;; Use org-mode-map as base
-      (use-local-map (copy-keymap org-mode-map))
+        ;; Browse headings more easily
+        (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
+        (local-set-key (kbd "C-M-p") #'org-backward-heading-same-level)
 
-      ;; Press <C-return> from isearch to directly open matching heading
-      (define-key isearch-mode-map (kbd "<C-return>") #'org-tree-view/isearch-return)
+        ;; Quit tree view
+        (local-set-key (kbd "Q") #'org-tree-view/exit)
 
-      ;; Browse headings more easily
-      (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
-      (local-set-key (kbd "C-M-p") #'org-backward-heading-same-level)
+        ;; Switch back to base buffer
+        (local-set-key (kbd "C-c C-t")
+                       (lambda ()
+                         (interactive)
+                         (select-window (get-buffer-window (buffer-base-buffer)))))
 
-      ;; Quit tree view
-      (local-set-key (kbd "Q") #'org-tree-view/exit)
-
-      ;; Switch back to base buffer
-      (local-set-key (kbd "C-c C-t")
-                     (lambda ()
-                       (interactive)
-                       (select-window (get-buffer-window (buffer-base-buffer)))))
-
-      ;; Open heading in base buffer
-      (mapc (lambda (key)
-              (local-set-key (kbd key) 'org-tree-view/open-heading))
-            '("<mouse-1>" "RET")))))
+        ;; Open heading in base buffer
+        (mapc (lambda (key)
+                (local-set-key (kbd key) 'org-tree-view/open-heading))
+              '("<mouse-1>" "RET"))))))
 
 (define-key org-mode-map (kbd "C-c C-t") #'org-tree-view/open)
+#+END_SRC
+
+***** Customizable options
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defgroup org-tree-view nil
+  "A window providing easy access to all headings in an Org document.")
+
+(defcustom org-tree-view/levels 3
+  "The highest level headings to show in the tree view. Think of
+  each asterisk preceding a heading as a level."
+  :group 'org-tree-view
+  :type 'integer)
+
+(defcustom org-tree-view/width 30
+  "The width of the tree view window."
+  :group 'org-tree-view
+  :type 'integer)
+
+(defcustom org-tree-view/side 'left
+  "The side on which to open the tree view window."
+  :group 'org-tree-view
+  :type '(radio
+          (const :tag "Left" left)
+          (const :tag "Right" right)))
 #+END_SRC
 
 **** Issues

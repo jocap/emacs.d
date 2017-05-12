@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-05-12 Fri 16:14 -->
+<!-- 2017-05-12 Fri 17:58 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>My Emacs Configuration</title>
@@ -236,14 +236,14 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org96e8e87">1. Introduction</a></li>
-<li><a href="#org585b4f2">2. Packages</a>
+<li><a href="#org0a8f482">1. Introduction</a></li>
+<li><a href="#org173dddf">2. Packages</a>
 <ul>
-<li><a href="#org991bafd">2.1. Package management</a></li>
-<li><a href="#org70ca1d6">2.2. List of packages</a>
+<li><a href="#org8b860c7">2.1. Package management</a></li>
+<li><a href="#orgde46261">2.2. List of packages</a>
 <ul>
-<li><a href="#org6625895">Packages with configuration elsewhere</a></li>
-<li><a href="#org5555611">Packages without interesting configuration</a></li>
+<li><a href="#orgf8ea739">Packages with configuration elsewhere</a></li>
+<li><a href="#org8500304">Packages without interesting configuration</a></li>
 </ul>
 </li>
 </ul>
@@ -253,16 +253,16 @@ for the JavaScript code in this tag.
 <li><a href="#directories">3.1. Directories</a></li>
 <li><a href="#keybindings">3.2. Keybindings</a></li>
 <li><a href="#session-management">3.3. Session management</a></li>
-<li><a href="#org37a81e9">3.4. Shebang mode detection</a></li>
+<li><a href="#orga4ec74f">3.4. Shebang mode detection</a></li>
 </ul>
 </li>
-<li><a href="#orgacf8cf8">4. Text editing</a>
+<li><a href="#org3b7aa8a">4. Text editing</a>
 <ul>
 <li><a href="#multiple-cursors">4.1. Multiple cursors</a></li>
 <li><a href="#visual-regexp">4.2. Search &amp; replace: <i>visual-regexp</i></a></li>
 <li><a href="#alignment">4.3. Alignment</a>
 <ul>
-<li><a href="#org33c7bf6">Aligning comments</a></li>
+<li><a href="#orgcce4356">Aligning comments</a></li>
 </ul>
 </li>
 <li><a href="#lisp">4.4. Working with Lisp</a>
@@ -280,7 +280,7 @@ for the JavaScript code in this tag.
 <li><a href="#commenting-lines">4.7. Commenting lines</a></li>
 </ul>
 </li>
-<li><a href="#org073d253">5. Movement</a>
+<li><a href="#org69ece0d">5. Movement</a>
 <ul>
 <li><a href="#jumping">5.1. Quickly jumping around</a>
 <ul>
@@ -293,14 +293,14 @@ for the JavaScript code in this tag.
 <li><a href="#scrolling-pleasantly">5.4. Scrolling pleasantly</a></li>
 </ul>
 </li>
-<li><a href="#org9b93d0a">6. Visual aids</a>
+<li><a href="#org19d3667">6. Visual aids</a>
 <ul>
 <li><a href="#origami">6.1. Folding with <i>origami</i></a></li>
 <li><a href="#show-trailing-whitespace">6.2. Highlighting superfluous whitespace</a></li>
 <li><a href="#dynamic-cursor-shape">6.3. Dynamic cursor shape</a></li>
 </ul>
 </li>
-<li><a href="#orgcc1d2c9">7. Helpful tools</a>
+<li><a href="#org6fa59ad">7. Helpful tools</a>
 <ul>
 <li><a href="#helm">7.1. Helm</a></li>
 <li><a href="#projectile">7.2. Projectile</a></li>
@@ -309,30 +309,30 @@ for the JavaScript code in this tag.
 <li><a href="#openwith">7.5. <i>openwith</i></a></li>
 </ul>
 </li>
-<li><a href="#orgc8d8e21">8. Modes</a>
+<li><a href="#org9285e3a">8. Modes</a>
 <ul>
 <li><a href="#org-mode">8.1. Org-mode</a>
 <ul>
 <li><a href="#org-make-wiktionary-link">Automatic Wiktionary links</a></li>
 <li><a href="#org-tree-view"><i>org-tree-view</i></a>
 <ul>
-<li><a href="#org317dd0d">Options</a></li>
-<li><a href="#org121ecfb">Source</a></li>
-<li><a href="#org2b87754">Issues</a></li>
+<li><a href="#org0dc1390">Options</a></li>
+<li><a href="#org918124f">Source</a></li>
+<li><a href="#orgcf8c60b">Issues</a></li>
 </ul>
 </li>
-<li><a href="#org51d5420">Tangling my configuration</a></li>
+<li><a href="#org095af6b">Tangling my configuration</a></li>
 <li><a href="#org-beginning-of-line">Adjusting <i>org-beginning-of-line</i></a></li>
 </ul>
 </li>
-<li><a href="#org74d2081">8.2. Python mode</a></li>
-<li><a href="#org2880a3e">8.3. (La)TeX mode</a></li>
+<li><a href="#org2f15aa8">8.2. Python mode</a></li>
+<li><a href="#orge2c3e21">8.3. (La)TeX mode</a></li>
 </ul>
 </li>
 <li><a href="#custom-hooks">9. Custom hooks</a></li>
 <li><a href="#themes">10. Themes</a>
 <ul>
-<li><a href="#orgfbc9a68">10.1. Theme configuration</a>
+<li><a href="#orge7a931f">10.1. Theme configuration</a>
 <ul>
 <li><a href="#daylight-sets-color">Daylight-dependent default theme</a></li>
 <li><a href="#dynamic-theme-settings">Dynamic theme settings</a></li>
@@ -349,7 +349,7 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#rsi">12. Preventing repeated strain injury</a></li>
-<li><a href="#org2cbb21e">13. Non-Emacs Emacs-related configuration</a>
+<li><a href="#org1766809">13. Non-Emacs Emacs-related configuration</a>
 <ul>
 <li><a href="#wsl">13.1. Windows Subsystem for Linux (WSL)</a>
 <ul>
@@ -363,13 +363,13 @@ for the JavaScript code in this tag.
 </li>
 </ul>
 </li>
-<li><a href="#org917f550">14. Credits</a></li>
+<li><a href="#org6f96268">14. Credits</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org96e8e87" class="outline-2">
-<h2 id="org96e8e87"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-org0a8f482" class="outline-2">
+<h2 id="org0a8f482"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Welcome to my Emacs configuration. It is written in the style of literate
@@ -386,18 +386,18 @@ on GitHub</a>.
 </div>
 
 
-<div id="outline-container-org585b4f2" class="outline-2">
-<h2 id="org585b4f2"><span class="section-number-2">2</span> Packages</h2>
+<div id="outline-container-org173dddf" class="outline-2">
+<h2 id="org173dddf"><span class="section-number-2">2</span> Packages</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-org991bafd" class="outline-3">
-<h3 id="org991bafd"><span class="section-number-3">2.1</span> Package management</h3>
+</div><div id="outline-container-org8b860c7" class="outline-3">
+<h3 id="org8b860c7"><span class="section-number-3">2.1</span> Package management</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 First and foremost, I define what sources to install packages from:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org456c170"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">require</span> '<span style="color: #888888; font-weight: bold;">package</span><span style="color: #0f0f0f;">)</span>
+<pre class="src src-emacs-lisp" id="org2b23286"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">require</span> '<span style="color: #888888; font-weight: bold;">package</span><span style="color: #0f0f0f;">)</span>
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> package-archives
       '<span style="color: #1e1e1e;">(</span><span style="color: #2d2d2d;">(</span><span style="color: #555555;">"gnu"</span> . <span style="color: #555555;">"http://elpa.gnu.org/packages/"</span><span style="color: #2d2d2d;">)</span>
         <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"org"</span> . <span style="color: #555555;">"http://orgmode.org/elpa/"</span><span style="color: #2d2d2d;">)</span>
@@ -420,7 +420,7 @@ For that I initialize <i>use-package</i>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org869202b"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">eval-when-compile</span>
+<pre class="src src-emacs-lisp" id="org7a4a2f4"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">eval-when-compile</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">require</span> '<span style="color: #888888; font-weight: bold;">use-package</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">require</span> '<span style="color: #888888; font-weight: bold;">diminish</span><span style="color: #0f0f0f;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">if you use :diminish</span>
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">require</span> '<span style="color: #888888; font-weight: bold;">bind-key</span><span style="color: #0f0f0f;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">if you use any :bind variant</span>
@@ -429,8 +429,8 @@ For that I initialize <i>use-package</i>:
 </div>
 </div>
 
-<div id="outline-container-org70ca1d6" class="outline-3">
-<h3 id="org70ca1d6"><span class="section-number-3">2.2</span> List of packages</h3>
+<div id="outline-container-orgde46261" class="outline-3">
+<h3 id="orgde46261"><span class="section-number-3">2.2</span> List of packages</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 As I&rsquo;ve said, this document is presented in a non-linear way. Under this rubric,
@@ -439,9 +439,9 @@ respective configurations are listed elsewhere.
 </p>
 </div>
 
-<div id="outline-container-org6625895" class="outline-4">
-<h4 id="org6625895">Packages with configuration elsewhere</h4>
-<div class="outline-text-4" id="text-org6625895">
+<div id="outline-container-orgf8ea739" class="outline-4">
+<h4 id="orgf8ea739">Packages with configuration elsewhere</h4>
+<div class="outline-text-4" id="text-orgf8ea739">
 <ul class="org-ul">
 <li><a href="#multiple-cursors">multiple-cursors</a></li>
 <li><a href="#visual-regexp">visual-regexp</a></li>
@@ -460,9 +460,9 @@ respective configurations are listed elsewhere.
 </div>
 </div>
 
-<div id="outline-container-org5555611" class="outline-4">
-<h4 id="org5555611">Packages without interesting configuration</h4>
-<div class="outline-text-4" id="text-org5555611">
+<div id="outline-container-org8500304" class="outline-4">
+<h4 id="org8500304">Packages without interesting configuration</h4>
+<div class="outline-text-4" id="text-org8500304">
 <p>
 In order to do their job, some packages have to be explicitly enabled in the
 Emacs configuration, but do not need to be further configured. For that reason,
@@ -492,8 +492,8 @@ perfect though.</dd>
 </div>
 </div>
 
-<div id="outline-container-org64bda3f" class="outline-2">
-<h2 id="basic-preferences"><a id="org64bda3f"></a><span class="section-number-2">3</span> Basic preferences</h2>
+<div id="outline-container-org99e0c63" class="outline-2">
+<h2 id="basic-preferences"><a id="org99e0c63"></a><span class="section-number-2">3</span> Basic preferences</h2>
 <div class="outline-text-2" id="text-basic-preferences">
 <p>
 In my configuration, there are some basic settings that don&rsquo;t really belong
@@ -502,7 +502,7 @@ under any section in this documentation. Most of them are set using the
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org0a682df"><span style="color: #0f0f0f;">(</span>server-start<span style="color: #0f0f0f;">)</span>         <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">use emacs as a server</span>
+<pre class="src src-emacs-lisp" id="orgdc39c8a"><span style="color: #0f0f0f;">(</span>server-start<span style="color: #0f0f0f;">)</span>         <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">use emacs as a server</span>
 <span style="color: #0f0f0f;">(</span>electric-pair-mode 1<span style="color: #0f0f0f;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">auto-insert matching pairs</span>
 <span style="color: #0f0f0f;">(</span>menu-bar-mode -1<span style="color: #0f0f0f;">)</span>     <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">disable menu bar</span>
 <span style="color: #0f0f0f;">(</span>tool-bar-mode -1<span style="color: #0f0f0f;">)</span>     <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">disable gui toolbar</span>
@@ -515,8 +515,8 @@ under any section in this documentation. Most of them are set using the
 </div>
 </div>
 
-<div id="outline-container-orgbb4fbab" class="outline-3">
-<h3 id="directories"><a id="orgbb4fbab"></a><span class="section-number-3">3.1</span> Directories</h3>
+<div id="outline-container-org70e5323" class="outline-3">
+<h3 id="directories"><a id="org70e5323"></a><span class="section-number-3">3.1</span> Directories</h3>
 <div class="outline-text-3" id="text-directories">
 <p>
 Per default, Emacs insists on making a mess inside <code>~/.emacs.d</code>. These settings
@@ -524,7 +524,7 @@ prevent that.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgacbfc69"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> custom-file <span style="color: #1e1e1e;">(</span>concat user-emacs-directory <span style="color: #555555;">"custom.el"</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
+<pre class="src src-emacs-lisp" id="org482cf1b"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> custom-file <span style="color: #1e1e1e;">(</span>concat user-emacs-directory <span style="color: #555555;">"custom.el"</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> emacs-state-directory <span style="color: #1e1e1e;">(</span>expand-file-name <span style="color: #555555;">"state/"</span> user-emacs-directory<span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">state-dir</span> <span style="color: #1e1e1e;">(</span>file<span style="color: #1e1e1e;">)</span>
@@ -565,8 +565,8 @@ prevent that.
 </div>
 </div>
 
-<div id="outline-container-org13928ba" class="outline-3">
-<h3 id="keybindings"><a id="org13928ba"></a><span class="section-number-3">3.2</span> Keybindings</h3>
+<div id="outline-container-org1fa79eb" class="outline-3">
+<h3 id="keybindings"><a id="org1fa79eb"></a><span class="section-number-3">3.2</span> Keybindings</h3>
 <div class="outline-text-3" id="text-keybindings">
 <p>
 Here are a couple of keybindings that don&rsquo;t really fit in under any other
@@ -574,7 +574,7 @@ headline. Most of them are based on built-in functions.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org7ee1af1"><span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"M-&lt;f1&gt;"</span><span style="color: #1e1e1e;">)</span> 'menu-bar-mode<span style="color: #0f0f0f;">)</span>
+<pre class="src src-emacs-lisp" id="orgdbec272"><span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"M-&lt;f1&gt;"</span><span style="color: #1e1e1e;">)</span> 'menu-bar-mode<span style="color: #0f0f0f;">)</span>
 
 <span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"M-]"</span><span style="color: #1e1e1e;">)</span> 'other-window<span style="color: #0f0f0f;">)</span>
 <span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"M-["</span><span style="color: #1e1e1e;">)</span> <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #2d2d2d;">(</span>n<span style="color: #2d2d2d;">)</span> <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">interactive</span> <span style="color: #555555;">"p"</span><span style="color: #2d2d2d;">)</span>
@@ -593,7 +593,7 @@ for GUI Emacs, but keeps it for <code>emacs -nw</code> and <code>emacsclient -t<
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgc1feda4"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">suspend-frame-unless-gui</span> <span style="color: #1e1e1e;">(</span>oldfun <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org1d0c2bc"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">suspend-frame-unless-gui</span> <span style="color: #1e1e1e;">(</span>oldfun <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">unless</span> <span style="color: #2d2d2d;">(</span>display-graphic-p<span style="color: #2d2d2d;">)</span> <span style="color: #2d2d2d;">(</span>apply oldfun r<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 
 <span style="color: #0f0f0f;">(</span>advice-add #'suspend-frame <span style="color: #000000; font-weight: bold;">:around</span> #'suspend-frame-unless-gui<span style="color: #0f0f0f;">)</span>
@@ -605,8 +605,8 @@ It&rsquo;s not strictly a keybinding, but I still felt it belonged in this secti
 </p>
 </div>
 </div>
-<div id="outline-container-org40b8f30" class="outline-3">
-<h3 id="session-management"><a id="org40b8f30"></a><span class="section-number-3">3.3</span> Session management</h3>
+<div id="outline-container-org6a69304" class="outline-3">
+<h3 id="session-management"><a id="org6a69304"></a><span class="section-number-3">3.3</span> Session management</h3>
 <div class="outline-text-3" id="text-session-management">
 <p>
 If there is a way to save the current window configuration to a file, and I mean
@@ -626,7 +626,7 @@ In the meantime, this is my configuration for <code>desktop-save-mode</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org8622970"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> desktop-dirname             <span style="color: #1e1e1e;">(</span>concat emacs-state-directory <span style="color: #555555;">"desktop/"</span><span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org056b84a"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> desktop-dirname             <span style="color: #1e1e1e;">(</span>concat emacs-state-directory <span style="color: #555555;">"desktop/"</span><span style="color: #1e1e1e;">)</span>
       desktop-base-file-name      <span style="color: #555555;">"emacs.desktop"</span>
       desktop-base-lock-name      <span style="color: #555555;">"lock"</span>
       desktop-path                <span style="color: #1e1e1e;">(</span>list desktop-dirname<span style="color: #1e1e1e;">)</span>
@@ -639,7 +639,7 @@ Furthrmore, I have a custom function that lets me easily activate the mode:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgac1abe0"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">init-desktop</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> arg<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org15434d0"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">init-desktop</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> arg<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"Load the desktop (if C-u is provided) and enable autosaving."</span>
 
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span> <span style="color: #555555;">"p"</span><span style="color: #1e1e1e;">)</span>
@@ -653,11 +653,11 @@ Furthrmore, I have a custom function that lets me easily activate the mode:
 </div>
 </div>
 
-<div id="outline-container-org37a81e9" class="outline-3">
-<h3 id="org37a81e9"><span class="section-number-3">3.4</span> Shebang mode detection</h3>
+<div id="outline-container-orga4ec74f" class="outline-3">
+<h3 id="orga4ec74f"><span class="section-number-3">3.4</span> Shebang mode detection</h3>
 <div class="outline-text-3" id="text-3-4">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgc746d4d"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Shebang mode detection</span>
+<pre class="src src-emacs-lisp" id="orgfe90389"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Shebang mode detection</span>
 <span style="color: #0f0f0f;">(</span>add-to-list 'interpreter-mode-alist
              '<span style="color: #1e1e1e;">(</span><span style="color: #555555;">"python3"</span> . python-mode<span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 </pre>
@@ -667,11 +667,11 @@ Furthrmore, I have a custom function that lets me easily activate the mode:
 </div>
 
 
-<div id="outline-container-orgacf8cf8" class="outline-2">
-<h2 id="orgacf8cf8"><span class="section-number-2">4</span> Text editing</h2>
+<div id="outline-container-org3b7aa8a" class="outline-2">
+<h2 id="org3b7aa8a"><span class="section-number-2">4</span> Text editing</h2>
 <div class="outline-text-2" id="text-4">
-</div><div id="outline-container-org36e8e0f" class="outline-3">
-<h3 id="multiple-cursors"><a id="org36e8e0f"></a><span class="section-number-3">4.1</span> Multiple cursors</h3>
+</div><div id="outline-container-orga34ca63" class="outline-3">
+<h3 id="multiple-cursors"><a id="orga34ca63"></a><span class="section-number-3">4.1</span> Multiple cursors</h3>
 <div class="outline-text-3" id="text-multiple-cursors">
 <p>
 <code>multiple-cursors</code> is another indispensible part of my Emacs toolchain. This is
@@ -682,7 +682,7 @@ need to be tracked on a per-cursor basis.&rdquo;
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orga318681"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">multiple-cursors</span>
+<pre class="src src-emacs-lisp" id="orga99e412"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">multiple-cursors</span>
   <span style="color: #000000; font-weight: bold;">:bind</span> <span style="color: #1e1e1e;">(</span><span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-c c"</span> . mc/edit-lines<span style="color: #2d2d2d;">)</span>
          <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-c &gt;"</span> . mc/mark-next-like-this<span style="color: #2d2d2d;">)</span>
          <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-c &lt;"</span> . mc/mark-previous-like-this<span style="color: #2d2d2d;">)</span>
@@ -714,8 +714,8 @@ described above clearly illustrates the power of having multiple cursors.
 </div>
 </div>
 
-<div id="outline-container-org5da02ea" class="outline-3">
-<h3 id="visual-regexp"><a id="org5da02ea"></a><span class="section-number-3">4.2</span> Search &amp; replace: <i>visual-regexp</i></h3>
+<div id="outline-container-org5044239" class="outline-3">
+<h3 id="visual-regexp"><a id="org5044239"></a><span class="section-number-3">4.2</span> Search &amp; replace: <i>visual-regexp</i></h3>
 <div class="outline-text-3" id="text-visual-regexp">
 <p>
 <b>visual-regexp</b> is certainly worth a spot on the &ldquo;interesting&rdquo; packages list, not
@@ -740,7 +740,7 @@ so that <i>visual-regexp</i> won&rsquo;t load before its muscly brother.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgdf9b87f"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">visual-regexp</span>
+<pre class="src src-emacs-lisp" id="org3b9ab16"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">visual-regexp</span>
   <span style="color: #000000; font-weight: bold;">:defer</span><span style="color: #0f0f0f;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">prevent loading this package before visual-regexp-steroids!</span>
 
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">visual-regexp-steroids</span>
@@ -773,21 +773,21 @@ every match to a regex search. Useful!
 </div>
 </div>
 
-<div id="outline-container-org816ebbf" class="outline-3">
-<h3 id="alignment"><a id="org816ebbf"></a><span class="section-number-3">4.3</span> Alignment</h3>
+<div id="outline-container-org9c73feb" class="outline-3">
+<h3 id="alignment"><a id="org9c73feb"></a><span class="section-number-3">4.3</span> Alignment</h3>
 <div class="outline-text-3" id="text-alignment">
 </div>
 
-<div id="outline-container-org33c7bf6" class="outline-4">
-<h4 id="org33c7bf6">Aligning comments</h4>
-<div class="outline-text-4" id="text-org33c7bf6">
+<div id="outline-container-orgcce4356" class="outline-4">
+<h4 id="orgcce4356">Aligning comments</h4>
+<div class="outline-text-4" id="text-orgcce4356">
 <p>
 What follows is a function <a href="http://stackoverflow.com/a/20278032/305047">written by the user phils</a> at StackOverflow. It is a
 language-agnostic method of aligning comments. How useful!
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org569e2e2"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">align-comments-in-region</span> <span style="color: #1e1e1e;">(</span>beginning end<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org7316570"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">align-comments-in-region</span> <span style="color: #1e1e1e;">(</span>beginning end<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"Align comments within marked region."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span> <span style="color: #555555;">"*r"</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">let</span> <span style="color: #2d2d2d;">(</span>indent-tabs-mode align-to-tab-stop<span style="color: #2d2d2d;">)</span>
@@ -801,13 +801,13 @@ language-agnostic method of aligning comments. How useful!
 </div>
 </div>
 
-<div id="outline-container-org0328d2b" class="outline-3">
-<h3 id="lisp"><a id="org0328d2b"></a><span class="section-number-3">4.4</span> Working with Lisp</h3>
+<div id="outline-container-orge6320dc" class="outline-3">
+<h3 id="lisp"><a id="orge6320dc"></a><span class="section-number-3">4.4</span> Working with Lisp</h3>
 <div class="outline-text-3" id="text-lisp">
 </div>
 
-<div id="outline-container-org42d9690" class="outline-4">
-<h4 id="paredit"><a id="org42d9690"></a>Paredit</h4>
+<div id="outline-container-org6cb848e" class="outline-4">
+<h4 id="paredit"><a id="org6cb848e"></a>Paredit</h4>
 <div class="outline-text-4" id="text-paredit">
 <p>
 Paredit is a totally indispensible tool for editing Lisp code. It changes the
@@ -826,7 +826,7 @@ as I have Paredit installed, <code>use-package</code> binds <code>M-R</code> to 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgaae7f51"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">paredit</span>
+<pre class="src src-emacs-lisp" id="orgb257c7f"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">paredit</span>
   <span style="color: #000000; font-weight: bold;">:init</span>
   <span style="color: #1e1e1e;">(</span>autoload 'enable-paredit-mode
     <span style="color: #555555;">"paredit"</span> <span style="color: #555555; font-style: italic;">"Turn on pseudo-structural editing of Lisp code."</span> t<span style="color: #1e1e1e;">)</span>
@@ -868,13 +868,13 @@ as I have Paredit installed, <code>use-package</code> binds <code>M-R</code> to 
 </div>
 </div>
 
-<div id="outline-container-org0e87941" class="outline-3">
-<h3 id="regions"><a id="org0e87941"></a><span class="section-number-3">4.5</span> Working with regions</h3>
+<div id="outline-container-org9aade6c" class="outline-3">
+<h3 id="regions"><a id="org9aade6c"></a><span class="section-number-3">4.5</span> Working with regions</h3>
 <div class="outline-text-3" id="text-regions">
 </div>
 
-<div id="outline-container-org784c670" class="outline-4">
-<h4 id="expand-region"><a id="org784c670"></a><i>expand-region</i></h4>
+<div id="outline-container-orge46a095" class="outline-4">
+<h4 id="expand-region"><a id="orge46a095"></a><i>expand-region</i></h4>
 <div class="outline-text-4" id="text-expand-region">
 <p>
 I spend a lot of space setting up the shortcuts for <code>expand-region</code>, because
@@ -890,7 +890,7 @@ region.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org094f707"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">expand-region</span>
+<pre class="src src-emacs-lisp" id="org349aa79"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">expand-region</span>
   <span style="color: #000000; font-weight: bold;">:bind</span> <span style="color: #1e1e1e;">(</span><span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-' r"</span>  . er/expand-region<span style="color: #2d2d2d;">)</span>
          <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-' w"</span>  . er/mark-word<span style="color: #2d2d2d;">)</span>
          <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-' '"</span>  . er/mark-inside-quotes<span style="color: #2d2d2d;">)</span>
@@ -906,8 +906,8 @@ region.
 </div>
 </div>
 
-<div id="outline-container-org946739a" class="outline-4">
-<h4 id="wrap-region"><a id="org946739a"></a><i>wrap-region</i></h4>
+<div id="outline-container-orgea519e6" class="outline-4">
+<h4 id="wrap-region"><a id="orgea519e6"></a><i>wrap-region</i></h4>
 <div class="outline-text-4" id="text-wrap-region">
 <p>
 <code>wrap-region</code> is a handy plugin that automatically surrounds your selection with the
@@ -917,8 +917,8 @@ corresponding pairs when typing &ldquo;paired&rdquo; characters, like <code>'</c
 </div>
 </div>
 
-<div id="outline-container-org1d46a84" class="outline-3">
-<h3 id="smart-open-line"><a id="org1d46a84"></a><span class="section-number-3">4.6</span> Opening line below and above</h3>
+<div id="outline-container-org4c74834" class="outline-3">
+<h3 id="smart-open-line"><a id="org4c74834"></a><span class="section-number-3">4.6</span> Opening line below and above</h3>
 <div class="outline-text-3" id="text-smart-open-line">
 <p>
 Every Vim user knows how useful the <code>o</code> and <code>O</code> commands are. <code>smart-open-line</code> and
@@ -927,7 +927,7 @@ this behavior.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org53402ab"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">smart-open-line</span> <span style="color: #1e1e1e;">()</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">(courtesy of Emacs Redux)</span>
+<pre class="src src-emacs-lisp" id="org9484121"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">smart-open-line</span> <span style="color: #1e1e1e;">()</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">(courtesy of Emacs Redux)</span>
   <span style="color: #555555; font-style: italic;">"Insert an empty line after the current line.</span>
 <span style="color: #555555; font-style: italic;">  Position the cursor at beginning, according to current mode."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
@@ -952,7 +952,7 @@ Personally, I use the following keybindings:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgccf7b7b"><span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"M-o"</span><span style="color: #1e1e1e;">)</span> 'smart-open-line<span style="color: #0f0f0f;">)</span>
+<pre class="src src-emacs-lisp" id="orgbb766e8"><span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"M-o"</span><span style="color: #1e1e1e;">)</span> 'smart-open-line<span style="color: #0f0f0f;">)</span>
 <span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"M-O"</span><span style="color: #1e1e1e;">)</span> 'smart-open-line-above<span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
@@ -963,8 +963,8 @@ Note, however, that if you use Emacs in a terminal, <code>M-O</code> will not wo
 </div>
 </div>
 
-<div id="outline-container-org60ca75c" class="outline-3">
-<h3 id="commenting-lines"><a id="org60ca75c"></a><span class="section-number-3">4.7</span> Commenting lines</h3>
+<div id="outline-container-org6107ff5" class="outline-3">
+<h3 id="commenting-lines"><a id="org6107ff5"></a><span class="section-number-3">4.7</span> Commenting lines</h3>
 <div class="outline-text-3" id="text-commenting-lines">
 <p>
 What follows is a function by Jason Viers at StackExchange. It makes it a bit
@@ -972,7 +972,7 @@ easier to comment either the current line or the current region.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org67fb52a"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">comment-dwim-line</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> arg<span style="color: #1e1e1e;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">(courtesy of Jason Viers @ SE)</span>
+<pre class="src src-emacs-lisp" id="org1acede4"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">comment-dwim-line</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> arg<span style="color: #1e1e1e;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">(courtesy of Jason Viers @ SE)</span>
   <span style="color: #555555; font-style: italic;">"Replacement for the comment-dwim command.</span>
 <span style="color: #555555; font-style: italic;">  If no region is selected and current line is not blank and we</span>
 <span style="color: #555555; font-style: italic;">  are not at the end of the line, then comment current line.</span>
@@ -993,11 +993,11 @@ easier to comment either the current line or the current region.
 </div>
 
 
-<div id="outline-container-org073d253" class="outline-2">
-<h2 id="org073d253"><span class="section-number-2">5</span> Movement</h2>
+<div id="outline-container-org69ece0d" class="outline-2">
+<h2 id="org69ece0d"><span class="section-number-2">5</span> Movement</h2>
 <div class="outline-text-2" id="text-5">
-</div><div id="outline-container-org2413797" class="outline-3">
-<h3 id="jumping"><a id="org2413797"></a><span class="section-number-3">5.1</span> Quickly jumping around</h3>
+</div><div id="outline-container-orgc0d0190" class="outline-3">
+<h3 id="jumping"><a id="orgc0d0190"></a><span class="section-number-3">5.1</span> Quickly jumping around</h3>
 <div class="outline-text-3" id="text-jumping">
 <p>
 Moving around using <code>C-n</code>, <code>C-p</code>, <code>C-f</code> and <code>C-b</code> is not only tiresome, but
@@ -1006,11 +1006,11 @@ methods I use to quickly jump to any position in the current window.
 </p>
 </div>
 
-<div id="outline-container-orgeca7284" class="outline-4">
-<h4 id="iy-go-to-char"><a id="orgeca7284"></a><i>iy-go-to-char</i></h4>
+<div id="outline-container-orgda4d0f8" class="outline-4">
+<h4 id="iy-go-to-char"><a id="orgda4d0f8"></a><i>iy-go-to-char</i></h4>
 <div class="outline-text-4" id="text-iy-go-to-char">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org778626b"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">iy-go-to-char</span>
+<pre class="src src-emacs-lisp" id="orgc7ab28c"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">iy-go-to-char</span>
   <span style="color: #000000; font-weight: bold;">:bind</span> <span style="color: #1e1e1e;">(</span><span style="color: #2d2d2d;">(</span><span style="color: #555555;">"M-m"</span> . iy-go-to-char<span style="color: #2d2d2d;">)</span>
          <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"M-M"</span> . iy-go-to-char-backward<span style="color: #2d2d2d;">)</span>
          <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-."</span> . iy-go-to-char-continue<span style="color: #2d2d2d;">)</span>
@@ -1025,11 +1025,11 @@ and <code>F</code>. Works well, without any problems.
 </div>
 </div>
 
-<div id="outline-container-org30c87a6" class="outline-4">
-<h4 id="avy"><a id="org30c87a6"></a><i>avy</i></h4>
+<div id="outline-container-org4254fda" class="outline-4">
+<h4 id="avy"><a id="org4254fda"></a><i>avy</i></h4>
 <div class="outline-text-4" id="text-avy">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org37e49e5"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">avy</span>
+<pre class="src src-emacs-lisp" id="orgfc5ed37"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">avy</span>
   <span style="color: #000000; font-weight: bold;">:commands</span> avy-isearch
   <span style="color: #000000; font-weight: bold;">:init</span> <span style="color: #1e1e1e;">(</span>global-set-key <span style="color: #2d2d2d;">(</span>kbd <span style="color: #555555;">"M-'"</span><span style="color: #2d2d2d;">)</span> nil<span style="color: #1e1e1e;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">reset M-'</span>
   <span style="color: #000000; font-weight: bold;">:config</span> <span style="color: #1e1e1e;">(</span>define-key isearch-mode-map <span style="color: #2d2d2d;">(</span>kbd <span style="color: #555555;">"M-'"</span><span style="color: #2d2d2d;">)</span> 'avy-isearch<span style="color: #1e1e1e;">)</span>
@@ -1055,8 +1055,8 @@ to <code>M-'</code> I have remapped to <code>C-M-'</code>.
 </div>
 </div>
 
-<div id="outline-container-org8ea16bf" class="outline-3">
-<h3 id="windmove"><a id="org8ea16bf"></a><span class="section-number-3">5.2</span> Moving between windows: <i>windmove</i></h3>
+<div id="outline-container-orgfa30ef1" class="outline-3">
+<h3 id="windmove"><a id="orgfa30ef1"></a><span class="section-number-3">5.2</span> Moving between windows: <i>windmove</i></h3>
 <div class="outline-text-3" id="text-windmove">
 <p>
 For the most part, especially when using Org-mode, I use the normal <code>C-x o</code> to
@@ -1071,18 +1071,18 @@ combination with any of the arrow keys.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org6ab8b1c"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">windmove</span>
+<pre class="src src-emacs-lisp" id="org8869635"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">windmove</span>
   <span style="color: #000000; font-weight: bold;">:init</span> <span style="color: #1e1e1e;">(</span>windmove-default-keybindings<span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org859a75e" class="outline-3">
-<h3 id="c-a"><a id="org859a75e"></a><span class="section-number-3">5.3</span> Improving <i>move-beginning-of-line</i></h3>
+<div id="outline-container-org774c05a" class="outline-3">
+<h3 id="c-a"><a id="org774c05a"></a><span class="section-number-3">5.3</span> Improving <i>move-beginning-of-line</i></h3>
 <div class="outline-text-3" id="text-c-a">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org7330a68"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">smarter-move-beginning-of-line</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> <span style="color: #222222; text-decoration: underline;">&amp;rest</span> args<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="orgbf9c325"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">smarter-move-beginning-of-line</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> <span style="color: #222222; text-decoration: underline;">&amp;rest</span> args<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"Move point back to indentation of beginning of line.</span>
 <span style="color: #555555; font-style: italic;">  Move point to the first non-whitespace character on this line.</span>
 <span style="color: #555555; font-style: italic;">  If point is already there, move to the beginning of the line.</span>
@@ -1104,15 +1104,15 @@ combination with any of the arrow keys.
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org8ea6c8b"><span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">[</span>remap move-beginning-of-line<span style="color: #1e1e1e;">]</span>
+<pre class="src src-emacs-lisp" id="org6bfcd8e"><span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">[</span>remap move-beginning-of-line<span style="color: #1e1e1e;">]</span>
                 'smarter-move-beginning-of-line<span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org5a0dccd" class="outline-3">
-<h3 id="scrolling-pleasantly"><a id="org5a0dccd"></a><span class="section-number-3">5.4</span> Scrolling pleasantly</h3>
+<div id="outline-container-orgea2a7e4" class="outline-3">
+<h3 id="scrolling-pleasantly"><a id="orgea2a7e4"></a><span class="section-number-3">5.4</span> Scrolling pleasantly</h3>
 <div class="outline-text-3" id="text-scrolling-pleasantly">
 <p>
 Sometimes, the mouse is really useful. I love text-based interfaces, but they&rsquo;re
@@ -1133,7 +1133,7 @@ The following code surpresses any errors thrown by <code>mwheel-scroll</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org26722d7"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">silent-mwheel-scroll</span> <span style="color: #1e1e1e;">(</span>oldfun <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org2e96a1b"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">silent-mwheel-scroll</span> <span style="color: #1e1e1e;">(</span>oldfun <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span> <span style="color: #2d2d2d;">(</span>list last-input-event<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">ignore-errors</span>
     <span style="color: #2d2d2d;">(</span>call-interactively oldfun<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
@@ -1151,11 +1151,11 @@ modern.
 </div>
 
 
-<div id="outline-container-org9b93d0a" class="outline-2">
-<h2 id="org9b93d0a"><span class="section-number-2">6</span> Visual aids</h2>
+<div id="outline-container-org19d3667" class="outline-2">
+<h2 id="org19d3667"><span class="section-number-2">6</span> Visual aids</h2>
 <div class="outline-text-2" id="text-6">
-</div><div id="outline-container-org4bc07b3" class="outline-3">
-<h3 id="origami"><a id="org4bc07b3"></a><span class="section-number-3">6.1</span> Folding with <i>origami</i></h3>
+</div><div id="outline-container-orgdae55d4" class="outline-3">
+<h3 id="origami"><a id="orgdae55d4"></a><span class="section-number-3">6.1</span> Folding with <i>origami</i></h3>
 <div class="outline-text-3" id="text-origami">
 <p>
 Origami is a package that provides Vim-like folding. I have been an avid
@@ -1168,7 +1168,7 @@ and then, take a pause and explain what I&rsquo;ve done:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgfc33aef"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">origami</span>
+<pre class="src src-emacs-lisp" id="orgb1b5709"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">origami</span>
   <span style="color: #000000; font-weight: bold;">:config</span>
   <span style="color: #1e1e1e;">(</span>global-origami-mode t<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> origami-fold-style 'triple-braces<span style="color: #1e1e1e;">)</span>
@@ -1262,8 +1262,8 @@ reliably in Emacs outside of Org-mode.
 </div>
 </div>
 
-<div id="outline-container-orgdc6e901" class="outline-3">
-<h3 id="show-trailing-whitespace"><a id="orgdc6e901"></a><span class="section-number-3">6.2</span> Highlighting superfluous whitespace</h3>
+<div id="outline-container-org4106f64" class="outline-3">
+<h3 id="show-trailing-whitespace"><a id="org4106f64"></a><span class="section-number-3">6.2</span> Highlighting superfluous whitespace</h3>
 <div class="outline-text-3" id="text-show-trailing-whitespace">
 <p>
 With the following code, I enable highlighting of trailing whitespace in any
@@ -1271,15 +1271,15 @@ buffer whose mode descends from <i>prog-mode</i>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org934c204"><span style="color: #0f0f0f;">(</span>add-hook 'prog-mode-hook <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #2d2d2d;">()</span>
+<pre class="src src-emacs-lisp" id="org522a0cc"><span style="color: #0f0f0f;">(</span>add-hook 'prog-mode-hook <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #2d2d2d;">()</span>
                             <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> show-trailing-whitespace t<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgfb74dc8" class="outline-3">
-<h3 id="dynamic-cursor-shape"><a id="orgfb74dc8"></a><span class="section-number-3">6.3</span> Dynamic cursor shape</h3>
+<div id="outline-container-org4d1cf84" class="outline-3">
+<h3 id="dynamic-cursor-shape"><a id="org4d1cf84"></a><span class="section-number-3">6.3</span> Dynamic cursor shape</h3>
 <div class="outline-text-3" id="text-dynamic-cursor-shape">
 <p>
 One of the things I struggle with while using Emacs is identifying which window
@@ -1301,7 +1301,7 @@ focused.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orga87ff31"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> default-cursor-type cursor-type<span style="color: #0f0f0f;">)</span>
+<pre class="src src-emacs-lisp" id="org482e3ae"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> default-cursor-type cursor-type<span style="color: #0f0f0f;">)</span>
 
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">cursor-focused</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> cursor-type default-cursor-type<span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
@@ -1318,7 +1318,7 @@ Otherwise it calls <code>cursor-unfocused</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org9e28646"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">cursor-set-focus</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="org5968e86"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">cursor-set-focus</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">cl-loop</span>
    for window in <span style="color: #2d2d2d;">(</span>window-list<span style="color: #2d2d2d;">)</span>
    do <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">let</span> <span style="color: #3d3d3d;">(</span><span style="color: #4c4c4c;">(</span>current-buffer <span style="color: #5b5b5b;">(</span>window-buffer<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
@@ -1341,11 +1341,11 @@ anything as reliable. Believe me, <a href="#custom-hooks">I&rsquo;ve tried</a>.
 </div>
 
 
-<div id="outline-container-orgcc1d2c9" class="outline-2">
-<h2 id="orgcc1d2c9"><span class="section-number-2">7</span> Helpful tools</h2>
+<div id="outline-container-org6fa59ad" class="outline-2">
+<h2 id="org6fa59ad"><span class="section-number-2">7</span> Helpful tools</h2>
 <div class="outline-text-2" id="text-7">
-</div><div id="outline-container-org0618410" class="outline-3">
-<h3 id="helm"><a id="org0618410"></a><span class="section-number-3">7.1</span> Helm</h3>
+</div><div id="outline-container-org21937d8" class="outline-3">
+<h3 id="helm"><a id="org21937d8"></a><span class="section-number-3">7.1</span> Helm</h3>
 <div class="outline-text-3" id="text-helm">
 <p>
 I always feel a bit guilty when I use Helm. Which is, like, all the time,
@@ -1360,7 +1360,7 @@ from Eshell, which is very useful.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org5f7002c"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">helm</span>
+<pre class="src src-emacs-lisp" id="orgdd37022"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">helm</span>
   <span style="color: #000000; font-weight: bold;">:commands</span> helm-command-prefix
   <span style="color: #000000; font-weight: bold;">:bind</span> <span style="color: #1e1e1e;">(</span><span style="color: #2d2d2d;">(</span><span style="color: #555555;">"M-x"</span>     . helm-M-x<span style="color: #2d2d2d;">)</span>
          <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-x C-f"</span> . helm-find-files<span style="color: #2d2d2d;">)</span>
@@ -1383,11 +1383,11 @@ from Eshell, which is very useful.
 </div>
 </div>
 
-<div id="outline-container-org7856e97" class="outline-3">
-<h3 id="projectile"><a id="org7856e97"></a><span class="section-number-3">7.2</span> Projectile</h3>
+<div id="outline-container-org7b824cb" class="outline-3">
+<h3 id="projectile"><a id="org7b824cb"></a><span class="section-number-3">7.2</span> Projectile</h3>
 <div class="outline-text-3" id="text-projectile">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org001158f"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">projectile</span>
+<pre class="src src-emacs-lisp" id="orgb06f97d"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">projectile</span>
   <span style="color: #000000; font-weight: bold;">:ensure</span> helm-projectile
   <span style="color: #000000; font-weight: bold;">:config</span>
   <span style="color: #1e1e1e;">(</span>projectile-global-mode<span style="color: #1e1e1e;">)</span>
@@ -1411,11 +1411,11 @@ and the file finder.
 </div>
 </div>
 
-<div id="outline-container-org4dc932e" class="outline-3">
-<h3 id="magit"><a id="org4dc932e"></a><span class="section-number-3">7.3</span> Magit</h3>
+<div id="outline-container-orge8036cb" class="outline-3">
+<h3 id="magit"><a id="orge8036cb"></a><span class="section-number-3">7.3</span> Magit</h3>
 <div class="outline-text-3" id="text-magit">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org28147d8"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">magit</span>
+<pre class="src src-emacs-lisp" id="orge140384"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">magit</span>
   <span style="color: #000000; font-weight: bold;">:bind</span> <span style="color: #1e1e1e;">(</span><span style="color: #555555;">"C-c g"</span>   . magit-status<span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
@@ -1429,8 +1429,8 @@ hope it&rsquo;s just because I&rsquo;m running it on the Windows Subsystem for L
 </div>
 </div>
 
-<div id="outline-container-org3b34e2c" class="outline-3">
-<h3 id="git-gutter"><a id="org3b34e2c"></a><span class="section-number-3">7.4</span> <i>git-gutter+</i></h3>
+<div id="outline-container-orgedfa268" class="outline-3">
+<h3 id="git-gutter"><a id="orgedfa268"></a><span class="section-number-3">7.4</span> <i>git-gutter+</i></h3>
 <div class="outline-text-3" id="text-git-gutter">
 <p>
 As much as I love Magit, it&rsquo;s big, unwieldy and a bit slow. When editing my
@@ -1451,7 +1451,7 @@ commands.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org880c09c"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">git-gutter+</span>
+<pre class="src src-emacs-lisp" id="org6d4f06c"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">git-gutter+</span>
   <span style="color: #000000; font-weight: bold;">:bind</span> <span style="color: #1e1e1e;">(</span><span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-M-g C-M-g"</span> . git-gutter+-mode<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #000000; font-weight: bold;">:bind</span> <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">:map</span> git-gutter+-mode-map
               <span style="color: #2d2d2d;">(</span><span style="color: #555555;">"C-M-g n"</span> . git-gutter+-next-hunk<span style="color: #2d2d2d;">)</span>
@@ -1470,11 +1470,11 @@ work. Perhaps it needs updating, I don&rsquo;t know. For now, <code>git-gutter+<
 </p>
 </div>
 </div>
-<div id="outline-container-org6fa21be" class="outline-3">
-<h3 id="openwith"><a id="org6fa21be"></a><span class="section-number-3">7.5</span> <i>openwith</i></h3>
+<div id="outline-container-org5d5fdc4" class="outline-3">
+<h3 id="openwith"><a id="org5d5fdc4"></a><span class="section-number-3">7.5</span> <i>openwith</i></h3>
 <div class="outline-text-3" id="text-openwith">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgbeeae24"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">openwith</span>
+<pre class="src src-emacs-lisp" id="org0d7686f"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">openwith</span>
   <span style="color: #000000; font-weight: bold;">:init</span>
   <span style="color: #1e1e1e;">(</span>openwith-mode t<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">setq</span> openwith-associations '<span style="color: #2d2d2d;">(</span><span style="color: #3d3d3d;">(</span><span style="color: #555555;">"\\.pdf\\'"</span> <span style="color: #555555;">"mupdf"</span> <span style="color: #4c4c4c;">(</span>file<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
@@ -1491,11 +1491,11 @@ PDF reading.
 </div>
 
 
-<div id="outline-container-orgc8d8e21" class="outline-2">
-<h2 id="orgc8d8e21"><span class="section-number-2">8</span> Modes</h2>
+<div id="outline-container-org9285e3a" class="outline-2">
+<h2 id="org9285e3a"><span class="section-number-2">8</span> Modes</h2>
 <div class="outline-text-2" id="text-8">
-</div><div id="outline-container-org4635029" class="outline-3">
-<h3 id="org-mode"><a id="org4635029"></a><span class="section-number-3">8.1</span> Org-mode</h3>
+</div><div id="outline-container-org22c3c63" class="outline-3">
+<h3 id="org-mode"><a id="org22c3c63"></a><span class="section-number-3">8.1</span> Org-mode</h3>
 <div class="outline-text-3" id="text-org-mode">
 <p>
 Org-mode is where I spend much of my Emacs time. I use it for writing, studying,
@@ -1509,7 +1509,7 @@ functions - they are defined further down.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orga40e5b3"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">org</span>
+<pre class="src src-emacs-lisp" id="org124cfab"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">use-package</span> <span style="color: #888888; font-weight: bold;">org</span>
   <span style="color: #000000; font-weight: bold;">:mode</span> <span style="color: #1e1e1e;">(</span><span style="color: #2d2d2d;">(</span><span style="color: #555555;">"\\.org$"</span> . org-mode<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #000000; font-weight: bold;">:ensure</span> org-plus-contrib
   <span style="color: #000000; font-weight: bold;">:demand</span>
@@ -1540,11 +1540,11 @@ functions - they are defined further down.
 </div>
 </div>
 
-<div id="outline-container-orgac11c0e" class="outline-4">
-<h4 id="org-make-wiktionary-link"><a id="orgac11c0e"></a>Automatic Wiktionary links</h4>
+<div id="outline-container-org9b148f7" class="outline-4">
+<h4 id="org-make-wiktionary-link"><a id="org9b148f7"></a>Automatic Wiktionary links</h4>
 <div class="outline-text-4" id="text-org-make-wiktionary-link">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org1b4c983"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-make-wiktionary-link</span> <span style="color: #1e1e1e;">(</span>string <span style="color: #222222; text-decoration: underline;">&amp;optional</span> from to<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org1ee2af4"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-make-wiktionary-link</span> <span style="color: #1e1e1e;">(</span>string <span style="color: #222222; text-decoration: underline;">&amp;optional</span> from to<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"Wraps the word at point or selected word in a Wiktionary link to the word."</span>
 
   <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">(see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)</span>
@@ -1590,8 +1590,8 @@ on <a href="#lang">non-English languages</a>.
 </div>
 </div>
 
-<div id="outline-container-org6e2e029" class="outline-4">
-<h4 id="org-tree-view"><a id="org6e2e029"></a><i>org-tree-view</i></h4>
+<div id="outline-container-orgff7e6fc" class="outline-4">
+<h4 id="org-tree-view"><a id="orgff7e6fc"></a><i>org-tree-view</i></h4>
 <div class="outline-text-4" id="text-org-tree-view">
 <p>
 Sometimes, I use to write large documents with many headings and many levels.
@@ -1607,7 +1607,7 @@ respectively, but they have developed into something quite solid.
 </p>
 
 
-<div id="org6ccc4ee" class="figure">
+<div id="org21ffd2c" class="figure">
 <p><img src="./resources/org-tree-view.png" alt="org-tree-view.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span><i>org-tree-view</i> in combination with the theme <i>leuven</i></p>
@@ -1630,9 +1630,9 @@ the base buffer</li>
 </ul>
 </div>
 
-<div id="outline-container-org317dd0d" class="outline-5">
-<h5 id="org317dd0d">Options</h5>
-<div class="outline-text-5" id="text-org317dd0d">
+<div id="outline-container-org0dc1390" class="outline-5">
+<h5 id="org0dc1390">Options</h5>
+<div class="outline-text-5" id="text-org0dc1390">
 <p>
 With <i>org-tree-view</i> looking more and more like a package, there are of course
 options that can be set.
@@ -1641,18 +1641,18 @@ options that can be set.
 <dl class="org-dl">
 <dt>org-tree-view/levels</dt><dd>how many levels of heading to show.</dd>
 <dt>org-tree-view/width</dt><dd>the width of the tree view.</dd>
-<dt>org-tree-view/split-right</dt><dd>create the tree view window on the right side
-instead of the default left.</dd>
+<dt>org-tree-view/split</dt><dd>at what side of the base buffer the tree view should be
+opened.</dd>
 </dl>
 </div>
 </div>
 
-<div id="outline-container-org121ecfb" class="outline-5">
-<h5 id="org121ecfb">Source</h5>
-<div class="outline-text-5" id="text-org121ecfb">
-</div><ul class="org-ul"><li><a id="orgb17da12"></a><i>org-tree-view/open-heading</i><br /><div class="outline-text-6" id="text-orgb17da12">
+<div id="outline-container-org918124f" class="outline-5">
+<h5 id="org918124f">Source</h5>
+<div class="outline-text-5" id="text-org918124f">
+</div><ul class="org-ul"><li><a id="orge1c2e1d"></a><i>org-tree-view/open-heading</i><br /><div class="outline-text-6" id="text-orge1c2e1d">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org7df64ba"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/open-heading</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="org21c189f"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/open-heading</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #555555; font-style: italic;">"Switch to a cloned buffer's base buffer and narrow in on the</span>
 <span style="color: #555555; font-style: italic;">  selected subtree."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
@@ -1673,9 +1673,9 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="orga93a5b7"></a><i>org-tree-view/refresh</i><br /><div class="outline-text-6" id="text-orga93a5b7">
+<li><a id="orgb65463f"></a><i>org-tree-view/refresh</i><br /><div class="outline-text-6" id="text-orgb65463f">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orge103ae2"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/refresh</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org619726e"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/refresh</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"Refresh the tree view."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">let</span> <span style="color: #2d2d2d;">(</span><span style="color: #3d3d3d;">(</span>tree-view-buffer-name <span style="color: #4c4c4c;">(</span>org-tree-view/buffer-name<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span>
     <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">when</span> <span style="color: #3d3d3d;">(</span>get-buffer-window tree-view-buffer-name<span style="color: #3d3d3d;">)</span>
@@ -1692,9 +1692,9 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="org59215d4"></a><i>org-tree-view/buffer-name</i><br /><div class="outline-text-6" id="text-org59215d4">
+<li><a id="org5d32d82"></a><i>org-tree-view/buffer-name</i><br /><div class="outline-text-6" id="text-org5d32d82">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgcdb59c3"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/buffer-name</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="orga9548aa"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/buffer-name</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #555555; font-style: italic;">"Return the the appropriate name for the current file's tree view buffer."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">if</span> <span style="color: #2d2d2d;">(</span>s-starts-with? <span style="color: #555555;">"&lt;tree&gt;"</span> <span style="color: #3d3d3d;">(</span>buffer-name<span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span>
       <span style="color: #2d2d2d;">(</span>buffer-name<span style="color: #2d2d2d;">)</span>
@@ -1703,9 +1703,9 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="org91d5cbc"></a><i>org-tree-view/beginning-of-line</i><br /><div class="outline-text-6" id="text-org91d5cbc">
+<li><a id="orgc1c1a79"></a><i>org-tree-view/beginning-of-line</i><br /><div class="outline-text-6" id="text-orgc1c1a79">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org63209aa"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/beginning-of-line</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="orgdd3eaa2"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/beginning-of-line</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> <span style="color: #222222; text-decoration: underline;">&amp;rest</span> r<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"Go to the beginning of the current heading and be smart about it."</span>
   <span style="color: #1e1e1e;">(</span>org-end-of-line<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span>org-beginning-of-line<span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
@@ -1713,9 +1713,9 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="org0a3beab"></a><i>org-tree-view/search</i><br /><div class="outline-text-6" id="text-org0a3beab">
+<li><a id="orge072d88"></a><i>org-tree-view/search</i><br /><div class="outline-text-6" id="text-orge072d88">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org355eb27"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/search</span> <span style="color: #1e1e1e;">(</span>N<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="orgd926189"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/search</span> <span style="color: #1e1e1e;">(</span>N<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span> <span style="color: #555555;">"p"</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Scroll to top of window</span>
   <span style="color: #1e1e1e;">(</span>goto-char <span style="color: #2d2d2d;">(</span>point-min<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
@@ -1727,9 +1727,9 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="org0f1b183"></a><i>org-tree-view/isearch-return</i><br /><div class="outline-text-6" id="text-org0f1b183">
+<li><a id="orgb5994d8"></a><i>org-tree-view/isearch-return</i><br /><div class="outline-text-6" id="text-orgb5994d8">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org17fca36"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/isearch-return</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="org39acc73"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/isearch-return</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">when</span> <span style="color: #2d2d2d;">(</span>s-starts-with? <span style="color: #555555;">"&lt;tree&gt;"</span> <span style="color: #3d3d3d;">(</span>buffer-name<span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span>
     <span style="color: #2d2d2d;">(</span>org-tree-view/open-heading<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
@@ -1738,9 +1738,9 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="orga2e1f54"></a><i>org-tree-view/self-insert-command</i><br /><div class="outline-text-6" id="text-orga2e1f54">
+<li><a id="orga5ee6c0"></a><i>org-tree-view/self-insert-command</i><br /><div class="outline-text-6" id="text-orga5ee6c0">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org50cfc8a"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/self-insert-command</span> <span style="color: #1e1e1e;">(</span>oldfun N<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org6c63f6f"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/self-insert-command</span> <span style="color: #1e1e1e;">(</span>oldfun N<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span> <span style="color: #555555;">"p"</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">if</span> <span style="color: #2d2d2d;">(</span>s-starts-with? <span style="color: #555555;">"&lt;tree&gt;"</span> <span style="color: #3d3d3d;">(</span>buffer-name<span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span>
       <span style="color: #2d2d2d;">(</span>call-interactively #'org-tree-view/search<span style="color: #2d2d2d;">)</span>
@@ -1749,9 +1749,9 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="org64bc661"></a><i>org-tree-view/exit</i><br /><div class="outline-text-6" id="text-org64bc661">
+<li><a id="org2fbb544"></a><i>org-tree-view/exit</i><br /><div class="outline-text-6" id="text-org2fbb544">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgb3cb494"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/exit</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="org36c3944"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/exit</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #555555; font-style: italic;">"Kill the tree view."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
 
@@ -1770,139 +1770,158 @@ instead of the default left.</dd>
 </div>
 </div></li>
 
-<li><a id="org64d6aef"></a><i>org-tree-view/open</i><br /><div class="outline-text-6" id="text-org64d6aef">
+<li><a id="org66195d6"></a><i>org-tree-view/open</i><br /><div class="outline-text-6" id="text-org66195d6">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org428215f"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/open</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="orgbf997d9"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-tree-view/open</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #555555; font-style: italic;">"Open a clone of the current buffer to the left, resize it to</span>
 <span style="color: #555555; font-style: italic;">   30 columns, and bind RET to jump to the same position in the</span>
 <span style="color: #555555; font-style: italic;">   base buffer."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span>push-mark<span style="color: #1e1e1e;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">in case user gets lost</span>
 
-  <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Default options</span>
+  <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">if</span> <span style="color: #2d2d2d;">(</span>buffer-base-buffer<span style="color: #2d2d2d;">)</span>
+      <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">error</span> <span style="color: #555555;">"Tree view can only be opened from a base buffer!"</span><span style="color: #2d2d2d;">)</span>
+    <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">let</span> <span style="color: #3d3d3d;">(</span><span style="color: #4c4c4c;">(</span>tree-view-buffer-name <span style="color: #5b5b5b;">(</span>org-tree-view/buffer-name<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
+      <span style="color: #3d3d3d;">(</span><span style="color: #000000; font-weight: bold;">if</span> <span style="color: #4c4c4c;">(</span>get-buffer-window tree-view-buffer-name<span style="color: #4c4c4c;">)</span>
+          <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Use existing tree buffer</span>
+          <span style="color: #4c4c4c;">(</span>select-window <span style="color: #5b5b5b;">(</span>get-buffer-window tree-view-buffer-name<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
 
-  <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">unless</span> <span style="color: #2d2d2d;">(</span>boundp 'org-tree-view/levels<span style="color: #2d2d2d;">)</span>
-    <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">setq</span> org-tree-view/levels 3<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
-  <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">unless</span> <span style="color: #2d2d2d;">(</span>boundp 'org-tree-view/width<span style="color: #2d2d2d;">)</span>
-    <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">setq</span> org-tree-view/width 30<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
-  <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">unless</span> <span style="color: #2d2d2d;">(</span>boundp 'org-tree-view/right-side<span style="color: #2d2d2d;">)</span>
-    <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">setq</span> org-tree-view/right-side nil<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">default: left side</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Make new tree buffer</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">********************</span>
 
-  <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">let</span> <span style="color: #2d2d2d;">(</span><span style="color: #3d3d3d;">(</span>tree-view-buffer-name <span style="color: #4c4c4c;">(</span>org-tree-view/buffer-name<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span>
-    <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">if</span> <span style="color: #3d3d3d;">(</span>get-buffer-window tree-view-buffer-name<span style="color: #3d3d3d;">)</span>
-        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Use existing tree buffer</span>
-        <span style="color: #3d3d3d;">(</span>select-window <span style="color: #4c4c4c;">(</span>get-buffer-window tree-view-buffer-name<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
+        <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">if</span> <span style="color: #5b5b5b;">(</span>equal org-tree-view/side 'left<span style="color: #5b5b5b;">)</span>
+            <span style="color: #5b5b5b;">(</span>split-window-right org-tree-view/width<span style="color: #5b5b5b;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">left</span>
+          <span style="color: #5b5b5b;">(</span>split-window-right <span style="color: #6b6b6b;">(</span>- <span style="color: #7a7a7a;">(</span>frame-width<span style="color: #7a7a7a;">)</span> org-tree-view/width<span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">right</span>
+          <span style="color: #5b5b5b;">(</span>other-window 1<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
+        <span style="color: #4c4c4c;">(</span>clone-indirect-buffer tree-view-buffer-name nil <span style="color: #000000; font-weight: bold;">:norecord</span><span style="color: #4c4c4c;">)</span>
+        <span style="color: #4c4c4c;">(</span>switch-to-buffer tree-view-buffer-name<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Make new tree buffer</span>
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">********************</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Basic setup</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">***********</span>
 
-      <span style="color: #3d3d3d;">(</span><span style="color: #000000; font-weight: bold;">if</span> <span style="color: #4c4c4c;">(</span>not org-tree-view/right-side<span style="color: #4c4c4c;">)</span>
-          <span style="color: #4c4c4c;">(</span>split-window-right org-tree-view/width<span style="color: #4c4c4c;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">left</span>
-        <span style="color: #4c4c4c;">(</span>split-window-right <span style="color: #5b5b5b;">(</span>- <span style="color: #6b6b6b;">(</span>frame-width<span style="color: #6b6b6b;">)</span> org-tree-view/width<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">right</span>
-        <span style="color: #4c4c4c;">(</span>other-window 1<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
-      <span style="color: #3d3d3d;">(</span>clone-indirect-buffer tree-view-buffer-name nil <span style="color: #000000; font-weight: bold;">:norecord</span><span style="color: #3d3d3d;">)</span>
-      <span style="color: #3d3d3d;">(</span>switch-to-buffer tree-view-buffer-name<span style="color: #3d3d3d;">)</span>
+        <span style="color: #4c4c4c;">(</span>widen<span style="color: #4c4c4c;">)</span>                           <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">widen if possible</span>
+        <span style="color: #4c4c4c;">(</span>org-tree-view/refresh<span style="color: #4c4c4c;">)</span>           <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">show only headings</span>
+        <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> truncate-lines t<span style="color: #4c4c4c;">)</span>     <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">ensure truncated lines</span>
+        <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> scroll-margin 0<span style="color: #4c4c4c;">)</span>      <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">disable scroll-margin for buffer</span>
+        <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> search-invisible nil<span style="color: #4c4c4c;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">search only visible text</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Basic setup</span>
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">***********</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Hide fringe truncation indicators</span>
+        <span style="color: #4c4c4c;">(</span>set-window-fringes nil 8 1<span style="color: #4c4c4c;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">don't set to 0 unless you want to see $'s</span>
 
-      <span style="color: #3d3d3d;">(</span>widen<span style="color: #3d3d3d;">)</span>                           <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">widen if possible</span>
-      <span style="color: #3d3d3d;">(</span>org-tree-view/refresh<span style="color: #3d3d3d;">)</span>           <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">show only headings</span>
-      <span style="color: #3d3d3d;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> truncate-lines t<span style="color: #3d3d3d;">)</span>     <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">ensure truncated lines</span>
-      <span style="color: #3d3d3d;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> scroll-margin 0<span style="color: #3d3d3d;">)</span>      <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">disable scroll-margin for buffer</span>
-      <span style="color: #3d3d3d;">(</span><span style="color: #000000; font-weight: bold;">setq-local</span> search-invisible nil<span style="color: #3d3d3d;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">search only visible text</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815</span>
+        <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">let</span> <span style="color: #5b5b5b;">(</span><span style="color: #6b6b6b;">(</span>display-table
+               <span style="color: #7a7a7a;">(</span><span style="color: #000000; font-weight: bold;">if</span> buffer-display-table
+                   buffer-display-table
+                 <span style="color: #898989;">(</span>make-display-table<span style="color: #898989;">)</span><span style="color: #7a7a7a;">)</span><span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span>
+          <span style="color: #5b5b5b;">(</span><span style="color: #000000; font-weight: bold;">unless</span> buffer-display-table
+            <span style="color: #6b6b6b;">(</span><span style="color: #000000; font-weight: bold;">setq</span> buffer-display-table display-table<span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span>
+          <span style="color: #5b5b5b;">(</span>set-display-table-slot
+           display-table 4
+           <span style="color: #6b6b6b;">(</span>vconcat <span style="color: #7a7a7a;">(</span>mapcar
+                     <span style="color: #898989;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #0f0f0f;">(</span>c<span style="color: #0f0f0f;">)</span>
+                       <span style="color: #0f0f0f;">(</span>make-glyph-code c 'font-lock-keyword-face<span style="color: #0f0f0f;">)</span><span style="color: #898989;">)</span>
+                     <span style="color: #898989;">(</span>apply #'concat <span style="color: #0f0f0f;">(</span>make-list org-tree-view/width <span style="color: #555555;">" "</span><span style="color: #0f0f0f;">)</span><span style="color: #898989;">)</span><span style="color: #7a7a7a;">)</span><span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">The above code replaces the ellipsis with a string of spaces as long as</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">org-tree-view/width. If Org headings are themed with a background, this</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">creates a nice, unified look.</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Hide fringe truncation indicators</span>
-      <span style="color: #3d3d3d;">(</span>set-window-fringes nil 8 1<span style="color: #3d3d3d;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">don't set to 0 unless you want to see $'s</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Go to top of tree view</span>
+        <span style="color: #4c4c4c;">(</span>goto-char <span style="color: #5b5b5b;">(</span>point-min<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>      <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">go to beginning of buffer</span>
+        <span style="color: #4c4c4c;">(</span>org-next-visible-heading 1<span style="color: #4c4c4c;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">go to first heading</span>
+        <span style="color: #4c4c4c;">(</span>recenter 0<span style="color: #4c4c4c;">)</span>                 <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">put top of window at point</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815</span>
-      <span style="color: #3d3d3d;">(</span><span style="color: #000000; font-weight: bold;">let</span> <span style="color: #4c4c4c;">(</span><span style="color: #5b5b5b;">(</span>display-table
-             <span style="color: #6b6b6b;">(</span><span style="color: #000000; font-weight: bold;">if</span> buffer-display-table
-                 buffer-display-table
-               <span style="color: #7a7a7a;">(</span>make-display-table<span style="color: #7a7a7a;">)</span><span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
-        <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">unless</span> buffer-display-table
-          <span style="color: #5b5b5b;">(</span><span style="color: #000000; font-weight: bold;">setq</span> buffer-display-table display-table<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
-        <span style="color: #4c4c4c;">(</span>set-display-table-slot
-         display-table 4
-         <span style="color: #5b5b5b;">(</span>vconcat <span style="color: #6b6b6b;">(</span>mapcar
-                   <span style="color: #7a7a7a;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #898989;">(</span>c<span style="color: #898989;">)</span>
-                     <span style="color: #898989;">(</span>make-glyph-code c 'font-lock-keyword-face<span style="color: #898989;">)</span><span style="color: #7a7a7a;">)</span>
-                   <span style="color: #7a7a7a;">(</span>apply #'concat <span style="color: #898989;">(</span>make-list org-tree-view/width <span style="color: #555555;">" "</span><span style="color: #898989;">)</span><span style="color: #7a7a7a;">)</span><span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">The above code replaces the ellipsis with a string of spaces as long as</span>
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">org-tree-view/width. If Org headings are themed with a background, this</span>
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">creates a nice, unified look.</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Hide everything above tree view</span>
+        <span style="color: #4c4c4c;">(</span>narrow-to-region <span style="color: #5b5b5b;">(</span>window-start<span style="color: #5b5b5b;">)</span> <span style="color: #5b5b5b;">(</span>point-max<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Go to top of tree view</span>
-      <span style="color: #3d3d3d;">(</span>goto-char <span style="color: #4c4c4c;">(</span>point-min<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>      <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">go to beginning of buffer</span>
-      <span style="color: #3d3d3d;">(</span>org-next-visible-heading 1<span style="color: #3d3d3d;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">go to first heading</span>
-      <span style="color: #3d3d3d;">(</span>recenter 0<span style="color: #3d3d3d;">)</span>                 <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">put top of window at point</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Go to smart beginning of line, if enabled</span>
+        <span style="color: #4c4c4c;">(</span>org-tree-view/beginning-of-line<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Hide everything above tree view</span>
-      <span style="color: #3d3d3d;">(</span>narrow-to-region <span style="color: #4c4c4c;">(</span>window-start<span style="color: #4c4c4c;">)</span> <span style="color: #4c4c4c;">(</span>point-max<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Refresh tree view on save</span>
+        <span style="color: #4c4c4c;">(</span>add-hook 'after-save-hook #'org-tree-view/refresh<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Go to smart beginning of line, if enabled</span>
-      <span style="color: #3d3d3d;">(</span>org-tree-view/beginning-of-line<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Automatically run isearch-forward on any key</span>
+        <span style="color: #4c4c4c;">(</span>advice-add #'org-self-insert-command <span style="color: #000000; font-weight: bold;">:around</span>
+                    #'org-tree-view/self-insert-command<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Refresh tree view on save</span>
-      <span style="color: #3d3d3d;">(</span>add-hook 'after-save-hook #'org-tree-view/refresh<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Make sure to be at the beginning of line before moving subtrees</span>
+        <span style="color: #4c4c4c;">(</span>advice-add #'org-move-subtree-up   <span style="color: #000000; font-weight: bold;">:before</span> #'org-tree-view/beginning-of-line<span style="color: #4c4c4c;">)</span>
+        <span style="color: #4c4c4c;">(</span>advice-add #'org-move-subtree-down <span style="color: #000000; font-weight: bold;">:before</span> #'org-tree-view/beginning-of-line<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Automatically run isearch-forward on any key</span>
-      <span style="color: #3d3d3d;">(</span>advice-add #'org-self-insert-command <span style="color: #000000; font-weight: bold;">:around</span>
-                  #'org-tree-view/self-insert-command<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Automatically refresh tree view after moving subtrees</span>
+        <span style="color: #4c4c4c;">(</span>advice-add #'org-move-subtree-up   <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/refresh<span style="color: #4c4c4c;">)</span>
+        <span style="color: #4c4c4c;">(</span>advice-add #'org-move-subtree-down <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/refresh<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Make sure to be at the beginning of line before moving subtrees</span>
-      <span style="color: #3d3d3d;">(</span>advice-add #'org-move-subtree-up   <span style="color: #000000; font-weight: bold;">:before</span> #'org-tree-view/beginning-of-line<span style="color: #3d3d3d;">)</span>
-      <span style="color: #3d3d3d;">(</span>advice-add #'org-move-subtree-down <span style="color: #000000; font-weight: bold;">:before</span> #'org-tree-view/beginning-of-line<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Go to smart beginning of line after jumping between headings</span>
+        <span style="color: #4c4c4c;">(</span>advice-add #'org-forward-heading-same-level <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/beginning-of-line<span style="color: #4c4c4c;">)</span>
+        <span style="color: #4c4c4c;">(</span>advice-add #'org-backward-heading-same-level <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/beginning-of-line<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Automatically refresh tree view after moving subtrees</span>
-      <span style="color: #3d3d3d;">(</span>advice-add #'org-move-subtree-up   <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/refresh<span style="color: #3d3d3d;">)</span>
-      <span style="color: #3d3d3d;">(</span>advice-add #'org-move-subtree-down <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/refresh<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Keybindings</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">***********</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Go to smart beginning of line after jumping between headings</span>
-      <span style="color: #3d3d3d;">(</span>advice-add #'org-forward-heading-same-level <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/beginning-of-line<span style="color: #3d3d3d;">)</span>
-      <span style="color: #3d3d3d;">(</span>advice-add #'org-backward-heading-same-level <span style="color: #000000; font-weight: bold;">:after</span> #'org-tree-view/beginning-of-line<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Use org-mode-map as base</span>
+        <span style="color: #4c4c4c;">(</span>use-local-map <span style="color: #5b5b5b;">(</span>copy-keymap org-mode-map<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Keybindings</span>
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">***********</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Press &lt;C-return&gt; from isearch to directly open matching heading</span>
+        <span style="color: #4c4c4c;">(</span>define-key isearch-mode-map <span style="color: #5b5b5b;">(</span>kbd <span style="color: #555555;">"&lt;C-return&gt;"</span><span style="color: #5b5b5b;">)</span> #'org-tree-view/isearch-return<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Use org-mode-map as base</span>
-      <span style="color: #3d3d3d;">(</span>use-local-map <span style="color: #4c4c4c;">(</span>copy-keymap org-mode-map<span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Browse headings more easily</span>
+        <span style="color: #4c4c4c;">(</span>local-set-key <span style="color: #5b5b5b;">(</span>kbd <span style="color: #555555;">"C-M-n"</span><span style="color: #5b5b5b;">)</span> #'org-forward-heading-same-level<span style="color: #4c4c4c;">)</span>
+        <span style="color: #4c4c4c;">(</span>local-set-key <span style="color: #5b5b5b;">(</span>kbd <span style="color: #555555;">"C-M-p"</span><span style="color: #5b5b5b;">)</span> #'org-backward-heading-same-level<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Press &lt;C-return&gt; from isearch to directly open matching heading</span>
-      <span style="color: #3d3d3d;">(</span>define-key isearch-mode-map <span style="color: #4c4c4c;">(</span>kbd <span style="color: #555555;">"&lt;C-return&gt;"</span><span style="color: #4c4c4c;">)</span> #'org-tree-view/isearch-return<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Quit tree view</span>
+        <span style="color: #4c4c4c;">(</span>local-set-key <span style="color: #5b5b5b;">(</span>kbd <span style="color: #555555;">"Q"</span><span style="color: #5b5b5b;">)</span> #'org-tree-view/exit<span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Browse headings more easily</span>
-      <span style="color: #3d3d3d;">(</span>local-set-key <span style="color: #4c4c4c;">(</span>kbd <span style="color: #555555;">"C-M-n"</span><span style="color: #4c4c4c;">)</span> #'org-forward-heading-same-level<span style="color: #3d3d3d;">)</span>
-      <span style="color: #3d3d3d;">(</span>local-set-key <span style="color: #4c4c4c;">(</span>kbd <span style="color: #555555;">"C-M-p"</span><span style="color: #4c4c4c;">)</span> #'org-backward-heading-same-level<span style="color: #3d3d3d;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Switch back to base buffer</span>
+        <span style="color: #4c4c4c;">(</span>local-set-key <span style="color: #5b5b5b;">(</span>kbd <span style="color: #555555;">"C-c C-t"</span><span style="color: #5b5b5b;">)</span>
+                       <span style="color: #5b5b5b;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #6b6b6b;">()</span>
+                         <span style="color: #6b6b6b;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #6b6b6b;">)</span>
+                         <span style="color: #6b6b6b;">(</span>select-window <span style="color: #7a7a7a;">(</span>get-buffer-window <span style="color: #898989;">(</span>buffer-base-buffer<span style="color: #898989;">)</span><span style="color: #7a7a7a;">)</span><span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
 
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Quit tree view</span>
-      <span style="color: #3d3d3d;">(</span>local-set-key <span style="color: #4c4c4c;">(</span>kbd <span style="color: #555555;">"Q"</span><span style="color: #4c4c4c;">)</span> #'org-tree-view/exit<span style="color: #3d3d3d;">)</span>
-
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Switch back to base buffer</span>
-      <span style="color: #3d3d3d;">(</span>local-set-key <span style="color: #4c4c4c;">(</span>kbd <span style="color: #555555;">"C-c C-t"</span><span style="color: #4c4c4c;">)</span>
-                     <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #5b5b5b;">()</span>
-                       <span style="color: #5b5b5b;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #5b5b5b;">)</span>
-                       <span style="color: #5b5b5b;">(</span>select-window <span style="color: #6b6b6b;">(</span>get-buffer-window <span style="color: #7a7a7a;">(</span>buffer-base-buffer<span style="color: #7a7a7a;">)</span><span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span>
-
-      <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Open heading in base buffer</span>
-      <span style="color: #3d3d3d;">(</span>mapc <span style="color: #4c4c4c;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #5b5b5b;">(</span>key<span style="color: #5b5b5b;">)</span>
-              <span style="color: #5b5b5b;">(</span>local-set-key <span style="color: #6b6b6b;">(</span>kbd key<span style="color: #6b6b6b;">)</span> 'org-tree-view/open-heading<span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span>
-            '<span style="color: #4c4c4c;">(</span><span style="color: #555555;">"&lt;mouse-1&gt;"</span> <span style="color: #555555;">"RET"</span><span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
+        <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Open heading in base buffer</span>
+        <span style="color: #4c4c4c;">(</span>mapc <span style="color: #5b5b5b;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #6b6b6b;">(</span>key<span style="color: #6b6b6b;">)</span>
+                <span style="color: #6b6b6b;">(</span>local-set-key <span style="color: #7a7a7a;">(</span>kbd key<span style="color: #7a7a7a;">)</span> 'org-tree-view/open-heading<span style="color: #6b6b6b;">)</span><span style="color: #5b5b5b;">)</span>
+              '<span style="color: #5b5b5b;">(</span><span style="color: #555555;">"&lt;mouse-1&gt;"</span> <span style="color: #555555;">"RET"</span><span style="color: #5b5b5b;">)</span><span style="color: #4c4c4c;">)</span><span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 
 <span style="color: #0f0f0f;">(</span>define-key org-mode-map <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"C-c C-t"</span><span style="color: #1e1e1e;">)</span> #'org-tree-view/open<span style="color: #0f0f0f;">)</span>
+</pre>
+</div>
+</div></li>
+
+<li><a id="org35f348b"></a>Customizable options<br /><div class="outline-text-6" id="text-org35f348b">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp" id="org6fd830e"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defgroup</span> <span style="color: #222222; text-decoration: underline;">org-tree-view</span> nil
+  <span style="color: #555555; font-style: italic;">"A window providing easy access to all headings in an Org document."</span><span style="color: #0f0f0f;">)</span>
+
+<span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defcustom</span> <span style="color: #000000;">org-tree-view/levels</span> 3
+  <span style="color: #555555; font-style: italic;">"The highest level headings to show in the tree view. Think of</span>
+<span style="color: #555555; font-style: italic;">  each asterisk preceding a heading as a level."</span>
+  <span style="color: #000000; font-weight: bold;">:group</span> 'org-tree-view
+  <span style="color: #000000; font-weight: bold;">:type</span> 'integer<span style="color: #0f0f0f;">)</span>
+
+<span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defcustom</span> <span style="color: #000000;">org-tree-view/width</span> 30
+  <span style="color: #555555; font-style: italic;">"The width of the tree view window."</span>
+  <span style="color: #000000; font-weight: bold;">:group</span> 'org-tree-view
+  <span style="color: #000000; font-weight: bold;">:type</span> 'integer<span style="color: #0f0f0f;">)</span>
+
+<span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defcustom</span> <span style="color: #000000;">org-tree-view/side</span> 'left
+  <span style="color: #555555; font-style: italic;">"The side on which to open the tree view window."</span>
+  <span style="color: #000000; font-weight: bold;">:group</span> 'org-tree-view
+  <span style="color: #000000; font-weight: bold;">:type</span> '<span style="color: #1e1e1e;">(</span>radio
+          <span style="color: #2d2d2d;">(</span>const <span style="color: #000000; font-weight: bold;">:tag</span> <span style="color: #555555;">"Left"</span> left<span style="color: #2d2d2d;">)</span>
+          <span style="color: #2d2d2d;">(</span>const <span style="color: #000000; font-weight: bold;">:tag</span> <span style="color: #555555;">"Right"</span> right<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
 </div></li></ul>
 </div>
 
-<div id="outline-container-org2b87754" class="outline-5">
-<h5 id="org2b87754">Issues</h5>
+<div id="outline-container-orgcf8c60b" class="outline-5">
+<h5 id="orgcf8c60b">Issues</h5>
 </div>
 </div>
 
-<div id="outline-container-org51d5420" class="outline-4">
-<h4 id="org51d5420">Tangling my configuration</h4>
-<div class="outline-text-4" id="text-org51d5420">
+<div id="outline-container-org095af6b" class="outline-4">
+<h4 id="org095af6b">Tangling my configuration</h4>
+<div class="outline-text-4" id="text-org095af6b">
 <p>
 Because I keep my Emacs configuration in an Org document, I need a quick and
 easy way to have <code>org-babel</code> <i>tangle</i> my configuration to <code>config.el</code>, which is loaded
@@ -1928,7 +1947,7 @@ probably edit that.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org0f213f8"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-babel-tangle-config</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="org237aed3"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-babel-tangle-config</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
 
   <span style="color: #1e1e1e;">(</span>clone-indirect-buffer <span style="color: #555555;">"tangle-config"</span> nil <span style="color: #000000; font-weight: bold;">:norecord</span><span style="color: #1e1e1e;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">clone buffer</span>
@@ -1953,8 +1972,8 @@ probably edit that.
 </div>
 </div>
 
-<div id="outline-container-org0b27b3d" class="outline-4">
-<h4 id="org-beginning-of-line"><a id="org0b27b3d"></a>Adjusting <i>org-beginning-of-line</i></h4>
+<div id="outline-container-orgb02dc5b" class="outline-4">
+<h4 id="org-beginning-of-line"><a id="orgb02dc5b"></a>Adjusting <i>org-beginning-of-line</i></h4>
 <div class="outline-text-4" id="text-org-beginning-of-line">
 <p>
 I know the following code will look hectic, but it&rsquo;s quite simple. You only need
@@ -1972,7 +1991,7 @@ Let&rsquo;s have a look at the code and then I&rsquo;ll explain it.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org4684950"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-smarter-beginning-of-line</span> <span style="color: #1e1e1e;">(</span>original-function <span style="color: #222222; text-decoration: underline;">&amp;optional</span> n<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="orgd20bc38"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">org-smarter-beginning-of-line</span> <span style="color: #1e1e1e;">(</span>original-function <span style="color: #222222; text-decoration: underline;">&amp;optional</span> n<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"The exact same function as `</span><span style="color: #888888; font-weight: bold; font-style: italic;">org-beginning-of-line</span><span style="color: #555555; font-style: italic;">',</span>
 <span style="color: #555555; font-style: italic;">  but with one exception: instead of calling `</span><span style="color: #888888; font-weight: bold; font-style: italic;">beginning-of-line</span><span style="color: #555555; font-style: italic;">'</span>
 <span style="color: #555555; font-style: italic;">  twice, it calls `</span><span style="color: #888888; font-weight: bold; font-style: italic;">smarter-beginning-of-line</span><span style="color: #555555; font-style: italic;">' once."</span>
@@ -2067,11 +2086,11 @@ updates.
 </div>
 </div>
 
-<div id="outline-container-org74d2081" class="outline-3">
-<h3 id="org74d2081"><span class="section-number-3">8.2</span> Python mode</h3>
+<div id="outline-container-org2f15aa8" class="outline-3">
+<h3 id="org2f15aa8"><span class="section-number-3">8.2</span> Python mode</h3>
 <div class="outline-text-3" id="text-8-2">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgf74d1b7"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">python-mode</span>
+<pre class="src src-emacs-lisp" id="orgb4094f5"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">python-mode</span>
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">shell-compile</span> <span style="color: #1e1e1e;">()</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">(courtesy of djangoliv @ stack interchange)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span>shell-command <span style="color: #2d2d2d;">(</span>concat <span style="color: #555555;">"python "</span> <span style="color: #3d3d3d;">(</span>buffer-file-name<span style="color: #3d3d3d;">)</span><span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span>
@@ -2086,11 +2105,11 @@ updates.
 </div>
 </div>
 
-<div id="outline-container-org2880a3e" class="outline-3">
-<h3 id="org2880a3e"><span class="section-number-3">8.3</span> (La)TeX mode</h3>
+<div id="outline-container-orge2c3e21" class="outline-3">
+<h3 id="orge2c3e21"><span class="section-number-3">8.3</span> (La)TeX mode</h3>
 <div class="outline-text-3" id="text-8-3">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org5417310"><span style="color: #0f0f0f;">(</span>add-hook 'TeX-mode-hook '<span style="color: #1e1e1e;">(</span>lambda <span style="color: #2d2d2d;">()</span> <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">setq</span> TeX-command-default <span style="color: #555555;">"latexmk"</span><span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
+<pre class="src src-emacs-lisp" id="org1acd156"><span style="color: #0f0f0f;">(</span>add-hook 'TeX-mode-hook '<span style="color: #1e1e1e;">(</span>lambda <span style="color: #2d2d2d;">()</span> <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">setq</span> TeX-command-default <span style="color: #555555;">"latexmk"</span><span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">my-latex-setup</span> <span style="color: #1e1e1e;">(</span><span style="color: #222222; text-decoration: underline;">&amp;optional</span> args<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">start-update-viewer</span> <span style="color: #2d2d2d;">()</span>
     <span style="color: #555555; font-style: italic;">"Starts/updates PDF viewer."</span>
@@ -2139,11 +2158,11 @@ updates.
 </div>
 
 
-<div id="outline-container-org167489f" class="outline-2">
-<h2 id="custom-hooks"><a id="org167489f"></a><span class="section-number-2">9</span> Custom hooks</h2>
+<div id="outline-container-orgccbc694" class="outline-2">
+<h2 id="custom-hooks"><a id="orgccbc694"></a><span class="section-number-2">9</span> Custom hooks</h2>
 <div class="outline-text-2" id="text-custom-hooks">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org4e751f1"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">window-focus-out-hook, window-focus-in-hook</span>
+<pre class="src src-emacs-lisp" id="orge387c33"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">window-focus-out-hook, window-focus-in-hook</span>
 
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">run-window-focus-out-hook</span> <span style="color: #1e1e1e;">(</span>window <span style="color: #222222; text-decoration: underline;">&amp;optional</span> norecord<span style="color: #1e1e1e;">)</span>
   <span style="color: #1e1e1e;">(</span>run-hooks 'window-focus-out-hook<span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
@@ -2195,13 +2214,13 @@ updates.
 </div>
 
 
-<div id="outline-container-org44ea563" class="outline-2">
-<h2 id="themes"><a id="org44ea563"></a><span class="section-number-2">10</span> Themes</h2>
+<div id="outline-container-orgbdc21d4" class="outline-2">
+<h2 id="themes"><a id="orgbdc21d4"></a><span class="section-number-2">10</span> Themes</h2>
 <div class="outline-text-2" id="text-themes">
 </div>
 
-<div id="outline-container-orgfbc9a68" class="outline-3">
-<h3 id="orgfbc9a68"><span class="section-number-3">10.1</span> Theme configuration</h3>
+<div id="outline-container-orge7a931f" class="outline-3">
+<h3 id="orge7a931f"><span class="section-number-3">10.1</span> Theme configuration</h3>
 <div class="outline-text-3" id="text-10-1">
 <p>
 I like to be flexible when it comes to themes. For example, I want to be able to
@@ -2216,8 +2235,8 @@ I believe I have succeeded in achieving my goals, and rather nicely at that.
 </p>
 </div>
 
-<div id="outline-container-orgae9ca69" class="outline-4">
-<h4 id="daylight-sets-color"><a id="orgae9ca69"></a>Daylight-dependent default theme</h4>
+<div id="outline-container-orgb998222" class="outline-4">
+<h4 id="daylight-sets-color"><a id="orgb998222"></a>Daylight-dependent default theme</h4>
 <div class="outline-text-4" id="text-daylight-sets-color">
 <p>
 This is a function that I have ported from my old <code>vimrc</code>. It relies on <code>sun</code>, a
@@ -2227,7 +2246,7 @@ you&rsquo;ve been warned.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org66d3b0d"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">daylight-sets-color</span> <span style="color: #1e1e1e;">()</span>
+<pre class="src src-emacs-lisp" id="org63e08b3"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">daylight-sets-color</span> <span style="color: #1e1e1e;">()</span>
   <span style="color: #555555; font-style: italic;">"Sets a light theme for day and a dark theme for night.</span>
 <span style="color: #555555; font-style: italic;">  Depends on the script `</span><span style="color: #888888; font-weight: bold; font-style: italic;">sun</span><span style="color: #555555; font-style: italic;">' being found in path."</span>
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #1e1e1e;">)</span>
@@ -2251,7 +2270,7 @@ The function depends on the following variables being set:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orga078176"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> light-theme 'eziam-light
+<pre class="src src-emacs-lisp" id="orgda7a5af"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">setq</span> light-theme 'eziam-light
       dark-theme  'eziam-dark<span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
@@ -2261,14 +2280,14 @@ To set the default theme on startup, I use the following code:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgcf7ef26"><span style="color: #0f0f0f;">(</span>add-hook 'after-init-hook 'daylight-sets-color<span style="color: #0f0f0f;">)</span>
+<pre class="src src-emacs-lisp" id="orge67c595"><span style="color: #0f0f0f;">(</span>add-hook 'after-init-hook 'daylight-sets-color<span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org1025fb9" class="outline-4">
-<h4 id="dynamic-theme-settings"><a id="org1025fb9"></a>Dynamic theme settings</h4>
+<div id="outline-container-org8488c84" class="outline-4">
+<h4 id="dynamic-theme-settings"><a id="org8488c84"></a>Dynamic theme settings</h4>
 <div class="outline-text-4" id="text-dynamic-theme-settings">
 <p>
 Another of my goals was being able to easily adjust the colors of individual
@@ -2281,7 +2300,7 @@ The way I have it set up is that every time a theme is loaded, a function called
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org9fff98f"><span style="color: #0f0f0f;">(</span>advice-add 'load-theme <span style="color: #000000; font-weight: bold;">:after</span> <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #2d2d2d;">(</span>theme <span style="color: #222222; text-decoration: underline;">&amp;optional</span> rest ...<span style="color: #2d2d2d;">)</span>
+<pre class="src src-emacs-lisp" id="orgf8a0e76"><span style="color: #0f0f0f;">(</span>advice-add 'load-theme <span style="color: #000000; font-weight: bold;">:after</span> <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #2d2d2d;">(</span>theme <span style="color: #222222; text-decoration: underline;">&amp;optional</span> rest ...<span style="color: #2d2d2d;">)</span>
                                  <span style="color: #2d2d2d;">(</span>theme-do-all theme<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
@@ -2307,7 +2326,7 @@ background.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orgf5ce7fd"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">theme-do-all</span> <span style="color: #1e1e1e;">(</span>theme<span style="color: #1e1e1e;">)</span>
+<pre class="src src-emacs-lisp" id="org80fa8db"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defun</span> <span style="background-color: #ffffff;">theme-do-all</span> <span style="color: #1e1e1e;">(</span>theme<span style="color: #1e1e1e;">)</span>
   <span style="color: #555555; font-style: italic;">"Actions to perform whenever a theme is loaded."</span>
 
   <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">require</span> '<span style="color: #888888; font-weight: bold;">color</span><span style="color: #1e1e1e;">)</span> <span style="color: #888888; font-style: italic;">; </span><span style="color: #888888; font-style: italic;">for color-* functions</span>
@@ -2423,8 +2442,8 @@ instead of <code>eziam-light</code>.
 </div>
 </div>
 
-<div id="outline-container-org49b81ac" class="outline-4">
-<h4 id="theme-switching"><a id="org49b81ac"></a>Switching between themes</h4>
+<div id="outline-container-org0fb326a" class="outline-4">
+<h4 id="theme-switching"><a id="org0fb326a"></a>Switching between themes</h4>
 <div class="outline-text-4" id="text-theme-switching">
 <p>
 To switch themes, I simply use <code>load-theme</code>. There is one problem with that,
@@ -2433,7 +2452,7 @@ code, surely copied from the internet, fixes that:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org22b5646"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">- Disable previous theme when enabling new theme</span>
+<pre class="src src-emacs-lisp" id="org68132da"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">- Disable previous theme when enabling new theme</span>
 <span style="color: #0f0f0f;">(</span>add-hook 'after-init-hook
           <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #2d2d2d;">()</span> <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">defadvice</span> <span style="background-color: #ffffff;">load-theme</span>
                          <span style="color: #3d3d3d;">(</span>before theme-dont-propagate activate<span style="color: #3d3d3d;">)</span>
@@ -2446,13 +2465,13 @@ code, surely copied from the internet, fixes that:
 </div>
 
 
-<div id="outline-container-org05060b3" class="outline-2">
-<h2 id="lang"><a id="org05060b3"></a><span class="section-number-2">11</span> Language configuration</h2>
+<div id="outline-container-org3f68a32" class="outline-2">
+<h2 id="lang"><a id="org3f68a32"></a><span class="section-number-2">11</span> Language configuration</h2>
 <div class="outline-text-2" id="text-lang">
 </div>
 
-<div id="outline-container-orgf725ea3" class="outline-3">
-<h3 id="spelling"><a id="orgf725ea3"></a><span class="section-number-3">11.1</span> Spelling</h3>
+<div id="outline-container-org7e22c4a" class="outline-3">
+<h3 id="spelling"><a id="org7e22c4a"></a><span class="section-number-3">11.1</span> Spelling</h3>
 <div class="outline-text-3" id="text-spelling">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"><span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">require</span> '<span style="color: #888888; font-weight: bold;">ispell</span><span style="color: #0f0f0f;">)</span>
@@ -2482,11 +2501,11 @@ code, surely copied from the internet, fixes that:
 </div>
 </div>
 
-<div id="outline-container-org3757b7a" class="outline-3">
-<h3 id="swe"><a id="org3757b7a"></a><span class="section-number-3">11.2</span> Swedish mode</h3>
+<div id="outline-container-org09625f4" class="outline-3">
+<h3 id="swe"><a id="org09625f4"></a><span class="section-number-3">11.2</span> Swedish mode</h3>
 <div class="outline-text-3" id="text-swe">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="org77a38c4"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Based on work by Moritz Ulrich <a href="mailto:ulrich.moritz%40googlemail.com">&lt;ulrich.moritz@googlemail.com&gt;</a></span>
+<pre class="src src-emacs-lisp" id="org9cc6135"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Based on work by Moritz Ulrich <a href="mailto:ulrich.moritz%40googlemail.com">&lt;ulrich.moritz@googlemail.com&gt;</a></span>
 <span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Published under GNU General Public License</span>
 
 <span style="color: #0f0f0f;">(</span><span style="color: #000000; font-weight: bold;">defvar</span> <span style="color: #000000;">swedish-mode-map</span> <span style="color: #1e1e1e;">(</span>make-keymap<span style="color: #1e1e1e;">)</span> <span style="color: #555555; font-style: italic;">"Swedish mode keymap."</span><span style="color: #0f0f0f;">)</span>
@@ -2510,11 +2529,11 @@ code, surely copied from the internet, fixes that:
 </div>
 </div>
 
-<div id="outline-container-org2fb7391" class="outline-3">
-<h3 id="combining-acute-accent"><a id="org2fb7391"></a><span class="section-number-3">11.3</span> Combining acute accent</h3>
+<div id="outline-container-org0e6ce2a" class="outline-3">
+<h3 id="combining-acute-accent"><a id="org0e6ce2a"></a><span class="section-number-3">11.3</span> Combining acute accent</h3>
 <div class="outline-text-3" id="text-combining-acute-accent">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp" id="orga2708f9"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Insert combining acute accent</span>
+<pre class="src src-emacs-lisp" id="orge6f0cd1"><span style="color: #888888; font-style: italic;">;; </span><span style="color: #888888; font-style: italic;">Insert combining acute accent</span>
 <span style="color: #0f0f0f;">(</span>global-set-key <span style="color: #1e1e1e;">(</span>kbd <span style="color: #555555;">"C-c 8 '"</span><span style="color: #1e1e1e;">)</span> <span style="color: #1e1e1e;">(</span><span style="color: #000000; font-weight: bold;">lambda</span> <span style="color: #2d2d2d;">()</span> <span style="color: #2d2d2d;">(</span><span style="color: #000000; font-weight: bold;">interactive</span><span style="color: #2d2d2d;">)</span> <span style="color: #2d2d2d;">(</span>insert-char 769<span style="color: #2d2d2d;">)</span><span style="color: #1e1e1e;">)</span><span style="color: #0f0f0f;">)</span>
 </pre>
 </div>
@@ -2523,18 +2542,18 @@ code, surely copied from the internet, fixes that:
 </div>
 
 
-<div id="outline-container-org07ba1cf" class="outline-2">
-<h2 id="rsi"><a id="org07ba1cf"></a><span class="section-number-2">12</span> Preventing repeated strain injury</h2>
+<div id="outline-container-org7cb6592" class="outline-2">
+<h2 id="rsi"><a id="org7cb6592"></a><span class="section-number-2">12</span> Preventing repeated strain injury</h2>
 <div class="outline-text-2" id="text-rsi">
 </div>
 </div>
 
 
-<div id="outline-container-org2cbb21e" class="outline-2">
-<h2 id="org2cbb21e"><span class="section-number-2">13</span> Non-Emacs Emacs-related configuration</h2>
+<div id="outline-container-org1766809" class="outline-2">
+<h2 id="org1766809"><span class="section-number-2">13</span> Non-Emacs Emacs-related configuration</h2>
 <div class="outline-text-2" id="text-13">
-</div><div id="outline-container-org12b4466" class="outline-3">
-<h3 id="wsl"><a id="org12b4466"></a><span class="section-number-3">13.1</span> Windows Subsystem for Linux (WSL)</h3>
+</div><div id="outline-container-org8134259" class="outline-3">
+<h3 id="wsl"><a id="org8134259"></a><span class="section-number-3">13.1</span> Windows Subsystem for Linux (WSL)</h3>
 <div class="outline-text-3" id="text-wsl">
 <p>
 I only own Windows PCs, with Windows installed on every single one, and I do
@@ -2562,8 +2581,8 @@ configuration.
 </p>
 </div>
 
-<div id="outline-container-orgb56d42b" class="outline-4">
-<h4 id="launching-emacs"><a id="orgb56d42b"></a>Launching Emacs</h4>
+<div id="outline-container-org50f6334" class="outline-4">
+<h4 id="launching-emacs"><a id="org50f6334"></a>Launching Emacs</h4>
 <div class="outline-text-4" id="text-launching-emacs">
 <p>
 Using the graphical version of Emacs on WSL is a bit trickier than just the
@@ -2613,8 +2632,8 @@ The following code at the end of my <code>.zshrc</code> makes it work:
 </div>
 </div>
 
-<div id="outline-container-orgf32d586" class="outline-4">
-<h4 id="wsl:default"><a id="orgf32d586"></a>Default programs</h4>
+<div id="outline-container-org5926894" class="outline-4">
+<h4 id="wsl:default"><a id="org5926894"></a>Default programs</h4>
 <div class="outline-text-4" id="text-wsl:default">
 <p>
 I use WSL for most development tools - like Emacs, Zsh and the odd local web
@@ -2623,12 +2642,12 @@ web browsing.
 </p>
 </div>
 
-<div id="outline-container-orgccf9605" class="outline-5">
-<h5 id="wsl:web-browser"><a id="orgccf9605"></a>Web browser</h5>
+<div id="outline-container-org713c090" class="outline-5">
+<h5 id="wsl:web-browser"><a id="org713c090"></a>Web browser</h5>
 <div class="outline-text-5" id="text-wsl:web-browser">
 </div>
 
-<ul class="org-ul"><li><a id="orgf382234"></a>Problem<br /><div class="outline-text-6" id="text-orgf382234">
+<ul class="org-ul"><li><a id="org8eea445"></a>Problem<br /><div class="outline-text-6" id="text-org8eea445">
 <p>
 My web browser of choice is Firefox, because of the extensibility and
 reliability. Emacs can be configured to use Firefox by customizing
@@ -2672,7 +2691,7 @@ path.
 </p>
 </div></li>
 
-<li><a id="org1421f28"></a>Solution<br /><div class="outline-text-6" id="text-org1421f28">
+<li><a id="orgb80cf30"></a>Solution<br /><div class="outline-text-6" id="text-orgb80cf30">
 <p>
 To solve this once and for all, I scrapped my old symlinks and aliases and
 instead, wrote the following shell script:
@@ -2748,13 +2767,13 @@ with other systems, where I don&rsquo;t use my <code>wsl-browser</code> script.
 </div>
 
 
-<div id="outline-container-org917f550" class="outline-2">
-<h2 id="org917f550"><span class="section-number-2">14</span> Credits</h2>
+<div id="outline-container-org6f96268" class="outline-2">
+<h2 id="org6f96268"><span class="section-number-2">14</span> Credits</h2>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: John Ankarström</p>
-<p class="date">Created: 2017-05-12 Fri 16:14</p>
+<p class="date">Created: 2017-05-12 Fri 17:58</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
