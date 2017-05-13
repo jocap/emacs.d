@@ -803,38 +803,21 @@ and then, take a pause and explain what I've done:
 (use-package origami
   :config
   (global-origami-mode t)
-  (setq-local origami-fold-style 'triple-braces)
-
-  ;; I start the /:config/-clause by enabling =origami-mode= globally, and
-  ;; setting the fold method to triple braces (that is, ={{{= and =}}}=).
-
-  (defun origami-toggle-node () ; (courtesy of /u/Eldrik @ reddit)
-    (interactive)
-    (save-excursion ; leave point where it is
-      (goto-char (point-at-eol)) ; then go to the end of line
-      (origami-toggle-node (current-buffer) (point)))) ; and try to fold
-
-  ;; The above function is borrowed from Reddit user /Eldrik/. I'm not sure what
-  ;; it does better than just using =origami-toggle-node= directly, but it must be
-  ;; doing something.
 
   (defun traverse-folds (times &optional beginning)
     "Traverses through folds as many times as ordered by argument.
 A negative argument makes it traverse backwards."
-    (unless beginning (setq beginning (point)))
     (if (> times 0)
-        (progn
-          (move-end-of-line nil)
-          (fset 'fun 'origami-forward-fold))
-      (progn
-        (move-beginning-of-line nil)
-        (fset 'fun 'origami-previous-fold)))
-    (dotimes (i (abs times))
-      (condition-case err
-          (fun (current-buffer) (point))
-        (error (message "Fold not found: %s" err))))
-    (set-mark beginning)
-    (deactivate-mark))
+        (move-end-of-line nil)
+      (move-beginning-of-line nil))
+    (let ((fun (if (> times 0) 'origami-forward-fold 'origami-previous-fold))
+          (beginning (or beginning (point))))
+      (dotimes (i (abs times))
+        (condition-case err
+            (funcall fun (current-buffer) (point))
+          (error (message "Fold not found: %s" err))))
+      (set-mark beginning)
+      (deactivate-mark)))
 
   (defun next-fold (times)
     "Jumps to the beginning of the next fold (or previous, on
@@ -855,14 +838,13 @@ as ordered by argument."
     "Jumps to fold # (provided by argument) in file."
 
     (interactive "P")
-    (unless number (setq number
-                         (string-to-number (read-string "Jump to fold: "))))
-    (setq beginning (point))
-    (if (equal number 0) (setq number 1))
-    (if (> number 0)
-        (goto-char (point-min))
-      (goto-char (point-max)))
-    (traverse-folds number beginning))
+    (let ((number (or number (string-to-number (read-string "Jump to fold: "))))
+          (beginning (point)))
+      (if (equal number 0) (setq number 1))
+      (if (> number 0)
+          (goto-char (point-min))
+        (goto-char (point-max)))
+      (traverse-folds number beginning)))
 
   ;; Above are listed my own functions for traversing folds. I have functions
   ;; for going to the next, previous and nth fold, but they're all based on one
