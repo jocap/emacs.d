@@ -739,7 +739,9 @@ there."
         (if (= bol-point (point))
             (move-end-of-line 1)
           (backward-char)
-          (unless (looking-at "\s") (forward-char))
+          (if (looking-at "\s")
+              (re-search-backward "^\\|[^[:space:]]"))
+          (forward-char)
           (when (= orig-point (point))
             (move-end-of-line 1)))))))
 #+END_SRC
