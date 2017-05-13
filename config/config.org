@@ -901,10 +901,10 @@ focused.
 
 #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
-(setq default-cursor-type cursor-type)
+(defvar default-cursor-shape cursor-type)
 
 (defun cursor-focused ()
-  (setq-local cursor-type default-cursor-type))
+  (setq-local cursor-type default-cursor-shape))
 (defun cursor-unfocused ()
   (setq-local cursor-type 'block))
 #+END_SRC
@@ -932,6 +932,11 @@ This is a pretty nice way of checking the active window. I am usually against
 using =post-command-hook=, because of how often it is run, but there isn't
 anything as reliable. Believe me, [[#custom-hooks][I've tried]].
 
+** Prettify symbols mode
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'emacs-lisp-mode-hook #'prettify-symbols-mode)
+#+END_SRC
 
 * Helpful tools
 
@@ -964,10 +969,24 @@ from Eshell, which is very useful.
 
   :config
   ;; Eshell completion
-  (add-hook 'eshell-mode-hook
-          (lambda ()
-            (eshell-cmpl-initialize)
-            (define-key eshell-mode-map [remap eshell-pcomplete] 'helm-esh-pcomplete))))
+  (eval-when-compile
+    (autoload 'eshell "eshell" nil :interactive)
+    (with-eval-after-load 'eshell
+      (add-hook 'eshell-mode-hook
+                (lambda ()
+                  (eshell-cmpl-initialize)
+                  (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete)))))
+
+  ;; disable popwin-mode in an active Helm session It should be disabled
+  ;; otherwise it will conflict with other window opened by Helm persistent
+  ;; action, such as *Help* window.
+  (push '("^\*helm.+\*$" :regexp t) popwin:special-display-config)
+  (add-hook 'helm-after-initialize-hook (lambda ()
+                                          (popwin:display-buffer helm-buffer t)
+                                          (popwin-mode -1)))
+
+  ;;  Restore popwin-mode after a Helm session finishes.
+  (add-hook 'helm-cleanup-hook (lambda () (popwin-mode 1))))
 #+END_SRC
 
 ** Projectile
@@ -978,7 +997,6 @@ from Eshell, which is very useful.
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
-  :ensure helm-projectile
   :config
   (projectile-global-mode)
   (setq projectile-enable-caching t)
@@ -1472,19 +1490,20 @@ buffer."
      (let ((bds (bounds-of-thing-at-point 'word)) )
        (list nil (car bds) (cdr bds)))))
 
-  (setq wiktionary-language 'russian)
+  (let ((wiktionary-language
+         (if (boundp 'wiktionary-language) wiktionary-language 'russian)))
 
-  (let* ((input  (or string (buffer-substring-no-properties from to)))
-         (output (concat "[[https://en.wiktionary.org/wiki/"
-                         (org-link-escape (downcase input))
-                         "#"
-                         (capitalize (symbol-name wiktionary-language))
-                         "]["
-                         input
-                         "]]")))
-    (delete-region from to)
-    (goto-char from)
-    (insert output)))
+    (let* ((input  (or string (buffer-substring-no-properties from to)))
+           (output (concat "[[https://en.wiktionary.org/wiki/"
+                           (org-link-escape (downcase input))
+                           "#"
+                           (capitalize (symbol-name wiktionary-language))
+                           "]["
+                           input
+                           "]]")))
+      (delete-region from to)
+      (goto-char from)
+      (insert output))))
 
 (define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
 #+END_SRC
@@ -1524,8 +1543,8 @@ probably edit that.
 (defun org-babel-tangle-config ()
   (interactive)
 
-  (clone-indirect-buffer "tangle-config" nil :norecord) ; clone buffer
-  (switch-to-buffer "tangle-config")            ; switch to buffer
+  (clone-indirect-buffer "<tangle>config" nil :norecord) ; clone buffer
+  (switch-to-buffer "<tangle>config")            ; switch to buffer
   (widen)                                       ; widen if necessary
   (setq-local search-invisible t)               ; search invisible text
   (when (search-forward                         ; find c:config-all
@@ -1541,6 +1560,14 @@ probably edit that.
   (kill-buffer))
 
 (define-key org-mode-map (kbd "C-c C-v M-t") #'org-babel-tangle-config)
+#+END_SRC
+
+#+NAME: c:org:fun
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-babel-post-tangle-hook
+          (lambda ()
+            (when (s-ends-with? "config.el" (buffer-file-name))
+              (byte-compile-file (buffer-file-name)))))
 #+END_SRC
 
 *** Adjusting /org-beginning-of-line/
@@ -1640,7 +1667,39 @@ This works well, but of course it will block any potential future changes to
 that such a basic and well-working function should recieve any significant
 updates.
 
-** Python mode
+** LaTeX
+
+#+BEGIN_SRC emacs-lisp
+(use-package auctex
+  :config
+  (defun start-update-viewer ()
+    "Starts/updates PDF viewer."
+    (interactive)
+    (if (string-match "no process found"
+                      (shell-command-to-string "killall -HUP mupdf-x11"))
+        (start-process-shell-command
+         "mupdf"          ; process name
+         "mupdf"          ; process buffer
+         (concat "mupdf " ; shell command
+                 (expand-file-name
+                  (concat "output/"
+                          (file-name-base (buffer-file-name))
+                          ".pdf"))))))
+
+  (defun save-run ()
+    "Saves the document and processes it."
+    (interactive)
+    (save-buffer)
+    (TeX-command-run-all nil))
+
+  (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+
+  :bind (:map LaTeX-mode-map
+              ("C-c C-u" . start-update-viewer)))
+
+#+END_SRC
+
+** Python
 
 #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
@@ -1656,53 +1715,6 @@ updates.
              (define-key python-mode-map (kbd "C-c C-c") 'shell-compile)))
 #+END_SRC
 
-** (La)TeX mode
-
-#+NAME: c:basic-prefs
-#+BEGIN_SRC emacs-lisp
-(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
-(defun my-latex-setup (&optional args)
-  (defun start-update-viewer ()
-    "Starts/updates PDF viewer."
-    (interactive)
-    (if (string-match "no process found"
-                      (shell-command-to-string "killall -HUP mupdf-x11"))
-        (start-process-shell-command
-         "mupdf"          ; process name
-         "mupdf"          ; process buffer
-         (concat "mupdf " ; shell command
-                 (expand-file-name
-                  (concat "output/"
-                          (file-name-base (buffer-file-name))
-                          ".pdf"))))))
-  (define-key LaTeX-mode-map (kbd "C-c C-u") 'start-update-viewer)
-
-  (defun save-run ()
-    "Saves the document and processes it."
-    (interactive)
-    (save-buffer)
-    (TeX-command-run-all nil))
-
-  (defun latex-word-count () ; (courtesy of Nicholas Riley @ SE)
-    (interactive)
-    (let* ((this-file (buffer-file-name))
-           (word-count
-            (with-output-to-string
-              (with-current-buffer standard-output
-                (call-process "texcount" nil t nil "-brief" this-file)))))
-      (string-match "\n$" word-count)
-      (message (replace-match "" nil nil word-count))))
-  (define-key LaTeX-mode-map (kbd "C-c w") 'latex-word-count)
-
-  (defun latex-write-word-count ()
-    "Writes the word count to count.txt (if it exists)."
-    (interactive)
-    (shell-command (concat "texcount -brief "
-                    (shell-quote-argument buffer-file-name)
-                    " | sed -e 's/+.*//' > count.txt; cat count.txt")))
-  (define-key LaTeX-mode-map (kbd "C-c M-w") 'latex-write-word-count))
-(add-hook 'LaTeX-mode-hook 'my-latex-setup t)
-#+END_SRC
 
 
 * Custom hooks
@@ -2181,9 +2193,7 @@ path.
 To solve this once and for all, I scrapped my old symlinks and aliases and
 instead, wrote the following shell script:
 
-#+BEGIN_SRC sh :tangle ~/bin/wsl-browser
-#!/usr/bin/zsh
-
+#+BEGIN_SRC sh :tangle ~/bin/wsl-browser :shebang #!/usr/bin/zsh
 if [[ $1 =~ ^https?:// ]]; then
     local open_path="$1"
 elif [[ $1 =~ ^/mnt/c ]]; then
