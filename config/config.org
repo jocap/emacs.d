@@ -1083,7 +1083,7 @@ PDF reading.
 
 * Modes
 
-** Org-mode
+** Org
 :PROPERTIES:
 :CUSTOM_ID: org-mode
 :END:
@@ -1157,13 +1157,15 @@ left. The cloned buffer, called the /tree view/, has the following properties:
 - It displays nothing but headings
 - On ~<return>~ or ~<mouse-1>~, the heading at point is opened in the /base buffer/ and
   the base buffer is narrowed to the subtree of the heading
-- On ~<S-return>~, the heading is opened in the same way, but if you press
-  ~<S-return>~ again within one second of delay, the tree view is closed
+- When you open a heading, you can press the same key again, within one second of
+  delay, to close the tree view behind you
 - On ~Q~, the tree view is closed and its buffer deleted
 - On any other non-modifier key, it automatically starts searching through the
   headings (but, crucially, not the rest of the text) using =isearch=
 - Within =isearch=, ~<S-return>~ opens the currently selected matching heading in
   the base buffer
+
+Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el= string manipulation library]].
 
 #+NAME: c:org:fun
 #+BEGIN_SRC emacs-lisp :noweb yes :exports none
@@ -1178,7 +1180,8 @@ options that can be set:
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defgroup org-tree-view nil
-  "A window providing easy access to all headings in an Org document.")
+  "A window providing easy access to all headings in an Org document."
+  :group 'org-mode)
 
 (defcustom org-tree-view/levels 3
   "The highest level headings to show in the tree view. Think of
@@ -1190,6 +1193,11 @@ each asterisk preceding a heading as a level."
   "The width of the tree view window."
   :group 'org-tree-view
   :type 'integer)
+
+(defcustom org-tree-view/key-binding "C-c C-t"
+  "The key binding to open the tree view."
+  :group 'org-tree-view
+  :type 'string)
 
 (defcustom org-tree-view/side 'left
   "The side on which to open the tree view window."
@@ -1206,7 +1214,7 @@ each asterisk preceding a heading as a level."
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-(defun org-tree-view/open-heading ()
+(defun org-tree-view/open-heading (&optional no-bind-exit)
   "Switch to a cloned buffer's base buffer and narrow in on the
 selected subtree."
   (interactive)
@@ -1223,7 +1231,8 @@ selected subtree."
       (widen) ; first widen any potential narrowing
       (goto-char heading-pos)
       (org-narrow-to-subtree) ; narrow to org subtree
-      (outline-show-all)))) ; show everything
+      (outline-show-all) ; show everything
+      (unless no-bind-exit (org-tree-view/bind-exit)))))
 #+END_SRC
 
 ***** /org-tree-view/refresh/
@@ -1235,14 +1244,15 @@ selected subtree."
   (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
     (when (get-buffer-window tree-view-buffer-name)
       (with-current-buffer tree-view-buffer-name
-        (outline-show-all)        ; make sure all headings are visible
+        (outline-show-all)
         (let ((current-prefix-arg ; levels of heading to show
                org-tree-view/levels)
               (inhibit-message t))
           (call-interactively #'org-shifttab))
-        (outline-hide-body) ; hide body
+        (outline-hide-body)
         (org-tree-view/beginning-of-line)
-        (scroll-right 999)))))
+        (scroll-right 999)
+        (set-window-fringes nil 8 1))))) ; don't set to 0 unless you want to see $'s
 #+END_SRC
 
 ***** /org-tree-view/buffer-name/
@@ -1250,10 +1260,19 @@ selected subtree."
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/buffer-name ()
-  "Return the the appropriate name for the current file's tree view buffer."
+  "Return the appropriate name for the current file's tree view buffer."
   (if (s-starts-with? "<tree>" (buffer-name))
       (buffer-name)
     (concat "<tree>" (buffer-name))))
+#+END_SRC
+
+***** /org-tree-view/base-buffer-name/
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/base-buffer-name ()
+  "Return the appropriate base buffer name for the tree view."
+  (s-chop-prefix "<tree>" (buffer-name)))
 #+END_SRC
 
 ***** /org-tree-view/beginning-of-line/
@@ -1287,8 +1306,8 @@ selected subtree."
 (defun org-tree-view/isearch-return ()
   (interactive)
   (when (s-starts-with? "<tree>" (buffer-name))
-    (org-tree-view/open-heading))
-  (run-with-timer 0 nil (lambda () (org-tree-view/bind-exit)))
+    (org-tree-view/open-heading :no-bind-exit))
+  (run-with-timer 0 nil (lambda () (org-tree-view/bind-exit (kbd "<S-return>"))))
   (let ((inhibit-message t)) (isearch-exit)))
 #+END_SRC
 
@@ -1323,7 +1342,7 @@ there's something weird going on with =isearch-exit=.
   ;; Cleanup
   (remove-hook 'after-save-hook #'org-tree-view/refresh)
   (advice-remove #'org-self-insert-command
-                 #'org-tree-view-self-insert-command)
+                 #'org-tree-view/self-insert-command)
   (advice-remove #'org-move-subtree-up #'org-tree-view/refresh)
   (advice-remove #'org-move-subtree-down #'org-tree-view/refresh))
 #+END_SRC
@@ -1332,22 +1351,28 @@ there's something weird going on with =isearch-exit=.
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-(defun org-tree-view/bind-exit ()
-  (let* ((original-binding (local-key-binding (kbd "<S-return>")))
-         (reset-key `(local-set-key (kbd "<S-return>") (quote ,original-binding))))
-    (message "Press <S-return> again to close the tree view.")
-    (eval (macroexpand
-           `(progn
-              (local-set-key (kbd "<S-return>") (lambda () (interactive)
-                                                  ,reset-key
-                                                  (org-tree-view/exit)))
-              (run-with-timer 1 nil (lambda ()
-                                      (message " ") ; clear message
-                                      ,reset-key)))))))
+(defun org-tree-view/bind-exit (&optional key)
+  (let* ((key (or key (this-command-keys-vector)))
+         (original-binding (local-key-binding key))
+         (reset-key `(local-set-key ,key (quote ,original-binding)))
+         (base-buffer (org-tree-view/base-buffer-name)))
+    (unless (s-contains? "mouse" (key-description key))
+      (message "Press %s again to close the tree view." (key-description key))
+      (eval
+       (macroexpand
+        `(progn
+           (local-set-key ,key (lambda () (interactive)
+                                 ,reset-key
+                                 (org-tree-view/exit)))
+           (run-with-timer 1 nil (lambda ()
+                                   (message " ") ; clear
+                                   (with-current-buffer ,base-buffer
+                                     ,reset-key)))))))))
 #+END_SRC
 
-This function binds ~S-return~ to =org-tree-view/exit= for 1 second, after which it
-returns ~S-return~ to its previous function. Flexible!
+This function binds =(this-command-keys-vector)= (or, if provided, =key=) to
+=org-tree-view/exit= for 1 second, after which it returns the key binding to its
+original function. Flexible!
 
 ***** /org-tree-view/open/
 
@@ -1365,7 +1390,9 @@ buffer."
     (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
       (if (get-buffer-window tree-view-buffer-name)
           ;; Use existing tree buffer
-          (select-window (get-buffer-window tree-view-buffer-name))
+          (progn
+            (select-window (get-buffer-window tree-view-buffer-name))
+            (org-tree-view/refresh))
 
         ;; Make new tree buffer
         ;; ********************
@@ -1385,9 +1412,6 @@ buffer."
         (setq-local truncate-lines t)     ; ensure truncated lines
         (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
         (setq-local search-invisible nil) ; search only visible text
-
-        ;; Hide fringe truncation indicators
-        (set-window-fringes nil 8 1) ; don't set to 0 unless you want to see $'s
 
         ;; Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815
         (let ((display-table
@@ -1451,6 +1475,7 @@ buffer."
 
         ;; Quit tree view
         (local-set-key (kbd "Q") #'org-tree-view/exit)
+        (local-set-key (kbd "C-g") #'org-tree-view/exit)
 
         ;; Switch back to base buffer
         (local-set-key (kbd "C-c C-t")
@@ -1459,16 +1484,14 @@ buffer."
                          (select-window (get-buffer-window (buffer-base-buffer)))))
 
         ;; Press <S-return> to open heading, press it again to exit tree view
-        (local-set-key (kbd "<S-return>") (lambda () (interactive)
-                                            (org-tree-view/open-heading)
-                                            (org-tree-view/bind-exit)))
+        (local-set-key (kbd "<S-return>") #'org-tree-view/open-heading)
 
         ;; Open heading in base buffer
         (mapc (lambda (key)
                 (local-set-key (kbd key) #'org-tree-view/open-heading))
               '("<mouse-1>" "<return>"))))))
 
-(define-key org-mode-map (kbd "C-c C-t") #'org-tree-view/open)
+(define-key org-mode-map (kbd org-tree-view/key-binding) #'org-tree-view/open)
 #+END_SRC
 
 **** Issues

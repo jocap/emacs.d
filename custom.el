@@ -9,6 +9,7 @@
  '(column-number-mode t)
  '(comment-column 0)
  '(compilation-message-face (quote default))
+ '(confirm-kill-emacs (quote y-or-n-p))
  '(cua-global-mark-cursor-color "#2aa198")
  '(cua-normal-cursor-color "#839496")
  '(cua-overwrite-cursor-color "#b58900")
@@ -62,6 +63,9 @@
  '(ispell-local-dictionary-alist nil)
  '(linum-format "%4d │ ")
  '(magit-diff-use-overlays nil)
+ '(minibuffer-prompt-properties
+   (quote
+    (read-only t cursor-intangible t face minibuffer-prompt)))
  '(mouse-wheel-scroll-amount (quote (2 ((shift) . 5) ((control)))))
  '(next-screen-context-lines 6)
  '(nlinum-format "%4d │")
@@ -88,7 +92,7 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (pcomplete-extension git-gutter+ buffer-move org-autolist org helm-org-rifle ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org helm-org-rifle ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)

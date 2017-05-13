@@ -1,4 +1,5 @@
 state/
 secret/
-.init.el.restore
-.init.el.new
+.org-id-locations
+config/config.el
+config/config.elc

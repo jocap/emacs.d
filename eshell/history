@@ -1,0 +1,5 @@
+cd .config/emacs
+cd ~/.config/emacs
+ln -s /home/john/.config/emacs/config/config.elc init.el
+ls
+mv init.el init.elc
