@@ -975,18 +975,7 @@ from Eshell, which is very useful.
       (add-hook 'eshell-mode-hook
                 (lambda ()
                   (eshell-cmpl-initialize)
-                  (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete)))))
-
-  ;; disable popwin-mode in an active Helm session It should be disabled
-  ;; otherwise it will conflict with other window opened by Helm persistent
-  ;; action, such as *Help* window.
-  (push '("^\*helm.+\*$" :regexp t) popwin:special-display-config)
-  (add-hook 'helm-after-initialize-hook (lambda ()
-                                          (popwin:display-buffer helm-buffer t)
-                                          (popwin-mode -1)))
-
-  ;;  Restore popwin-mode after a Helm session finishes.
-  (add-hook 'helm-cleanup-hook (lambda () (popwin-mode 1))))
+                  (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete))))))
 #+END_SRC
 
 ** Projectile
@@ -1194,17 +1183,20 @@ each asterisk preceding a heading as a level."
   :group 'org-tree-view
   :type 'integer)
 
-(defcustom org-tree-view/key-binding "C-c C-t"
-  "The key binding to open the tree view."
-  :group 'org-tree-view
-  :type 'string)
-
 (defcustom org-tree-view/side 'left
   "The side on which to open the tree view window."
   :group 'org-tree-view
   :type '(radio
           (const :tag "Left" left)
           (const :tag "Right" right)))
+
+(defcustom org-tree-view/key-binding "C-c C-t"
+  "The key binding to open the tree view."
+  :group 'org-tree-view
+  :type 'string
+  :set (lambda (option value)
+         (define-key org-mode-map (kbd value)
+           #'org-tree-view/open)))
 #+END_SRC
 
 
@@ -1490,8 +1482,6 @@ buffer."
         (mapc (lambda (key)
                 (local-set-key (kbd key) #'org-tree-view/open-heading))
               '("<mouse-1>" "<return>"))))))
-
-(define-key org-mode-map (kbd org-tree-view/key-binding) #'org-tree-view/open)
 #+END_SRC
 
 **** Issues
@@ -1566,21 +1556,18 @@ probably edit that.
 (defun org-babel-tangle-config ()
   (interactive)
 
-  (clone-indirect-buffer "<tangle>config" nil :norecord) ; clone buffer
-  (switch-to-buffer "<tangle>config")            ; switch to buffer
-  (widen)                                       ; widen if necessary
-  (setq-local search-invisible t)               ; search invisible text
-  (when (search-forward                         ; find c:config-all
+  (clone-indirect-buffer "<tangle>config" nil :norecord)
+  (switch-to-buffer "<tangle>config")
+  (widen)
+  (setq-local search-invisible t)
+  (when (search-forward ; find c:config-all
          (concat "#+NAME: "
                  "c:config-all"))
-    (forward-line 2)                            ; go down to source block
+    (forward-line 2) ; go down to source block
 
     ;; Tangle the block at point
     (let ((current-prefix-arg '(4)))
-      (call-interactively 'org-babel-tangle)))
-
-  ;; Return to base buffer
-  (kill-buffer))
+      (call-interactively 'org-babel-tangle))))
 
 (define-key org-mode-map (kbd "C-c C-v M-t") #'org-babel-tangle-config)
 #+END_SRC
@@ -1590,6 +1577,7 @@ probably edit that.
 (add-hook 'org-babel-post-tangle-hook
           (lambda ()
             (when (s-ends-with? "config.el" (buffer-file-name))
+              (kill-buffer "<tangle>config")
               (byte-compile-file (buffer-file-name)))))
 #+END_SRC
 
@@ -2013,7 +2001,7 @@ code, surely copied from the internet, fixes that:
 (add-hook 'after-init-hook
           (lambda () (defadvice load-theme
                          (before theme-dont-propagate activate)
-                       (mapcar #'disable-theme custom-enabled-themes))))
+                       (mapc #'disable-theme custom-enabled-themes))))
 #+END_SRC
 
 
@@ -2155,15 +2143,23 @@ Now, the code above could have been simpler if I just used bash. However, my
 main shell is =zsh= and I'd like for Emacs to use that shell, along with my =zsh=
 configuration, specifically so that I can access my custom-set =$PATH=.
 
-The following code at the end of my =.zshrc= makes it work:
+The following code at the end of my =zsh= configuration makes it work:
 
 #+BEGIN_SRC shell :tangle ~/.config/zsh/load/system/wsl/launch_at_start.zsh
-if [[ "$LAUNCH_AT_START" == 'emacs' ]]; then
-   nohup emacs &> /dev/null & disown
-fi
+local LAUNCH_PROGRAM=0
+local LAUNCH_PROGRAM="$LAUNCH_AT_START"
+export LAUNCH_AT_START=0 # prevent launched program to launch more programs
+
+case "$LAUNCH_PROGRAM" in
+    emacs)
+        nohup emacs &> /dev/null & disown;;
+    gnome-terminal)
+        nohup gnome-terminal &> /dev/null & disown;;
+esac
 #+END_SRC
 
-# TODO: paredit M-]
+In the shell script I also have a launch option for =gnome-terminal=, which I like
+to use instead of the default =bash.exe=.
 
 *** Default programs
 :PROPERTIES:
