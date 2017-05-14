@@ -92,7 +92,7 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org helm-org-rifle ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker helm-projectile term-projectile dash helm diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (counsel ivy emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(scroll-bar-mode nil)

@@ -19,9 +19,7 @@ unlike other Emacs configurations written in Org, however, it is written in a
 non-linear fashion. That means that source code is presented in a way that's
 suitable for the /documenting/ of code, and not the running of code. If you
 copied all source blocks in this document and put them in the same order in an
-Emacs configuration file, it might not work. If you want to see exactly how
-the resulting code is arranged, you can look at the resulting [[https://github.com/jocap/emacs.d/blob/master/config.el][=config.el= file
-on GitHub]].
+Emacs configuration file, it might not work.
 
 ** "Best of"
 
@@ -82,7 +80,8 @@ respective configurations are listed elsewhere.
 - [[#iy-go-to-char][iy-go-to-char]]
 - [[#avy][avy]]
 - [[#origami][origami]]
-- [[#helm][helm]]
+- [[#helm][helm]] (currently disabled)
+- [[#ivy][ivy]]
 - [[#projectile][projectile]]
 - [[#magit][magit]]
 - [[#git-gutter][git-gutter+]]
@@ -131,6 +130,7 @@ here with a short description of why I like them.
   (popwin-mode 1))
 
 (use-package helm-org-rifle
+  :ensure nil
   :bind (("C-c f" . helm-org-rifle-current-buffer)
          ("C-c F" . helm-org-rifle)))
 
@@ -940,7 +940,7 @@ anything as reliable. Believe me, [[#custom-hooks][I've tried]].
 
 * Helpful tools
 
-** Helm
+** Helm (currently disabled)
 :PROPERTIES:
 :CUSTOM_ID: helm
 :END:
@@ -953,9 +953,15 @@ option, but for now, Helm does its job very well.
 I mostly use Helm "as-is." I do have some code that implements Helm completion
 from Eshell, which is very useful.
 
-#+NAME: c:pkg:config
+*Update:* As you can see in the [[#ivy][next section]], I am currently trying out Ivy
+instead of Helm. Thus, the code below is /not/ tangled to my =custom.el= and not
+loaded by Emacs. I will keep it here, though, in case I want to return to Helm
+in the future.
+
+# #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package helm
+  :ensure nil
   :commands helm-command-prefix
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
@@ -968,14 +974,49 @@ from Eshell, which is very useful.
   (helm-mode 1)
 
   :config
+  ;; Projectile integration
+  (setq projectile-completion-system 'helm)
+  (setq projectile-switch-project-action 'helm-projectile)
+  (helm-projectile-on)
+
   ;; Eshell completion
-  (eval-when-compile
-    (autoload 'eshell "eshell" nil :interactive)
-    (with-eval-after-load 'eshell
-      (add-hook 'eshell-mode-hook
-                (lambda ()
-                  (eshell-cmpl-initialize)
-                  (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete))))))
+  (with-eval-after-load 'eshell
+    (add-hook 'eshell-mode-hook
+              (lambda ()
+                (eshell-cmpl-initialize)
+                (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete)))))
+#+END_SRC
+
+** Ivy
+:PROPERTIES:
+:CUSTOM_ID: ivy
+:END:
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :init
+  (ivy-mode 1)
+  :config
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t)
+  (setq projectile-completion-system 'ivy)
+  :bind (("C-s"     . swiper)
+         ("C-c C-r" . ivy-resume)
+         ("<f6>"    . ivy-resume)
+         ("M-x"     . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("<f1> f"  . counsel-describe-function)
+         ("<f1> v"  . counsel-describe-variable)
+         ("<f1> l"  . counsel-find-library)
+         ("<f2> i"  . counsel-info-lookup-symbol)
+         ("<f2> u"  . counsel-unicode-char)
+         ("C-c k"   . counsel-ag)
+         ("C-x l"   . counsel-locate)
+         ("C-x C-b" . ivy-switch-buffer)
+         ("C-x b"   . list-buffers))
+  :bind (:map read-expression-map
+              ("C-r" . counsel-expression-history)))
 #+END_SRC
 
 ** Projectile
@@ -993,11 +1034,7 @@ from Eshell, which is very useful.
 
   (setq projectile-globally-ignored-directories
         (cl-list* ".cache" ".cargo"
-                  projectile-globally-ignored-directories))
-
-  (setq projectile-completion-system 'helm)
-  (setq projectile-switch-project-action 'helm-projectile) ;; see http://tuhdo.github.io/helm-projectile.html#sec-5
-  (helm-projectile-on))
+                  projectile-globally-ignored-directories)))
 #+END_SRC
 
 Projectile is a package that I use for two reasons: the Helm integration
