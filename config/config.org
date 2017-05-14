@@ -1185,6 +1185,8 @@ left. The cloned buffer, called the /tree view/, has the following properties:
   the base buffer is narrowed to the subtree of the heading
 - When you open a heading, you can press the same key again, within one second of
   delay, to close the tree view behind you
+- On =<tab>=, visibility is toggled between all headings and the levels of
+  headings set in =org-tree-view/levels= (default: 3)
 - On ~Q~, the tree view is closed and its buffer deleted
 - On any other non-modifier key, it automatically starts searching through the
   headings (but, crucially, not the rest of the text) using =isearch=
@@ -1277,14 +1279,31 @@ selected subtree."
     (when (get-buffer-window tree-view-buffer-name)
       (with-current-buffer tree-view-buffer-name
         (outline-show-all)
-        (let ((current-prefix-arg ; levels of heading to show
-               org-tree-view/levels)
+        ;; Show appropriate levels of headings
+        (let ((current-prefix-arg
+               (if (and (boundp 'org-tree-view/show-all) org-tree-view/show-all)
+                   99 ; show all
+                 org-tree-view/levels)) ; default
               (inhibit-message t))
           (call-interactively #'org-shifttab))
         (outline-hide-body)
         (org-tree-view/beginning-of-line)
         (scroll-right 999)
         (set-window-fringes nil 8 1))))) ; don't set to 0 unless you want to see $'s
+#+END_SRC
+
+***** /org-tree-view/toggle-show-all/
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/toggle-show-all ()
+  "Toggle between showing all headings and the levels of headings
+set in `org-tree-view/levels'."
+  (interactive)
+  (if (and (boundp 'org-tree-view/show-all) org-tree-view/show-all)
+      (setq-local org-tree-view/show-all nil)
+    (setq-local org-tree-view/show-all t))
+  (org-tree-view/refresh))
 #+END_SRC
 
 ***** /org-tree-view/buffer-name/
@@ -1509,6 +1528,7 @@ buffer."
         (local-set-key (kbd "C-M-p") #'org-backward-heading-same-level)
 
         ;; Show all headings
+        (local-set-key (kbd "<tab>") #'org-tree-view/toggle-show-all)
 
         ;; Quit tree view
         (local-set-key (kbd "Q") #'org-tree-view/exit)
