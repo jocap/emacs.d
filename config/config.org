@@ -80,8 +80,7 @@ respective configurations are listed elsewhere.
 - [[#iy-go-to-char][iy-go-to-char]]
 - [[#avy][avy]]
 - [[#origami][origami]]
-- [[#helm][helm]] (currently disabled)
-- [[#ivy][ivy]]
+- [[#helm][helm]]
 - [[#projectile][projectile]]
 - [[#magit][magit]]
 - [[#git-gutter][git-gutter+]]
@@ -130,7 +129,6 @@ here with a short description of why I like them.
   (popwin-mode 1))
 
 (use-package helm-org-rifle
-  :ensure nil
   :bind (("C-c f" . helm-org-rifle-current-buffer)
          ("C-c F" . helm-org-rifle)))
 
@@ -233,12 +231,7 @@ headline. Most of them are based on built-in functions.
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 
-(global-set-key (kbd "C-x 4 e") ; open eshell in split to the right
-                (lambda ()
-                  (interactive)
-                  (split-window-right)
-                  (other-window 1)
-                  (eshell)))
+(global-set-key (kbd "<C-tab>") #'completion-at-point)
 #+END_SRC
 
 Apart from defining new ones, there are some keybindings that I remove. One
@@ -940,28 +933,33 @@ anything as reliable. Believe me, [[#custom-hooks][I've tried]].
 
 * Helpful tools
 
-** Helm (currently disabled)
+** Helm
 :PROPERTIES:
 :CUSTOM_ID: helm
 :END:
 
 I always feel a bit guilty when I use Helm. Which is, like, all the time,
-because of how useful it is. I know it's big, a lot bigger than
-alternatives like Ivy, and to be honest, some day I might try another
-option, but for now, Helm does its job very well.
+because of how useful it is. I mostly use Helm "as-is." I do have some code that
+implements Helm completion from Eshell, which is very useful.
 
-I mostly use Helm "as-is." I do have some code that implements Helm completion
-from Eshell, which is very useful.
+I have used alternatives to Helm, like Ido and Ivy, but I felt that Ido provided
+too little, and that Ivy made things surprisingly complicated. Want to close all
+Magit buffers? With Helm, you just enter "magit", hit ~<C-space>~ a few times and
+then ~M-D~. With Ivy, you'd have to find the first buffer to delete, then hit
+~C-M-o~ (instead of the normal ~C-o~ that's in your muscle memory) and ~k~ to kill the
+/first/ buffer. Then repeat it all those keystrokes for all remaining buffers.
 
-*Update:* As you can see in the [[#ivy][next section]], I am currently trying out Ivy
-instead of Helm. Thus, the code below is /not/ tangled to my =custom.el= and not
-loaded by Emacs. I will keep it here, though, in case I want to return to Helm
-in the future.
+Another thing I never liked about Ivy was its =describe-function= and
+=describe-variable= integration. You would need to have your cursor /right next to/
+the function or variable name in order to look it up, whereas with Helm, you can
+be anywhere in the s-expression.
 
-# #+NAME: c:pkg:config
+Helm is big, but it does its job /very/ well, and it makes common actions /very/
+simple. Ivy is evidence that smaller doesn't always mean simpler.
+
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package helm
-  :ensure nil
   :commands helm-command-prefix
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
@@ -972,6 +970,7 @@ in the future.
   (global-unset-key (kbd "C-x c"))
   (require 'helm-config)
   (helm-mode 1)
+  (helm-flx-mode 1)
 
   :config
   ;; Projectile integration
@@ -985,38 +984,6 @@ in the future.
               (lambda ()
                 (eshell-cmpl-initialize)
                 (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete)))))
-#+END_SRC
-
-** Ivy
-:PROPERTIES:
-:CUSTOM_ID: ivy
-:END:
-
-#+NAME: c:pkg:config
-#+BEGIN_SRC emacs-lisp
-(use-package ivy
-  :init
-  (ivy-mode 1)
-  :config
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
-  (setq projectile-completion-system 'ivy)
-  :bind (("C-s"     . swiper)
-         ("C-c C-r" . ivy-resume)
-         ("<f6>"    . ivy-resume)
-         ("M-x"     . counsel-M-x)
-         ("C-x C-f" . counsel-find-file)
-         ("<f1> f"  . counsel-describe-function)
-         ("<f1> v"  . counsel-describe-variable)
-         ("<f1> l"  . counsel-find-library)
-         ("<f2> i"  . counsel-info-lookup-symbol)
-         ("<f2> u"  . counsel-unicode-char)
-         ("C-c k"   . counsel-ag)
-         ("C-x l"   . counsel-locate)
-         ("C-x C-b" . ivy-switch-buffer)
-         ("C-x b"   . list-buffers))
-  :bind (:map read-expression-map
-              ("C-r" . counsel-expression-history)))
 #+END_SRC
 
 ** Projectile
@@ -1055,6 +1022,21 @@ The fact that *magit* requires this little configuration, yet is so
 incredibly useful, is a testament to good design. The only thing I could
 possibly complain about is the speed. It does run slow on my computer. I
 hope it's just because I'm running it on the Windows Subsystem for Linux.
+
+** Eshell
+:PROPERTIES:
+:CUSTOM_ID: eshell
+:END:
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-x 4 e") ; open eshell in split to the right
+                (lambda ()
+                  (interactive)
+                  (split-window-right)
+                  (other-window 1)
+                  (eshell)))
+#+END_SRC
 
 ** /git-gutter+/
 :PROPERTIES:
@@ -1547,6 +1529,14 @@ buffer."
         (mapc (lambda (key)
                 (local-set-key (kbd key) #'org-tree-view/open-heading))
               '("<mouse-1>" "<return>"))))))
+#+END_SRC
+
+***** Variables
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defvar org-tree-view/show-all nil
+  "Local variable telling org-tree-view/refresh to show all levels.")
 #+END_SRC
 
 **** Issues
