@@ -1193,6 +1193,9 @@ left. The cloned buffer, called the /tree view/, has the following properties:
 
 Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el= string manipulation library]].
 
+# TODO:
+# - Replace (kill-buffer) + (delete-window) with (quit-window)
+
 #+NAME: c:org:fun
 #+BEGIN_SRC emacs-lisp :noweb yes :exports none
 <<c:org-tree-view>>
@@ -1364,9 +1367,11 @@ there's something weird going on with =isearch-exit=.
   (interactive)
 
   (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
-        (tree-view-window (get-buffer-window tree-view-buffer-name)))
-    (kill-buffer tree-view-buffer-name) ; kill buffer
-    (delete-window tree-view-window)) ; delete window
+         (tree-view-window (get-buffer-window tree-view-buffer-name))
+         (base-window (get-buffer-window (org-tree-view/base-buffer-name))))
+    (kill-buffer tree-view-buffer-name)
+    (delete-window tree-view-window)
+    (select-window base-window))
 
   ;; Cleanup
   (remove-hook 'after-save-hook #'org-tree-view/refresh)
@@ -1412,7 +1417,8 @@ original function. Flexible!
 30 columns, and bind RET to jump to the same position in the base
 buffer."
   (interactive)
-  (push-mark) ; in case user gets lost
+  (require 's)
+  (unless (eq (mark) (point)) (push-mark)) ; in case user gets lost
 
   (if (buffer-base-buffer)
       (error "Tree view can only be opened from a base buffer!")
@@ -1454,10 +1460,10 @@ buffer."
            (vconcat (mapcar
                      (lambda (c)
                        (make-glyph-code c 'font-lock-keyword-face))
-                     (apply #'concat (make-list org-tree-view/width " "))))))
-        ;; The above code replaces the ellipsis with a string of spaces as long as
-        ;; org-tree-view/width. If Org headings are themed with a background, this
-        ;; creates a nice, unified look.
+                     (apply #'concat (make-list (* 2 org-tree-view/width) " "))))))
+        ;; The above code replaces the ellipsis with a string of spaces as long
+        ;; as org-tree-view/width * 2. If Org headings are themed with a
+        ;; background, this creates a nice, unified look.
 
         ;; Go to top of tree view
         (goto-char (point-min))      ; go to beginning of buffer
@@ -1502,6 +1508,8 @@ buffer."
         (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
         (local-set-key (kbd "C-M-p") #'org-backward-heading-same-level)
 
+        ;; Show all headings
+
         ;; Quit tree view
         (local-set-key (kbd "Q") #'org-tree-view/exit)
         (local-set-key (kbd "C-g") #'org-tree-view/exit)
@@ -1522,6 +1530,16 @@ buffer."
 #+END_SRC
 
 **** Issues
+
+***** Searching
+
+When searching for the last word in a heading, you only see the following:
+
+#+CAPTION: Searching for "configuration", matching a heading ending with "configuration"
+#+NAME: fig:org-tree-view:bug:searching
+[[./resources/org-tree-view-bug.png]]
+
+I'm not quite sure how to fix it yet.
 
 *** Automatic Wiktionary links
 :PROPERTIES:
