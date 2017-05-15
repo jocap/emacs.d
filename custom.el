@@ -18,7 +18,7 @@
  '(custom-safe-themes
    (quote
     ("ed4f603e56aa85f6885b86de49394eda021d38f4768671b8b27bacc06f5a5fa1" "228b21af874cf3ba1df3d6a684a63e33089aa200ad2ab65df747ffaca6b43419" "d29231b2550e0d30b7d0d7fc54a7fb2aa7f47d1b110ee625c1a56b30fea3be0f" "3cddc1775f6c26573a69315dacd5fd45a6cd04df539b6354281d316985f254f3" "74dd165fb35d6605d833cb756250a95134d3bdf8342689866308e14a8891d092" "b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
- '(debug-on-error t)
+ '(debug-on-error nil)
  '(default-frame-alist (quote ((font . "Fira Mono Medium-10"))))
  '(default-input-method "russian-computer")
  '(enable-recursive-minibuffers t)
@@ -34,6 +34,8 @@
  '(helm-buffers-fuzzy-matching t)
  '(helm-completion-in-region-fuzzy-match t)
  '(helm-external-programs-associations (quote (("html" . "firefox"))))
+ '(helm-flx-for-helm-locate t)
+ '(helm-flx-mode t)
  '(helm-mode t)
  '(helm-mode-fuzzy-match t)
  '(helm-split-window-in-side-p t)

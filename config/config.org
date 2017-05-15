@@ -986,6 +986,28 @@ simple. Ivy is evidence that smaller doesn't always mean simpler.
                 (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete)))))
 #+END_SRC
 
+** Swiper
+:PROPERTIES:
+:CUSTOM_ID: swiper
+:END:
+
+All right, so I know I said I didn't like Ivy, but I do like Swiper, which uses
+Ivy. It's far better than both =isearch= and =helm-occur=. That said, if you know
+about a package with equivalent functionality, but for Helm, please let me know!
+
+The following configuration sets up Swiper to use ~C-s~. I also set up Ivy, since
+Swiper requires Ivy and =swiper-helm= didn't work, but I /defer/ its loading until
+it's needed by Swiper.
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :defer t)
+
+(use-package swiper
+  :bind (("C-s" . swiper)))
+#+END_SRC
+
 ** Projectile
 :PROPERTIES:
 :CUSTOM_ID: projectile
@@ -1541,6 +1563,23 @@ buffer."
 
 **** Issues
 
+***** Window configuration
+
+When exiting the tree view for an Org document in the right window, the original
+width of the right window will be shrunk.
+
+#+BEGIN_SRC
+|----- LEFT WINDOW -----|--------- RIGHT WINDOW ----------|
+#+END_SRC
+
+#+BEGIN_SRC
+|----- LEFT WINDOW -----|- tree -|----- RIGHT WINDOW -----|
+#+END_SRC
+
+#+BEGIN_SRC
+|---------- LEFT WINDOW ---------|----- RIGHT WINDOW -----|
+#+END_SRC
+
 ***** Searching
 
 When searching for the last word in a heading, you only see the following:
@@ -1549,7 +1588,18 @@ When searching for the last word in a heading, you only see the following:
 #+NAME: fig:org-tree-view:bug:searching
 [[./resources/org-tree-view-bug.png]]
 
-I'm not quite sure how to fix it yet.
+I'm not quite sure how to fix it yet. It could possibly be fixed by appending
+some searchable text (I'm thinking spaces) to every heading, but which isn't
+actual text inserted and saved into the buffer. Perhaps this could be achieved
+using text properties or maybe overlays.
+
+To alleviate the issue in the meantime, you can press ~C-r~ whenever this happens
+and you will see the the word you're searching for.
+
+Actually, that gives me an idea - a simple solution would be to advice
+=isearch-repeat-forward= (and =isearch-forward=, to be sure) to automatically run
+=iesarch-repeat-backward= after it's done. Or perhaps there's a way to force
+=isearch= to always put the point at the beginning of the match?
 
 *** Automatic Wiktionary links
 :PROPERTIES:
