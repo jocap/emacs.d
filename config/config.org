@@ -31,7 +31,6 @@ of quick links to the most interesting sections of this document.
      Org document. The resulting package is as interesting, I would say, as some
      of the underlying code.
 
-
 * Packages
 
 ** Package management
@@ -1245,7 +1244,6 @@ each asterisk preceding a heading as a level."
            #'org-tree-view/open)))
 #+END_SRC
 
-
 **** Source
 
 ***** /org-tree-view/open-heading/
@@ -1340,11 +1338,11 @@ set in `org-tree-view/levels'."
   (org-beginning-of-line))
 #+END_SRC
 
-***** /org-tree-view/search/
+***** /org-tree-view/start-search/
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-(defun org-tree-view/search (N)
+(defun org-tree-view/start-search (N)
   (interactive "p")
   ;; Scroll to top of window
   (goto-char (point-min))
@@ -1377,7 +1375,7 @@ there's something weird going on with =isearch-exit=.
 (defun org-tree-view/self-insert-command (oldfun N)
   (interactive "p")
   (if (s-starts-with? "<tree>" (buffer-name))
-      (call-interactively #'org-tree-view/search)
+      (call-interactively #'org-tree-view/start-search)
     (call-interactively oldfun)))
 #+END_SRC
 
@@ -1484,9 +1482,6 @@ buffer."
                      (lambda (c)
                        (make-glyph-code c 'font-lock-keyword-face))
                      (apply #'concat (make-list (* 2 org-tree-view/width) " "))))))
-        ;; The above code replaces the ellipsis with a string of spaces as long
-        ;; as org-tree-view/width * 2. If Org headings are themed with a
-        ;; background, this creates a nice, unified look.
 
         ;; Go to top of tree view
         (goto-char (point-min))      ; go to beginning of buffer
@@ -1588,18 +1583,17 @@ When searching for the last word in a heading, you only see the following:
 #+NAME: fig:org-tree-view:bug:searching
 [[./resources/org-tree-view-bug.png]]
 
-I'm not quite sure how to fix it yet. It could possibly be fixed by appending
-some searchable text (I'm thinking spaces) to every heading, but which isn't
-actual text inserted and saved into the buffer. Perhaps this could be achieved
-using text properties or maybe overlays.
-
 To alleviate the issue in the meantime, you can press ~C-r~ whenever this happens
 and you will see the the word you're searching for.
 
-Actually, that gives me an idea - a simple solution would be to advice
-=isearch-repeat-forward= (and =isearch-forward=, to be sure) to automatically run
-=iesarch-repeat-backward= after it's done. Or perhaps there's a way to force
-=isearch= to always put the point at the beginning of the match?
+I'm not quite sure how to fix it yet. It could possibly be fixed by appending
+some searchable text (I'm thinking spaces) to every heading, but which isn't
+actual text inserted and saved into the buffer. This doesn't seem to be possible
+using text properties or overlays, as those aren't searchable. The issue really
+lies with =isearch=.
+
+A possible solution could be advising =isearch-search-and-update= to scroll the
+screen to the left after its done.
 
 *** Automatic Wiktionary links
 :PROPERTIES:
