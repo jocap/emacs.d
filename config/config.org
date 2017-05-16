@@ -1209,8 +1209,10 @@ Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el=
 #+BEGIN_SRC emacs-lisp
 (defvar org-tree-view-mode-map (make-sparse-keymap))
 
-(define-key org-tree-view-mode-map (kbd "<return>") #'org-tree-view/open-headline-at-point)
-(define-key org-tree-view-mode-map (kbd "C-g")      #'org-tree-view/close)
+(define-key org-tree-view-mode-map (kbd "<return>")  #'org-tree-view/open-headline-at-point)
+(define-key org-tree-view-mode-map (kbd "<mouse-1>") #'org-tree-view/open-headline-at-point)
+(define-key org-tree-view-mode-map (kbd "C-g")       #'org-tree-view/close)
+(define-key org-tree-view-mode-map (kbd "<tab>")     #'org-tree-view/toggle-visibility)
 
 ;; Re-define self-insert-command
 (map-keymap (lambda (key fun)
@@ -1278,21 +1280,26 @@ face and its position in the base buffer encoded as the
     ;; Text properties
     (put-text-property ; org-tree-view-level-N
      0 (length text)
-     'face org-tree-view-level-face
+     'font-lock-face org-tree-view-level-face
      text)
-    (setq text (org-tree-view/draw-string text))
     (put-text-property ; encode headling position in base buffer
      0 (length text)
      'org-tree-view-headline-pos begin
      text)
+    (setq text (org-tree-view/draw-string text))
 
     ;; Pad headline with spaces
     (let ((end (1- (length text))))
       (setq text (concat text
                          (apply #'concat (make-list (* 2 org-tree-view/width) " "))))
+      ;; Add same properties to padding (a little repetitive)
       (put-text-property
        end (length text)
-       'face org-tree-view-level-face
+       'font-lock-face org-tree-view-level-face
+       text)
+      (put-text-property
+       end (length text)
+       'org-tree-view-headline-pos begin
        text))
     text))
 
@@ -1325,13 +1332,13 @@ syntax and return the resulting string."
           ;; Handle faces
           (when (-contains? faces type)
             (let* ((face (plist-get faces type))
-                   (existing-face (get-text-property begin 'face text))
+                   (existing-face (get-text-property begin 'font-lock-face text))
                    (new-face (if existing-face
                                  `(,face ,existing-face)
                                face)))
               (put-text-property ; add face for type
                begin end
-               'face new-face
+               'font-lock-face new-face
                text))
             (put-text-property ; remove first piece of markup
              begin (1+ begin)
@@ -1368,15 +1375,16 @@ syntax and return the resulting string."
                          (org-tree-view/draw-headline headline)
                          "\n")))))
 
-(defun org-tree-view/refresh (&optional new-point)
-  (let* ((orig-point (or new-point (point)))
+(defun org-tree-view/refresh (&optional new-line)
+  (let* ((orig-line (or new-line (string-to-number (format-mode-line "%l"))))
          (orig-window-start (window-start))
          (refresh `(progn
                      (setq-local buffer-read-only nil)
                      (set-window-fringes (get-buffer-window) 8 1)
                      (erase-buffer)
                      (org-tree-view/insert-headlines)
-                     (goto-char ,orig-point)
+                     (goto-line ,orig-line)
+                     (move-beginning-of-line 1)
                      (set-window-start (get-buffer-window) orig-window-start)
                      (setq-local buffer-read-only t))))
     (if (org-tree-view/is-tree-view)
@@ -1485,6 +1493,15 @@ also call `org-tree-view/bind-close-after' before finishing."
       (other-window 1)
       ;; FIXME: the following switch-to-buffer didn't work last I checked
       (switch-to-buffer (org-tree-view/make-base-buffer-name) nil :force-same-window))))
+
+(defun org-tree-view/toggle-visibility (&optional arg)
+  (interactive "P")
+  (if (numberp arg)
+      (setq-local org-tree-view/level arg)
+    (if (/= org-tree-view/level (default-value 'org-tree-view/level))
+        (setq-local org-tree-view/level (default-value 'org-tree-view/level))
+      (setq-local org-tree-view/level 2)))
+  (org-tree-view/refresh))
 #+END_SRC
 
 ***** Searching the tree view
@@ -1516,6 +1533,7 @@ character in the search."
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
 (defun org-tree-view/setup ()
+  (font-lock-mode)
   (org-tree-view/refresh)
   (setq-local buffer-read-only t)
   (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return))
@@ -1597,10 +1615,6 @@ each asterisk preceding a heading as a level."
 #+END_SRC
 
 **** Issues
-
-***** /org-tree-view/draw-string/ does not support strike-through
-
-Mostly because strike-through isn't a proper face and also because I'm lazy.
 
 *** Automatic Wiktionary links
 :PROPERTIES:
