@@ -1434,9 +1434,38 @@ syntax and return the resulting string."
                (kill-buffer tree-view-buffer))
       (error "No tree view found!"))))
 
-(defun org-tree-view/open-headline-at-point (&optional base-buffer)
+(defun org-tree-view/bind-close-after (&optional key)
+  "Bind the key combination pressed to call
+`org-tree-view/open-headline-at-point' to also close the tree
+view, but only for 1 second."
+  (let* ((key (or key (this-command-keys-vector)))
+         (original-binding (local-key-binding key))
+         (reset-key `(local-set-key ,key (quote ,original-binding)))
+         (base-buffer))
+    (if (org-tree-view/is-tree-view)
+        (setq base-buffer (org-tree-view/make-base-buffer-name))
+      (if (org-tree-view/has-tree-view)
+          (setq base-buffer (current-buffer))))
+    (when (and base-buffer (not (s-contains? "mouse" (key-description key))))
+      (message "Press %s again to close the tree view." (key-description key))
+      (eval
+       (macroexpand
+        `(progn
+           (local-set-key ,key (lambda () (interactive)
+                                 ,reset-key
+                                 (org-tree-view/close)))
+           (run-with-timer 1 nil (lambda ()
+                                   (message " ") ; clear
+                                   (with-current-buffer ,base-buffer
+                                     ,reset-key)))))))))
+
+(defun org-tree-view/open-headline-at-point (&optional bind-close-after)
+  "From tree view, open headline at point in base buffer. If
+`bind-close-after' is non-nil (default: t), the function will
+also call `org-tree-view/bind-close-after' before finishing."
   (interactive)
-  (let* ((base-buffer (or base-buffer (org-tree-view/make-base-buffer-name)))
+  (let* ((bind-close-after (or bind-close-after t))
+         (base-buffer (org-tree-view/make-base-buffer-name))
          (position (get-text-property (point) 'org-tree-view-headline-pos)))
     (condition-case nil
         (select-window (car (get-buffer-window-list base-buffer)))
@@ -1444,7 +1473,8 @@ syntax and return the resulting string."
              (switch-to-buffer base-buffer)))
     (if position
         (progn (unless (eq (mark) (point))) (push-mark (point))
-               (goto-char position))
+               (goto-char position)
+               (if bind-close-after (org-tree-view/bind-close-after)))
       (error "No headline found!"))))
 
 (defun org-tree-view/switch-to-base-buffer ()
@@ -1465,6 +1495,7 @@ syntax and return the resulting string."
   "Start an `isearch' with the character `N' as the first
 character in the search."
   (interactive "p")
+  (goto-char (point-min))
   (let* ((char (string-to-char (this-command-keys)))
          (unread-command-events (append unread-command-events (list char))))
     (isearch-forward)))
@@ -1474,6 +1505,8 @@ character in the search."
   (interactive)
   (when (org-tree-view/is-tree-view)
     (org-tree-view/open-headline-at-point)
+    (run-with-timer 0 nil (lambda () (org-tree-view/bind-close-after (kbd "<S-return>"))))
+    ;; ^ Timer needed because isearch-exit behaves weirdly otherwise.
     (let ((inhibit-message t))
       (isearch-exit))))
 #+END_SRC
