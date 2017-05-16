@@ -1268,7 +1268,7 @@ face and its position in the base buffer encoded as the
      0 (length text)
      'face org-tree-view-level-face
      text)
-    (setq text (org-tree-view/draw-string-like-org text))
+    (setq text (org-tree-view/draw-string text))
     (put-text-property ; encode headling position in base buffer
      0 (length text)
      'org-tree-view-headline-pos begin
@@ -1284,13 +1284,12 @@ face and its position in the base buffer encoded as the
        text))
     text))
 
-(defun org-tree-view/draw-string-like-org (text)
+(defun org-tree-view/draw-string (text)
   "Add, as Org would, proper faces for italic, bold and verbatim
 text. Regardless of Org settings,
 remove the markup for said
 types. Return the text with the new properties."
-  (let* ((text (concat text " ")) ; this is needed in case the string ends with one of the `types'
-         (types-faces
+  (let* ((types-faces
           '(italic italic bold bold verbatim org-verbatim))
          (types (--filter it
                           (-map-indexed
@@ -1303,17 +1302,24 @@ types. Return the text with the new properties."
                (begin (1- (org-element-property :begin object)))
                (end (1- (org-element-property :end object)))
                (face (plist-get types-faces type)))
-          (message "%s" type)
-          (put-text-property ; add face for type
-           begin end
-           'face `(,face ,(get-text-property begin 'face text))
-           text)
+          ;; Figure out real end of object
+          (let ((substr (s-trim-right (substring text begin end))))
+            (setq end (+ begin (length substr))))
+
+          (let* ((existing-face (get-text-property begin 'face text))
+                 (new-face (if existing-face
+                               `(,face ,existing-face)
+                             face)))
+            (put-text-property ; add face for type
+             begin end
+             'face new-face
+             text))
           (put-text-property ; remove first piece of markup
            begin (1+ begin)
            'display ""
            text)
           (put-text-property ; remove second piece of markup
-           (- end 2) (if (= end (length text)) end (1- end))
+           (1- end) end
            'display ""
            text))))
     text))
