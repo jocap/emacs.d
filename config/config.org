@@ -1162,7 +1162,7 @@ functions - they are defined further down.
 )
 #+END_SRC
 
-*** /org-tree-view/ [[#org-tree-view][Test ~code~ and =verbatim= link]]
+*** /org-tree-view/
 :PROPERTIES:
 :CUSTOM_ID: org-tree-view
 :END:
@@ -1285,70 +1285,69 @@ face and its position in the base buffer encoded as the
     text))
 
 (defun org-tree-view/draw-string (text)
-  "Add, as Org would, proper faces for italic, bold and verbatim
-text. Regardless of Org settings,
-remove the markup for said
-types. Return the text with the new properties."
+  "Apply the appropriate faces on `text' according to Org markup
+syntax and return the resulting string."
   (let* ((types '(link
                   italic
                   bold
+                  strike-through
                   verbatim
                   code))
          (data (org-element-parse-secondary-string text types)))
     (org-element-map data types
-      (org-tree-view/propertize-fun text types))
-    text))
+      (lambda (object)
+        (let* ((type (org-element-type object))
+               (begin (1- (org-element-property :begin object)))
+               (end (1- (org-element-property :end object)))
+               (faces
+                '(italic         italic
+                  bold           bold
+                  strike-through (:strike-through t)
+                  verbatim       org-verbatim
+                  code           org-code)))
 
-(defun org-tree-view/propertize-fun (text types)
-  (lambda (object)
-    (let* ((type (org-element-type object))
-           (value (org-element-property :raw-value object))
-           (begin (1- (org-element-property :begin object)))
-           (end (1- (org-element-property :end object)))
-           (faces
-            '(italic italic bold bold verbatim org-verbatim code org-code)))
+          ;; Figure out real end of object
+          (let ((substr (s-trim-right (substring text begin end))))
+            (setq end (+ begin (length substr))))
 
-      ;; Figure out real end of object
-      (let ((substr (s-trim-right (substring text begin end))))
-        (setq end (+ begin (length substr))))
-
-      ;; Handle faces
-      (when (-contains? faces type)
-        (let* (
-               (face (plist-get faces type))
-               (existing-face (get-text-property begin 'face text))
-               (new-face (if existing-face
-                             `(,face ,existing-face)
-                           face)))
-          (put-text-property ; add face for type
-           begin end
-           'face new-face
-           text))
-        (put-text-property ; remove first piece of markup
-         begin (1+ begin)
-         'display ""
-         text)
-        (put-text-property ; remove second piece of markup
-         (1- end) end
-         'display ""
-         text))
-
-      ;; Handle links
-      (when (equal 'link type)
-        (let ((contents-begin (org-element-property :contents-begin object)))
-          (if contents-begin ; has contents
-              (put-text-property
-               begin (1- contents-begin)
-               'display ""
-               text)
-            (put-text-property ; only url
-             begin (+ begin 2)
+          ;; Handle faces
+          (when (-contains? faces type)
+            (let* (
+                   (face (plist-get faces type))
+                   (existing-face (get-text-property begin 'face text))
+                   (new-face (if existing-face
+                                 `(,face ,existing-face)
+                               face)))
+              (put-text-property ; add face for type
+               begin end
+               'face new-face
+               text))
+            (put-text-property ; remove first piece of markup
+             begin (1+ begin)
+             'display ""
+             text)
+            (put-text-property ; remove second piece of markup
+             (1- end) end
              'display ""
              text))
-          (put-text-property
-           (- end 2) end
-           'display ""
-           text))))))
+
+          ;; Handle links
+          (when (equal 'link type)
+            (let ((contents-begin (org-element-property :contents-begin object)))
+              (if contents-begin ; has contents
+                  (put-text-property
+                   begin (1- contents-begin)
+                   'display ""
+                   text)
+                (put-text-property ; only url
+                 begin (+ begin 2)
+                 'display ""
+                 text))
+              (put-text-property
+               (- end 2) end
+               'display ""
+               text))))))
+    text))
 
 (defun org-tree-view/insert-headlines (&optional level &optional base-buffer)
   "Insert all drawn headlines at the current position."
@@ -1517,6 +1516,10 @@ each asterisk preceding a heading as a level."
 #+END_SRC
 
 **** Issues
+
+***** /org-tree-view/draw-string/ does not support strike-through
+
+Mostly because strike-through isn't a proper face and also because I'm lazy.
 
 *** Automatic Wiktionary links
 :PROPERTIES:

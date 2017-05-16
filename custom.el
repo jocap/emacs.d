@@ -77,6 +77,7 @@
      (t . ivy-sort-file-function-default))))
  '(ivy-use-virtual-buffers t)
  '(linum-format "%4d │ ")
+ '(lisp-indent-function (quote common-lisp-indent-function) nil nil "The CL function offers better indentation.")
  '(magit-diff-use-overlays nil)
  '(minibuffer-prompt-properties
    (quote
