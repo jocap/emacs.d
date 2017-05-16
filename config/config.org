@@ -1480,8 +1480,7 @@ also call `org-tree-view/bind-close-after' before finishing."
       (error (other-window 1)
              (switch-to-buffer base-buffer)))
     (if position
-        (progn (unless (eq (mark) (point))) (push-mark (point))
-               (goto-char position)
+        (progn (goto-char position)
                (if bind-close-after (org-tree-view/bind-close-after)))
       (error "No headline found!"))))
 
