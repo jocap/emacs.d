@@ -1203,14 +1203,24 @@ Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el=
 <<c:org-tree-view>>
 #+END_SRC
 
-**** Source
+**** Minor mode definition
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-(defvar org-tree-view-mode-map (make-keymap))
+(defvar org-tree-view-mode-map (make-sparse-keymap))
 
 (define-key org-tree-view-mode-map (kbd "<return>") #'org-tree-view/open-headline-at-point)
 (define-key org-tree-view-mode-map (kbd "C-g")      #'org-tree-view/close)
+
+;; Re-define self-insert-command
+(map-keymap (lambda (key fun)
+              (if (equal fun #'self-insert-command)
+                  ;; Append ((from . to) #'org-tree-view/self-insert-command))
+                  (nconc org-tree-view-mode-map
+                        (list (cons key #'org-tree-view/self-insert-command)))))
+            (current-global-map))
+(setq org-tree-view-mode-map ; develop (from . to) ranges, please
+      (keymap-canonicalize org-tree-view-mode-map))
 
 (define-minor-mode org-tree-view-mode
   ""
@@ -1220,6 +1230,8 @@ Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el=
 
 (provide 'org-tree-view-mode)
 #+END_SRC
+
+**** Rendering the tree view
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
@@ -1312,8 +1324,7 @@ syntax and return the resulting string."
 
           ;; Handle faces
           (when (-contains? faces type)
-            (let* (
-                   (face (plist-get faces type))
+            (let* ((face (plist-get faces type))
                    (existing-face (get-text-property begin 'face text))
                    (new-face (if existing-face
                                  `(,face ,existing-face)
@@ -1357,14 +1368,16 @@ syntax and return the resulting string."
                          (org-tree-view/draw-headline headline)
                          "\n")))))
 
-(defun org-tree-view/refresh ()
-  (let* ((original-point (point))
+(defun org-tree-view/refresh (&optional new-point)
+  (let* ((orig-point (or new-point (point)))
+         (orig-window-start (window-start))
          (refresh `(progn
                      (setq-local buffer-read-only nil)
                      (set-window-fringes (get-buffer-window) 8 1)
                      (erase-buffer)
                      (org-tree-view/insert-headlines)
-                     (goto-char ,original-point)
+                     (goto-char ,orig-point)
+                     (set-window-start (get-buffer-window) orig-window-start)
                      (setq-local buffer-read-only t))))
     (if (org-tree-view/is-tree-view)
         (eval (macroexpand refresh))
@@ -1372,27 +1385,12 @@ syntax and return the resulting string."
           (with-current-buffer (org-tree-view/make-tree-view-buffer-name)
             (eval (macroexpand refresh)))))))
 
-(defun org-tree-view/open-headline-at-point (&optional base-buffer)
-  (interactive)
-  (let* ((base-buffer (or base-buffer (org-tree-view/make-base-buffer-name)))
-         (position (get-text-property (point) 'org-tree-view-headline-pos)))
-    (condition-case nil
-        (select-window (car (get-buffer-window-list base-buffer)))
-      (error (other-window 1)
-             (switch-to-buffer base-buffer)))
-    (if position
-        (progn (unless (eq (mark) (point))) (push-mark (point))
-               (goto-char position))
-      (error "No headline found!"))))
+#+END_SRC
 
-(defun org-tree-view/switch-to-base-buffer ()
-  (interactive)
-  (when (org-tree-view/is-tree-view)
-    (if (get-buffer-window (org-tree-view/make-base-buffer-name))
-        (select-window (get-buffer-window (org-tree-view/make-base-buffer-name)))
-      (other-window 1)
-      (switch-to-buffer (org-tree-view/make-base-buffer-name) nil :force-same-window)))) ; this last part doesn't work?
+**** Interacting with the tree view
 
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
 (defun org-tree-view/open (&optional arg)
   ""
   (interactive "p")
@@ -1415,13 +1413,7 @@ syntax and return the resulting string."
 
     ;; Switch to tree view buffer
     (switch-to-buffer tree-view-buffer)
-    (org-tree-view/refresh)
-
-    ;; (org-mode)
-    ;; (org-mode)
-    ;; (setq-local org-indent-mode nil) ; move to org-tree-view-mode?
-    ;; (outline-show-all)
-    (setq-local buffer-read-only t)
+    (org-tree-view/setup)
     (org-tree-view-mode)))
 
 (defun org-tree-view/close (&optional tree-view-buffer &optional base-buffer)
@@ -1441,6 +1433,62 @@ syntax and return the resulting string."
                    (delete-window tree-view-window))
                (kill-buffer tree-view-buffer))
       (error "No tree view found!"))))
+
+(defun org-tree-view/open-headline-at-point (&optional base-buffer)
+  (interactive)
+  (let* ((base-buffer (or base-buffer (org-tree-view/make-base-buffer-name)))
+         (position (get-text-property (point) 'org-tree-view-headline-pos)))
+    (condition-case nil
+        (select-window (car (get-buffer-window-list base-buffer)))
+      (error (other-window 1)
+             (switch-to-buffer base-buffer)))
+    (if position
+        (progn (unless (eq (mark) (point))) (push-mark (point))
+               (goto-char position))
+      (error "No headline found!"))))
+
+(defun org-tree-view/switch-to-base-buffer ()
+  (interactive)
+  (when (org-tree-view/is-tree-view)
+    (if (get-buffer-window (org-tree-view/make-base-buffer-name))
+        (select-window (get-buffer-window (org-tree-view/make-base-buffer-name)))
+      (other-window 1)
+      ;; FIXME: the following switch-to-buffer didn't work last I checked
+      (switch-to-buffer (org-tree-view/make-base-buffer-name) nil :force-same-window))))
+#+END_SRC
+
+***** Searching the tree view
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/self-insert-command (N)
+  "Start an `isearch' with the character `N' as the first
+character in the search."
+  (interactive "p")
+  (let* ((char (string-to-char (this-command-keys)))
+         (unread-command-events (append unread-command-events (list char))))
+    (isearch-forward)))
+
+(defun org-tree-view/isearch-return ()
+  "Open the matching headline and exit the isearch."
+  (interactive)
+  (when (org-tree-view/is-tree-view)
+    (org-tree-view/open-headline-at-point)
+    (let ((inhibit-message t))
+      (isearch-exit))))
+#+END_SRC
+
+**** Helper functions
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defun org-tree-view/setup ()
+  (org-tree-view/refresh)
+  (setq-local buffer-read-only t)
+  (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return))
+
+(defun org-tree-view/cleanup ()
+  (define-key isearch-mode-map (kbd "<S-return>" nil)))
 
 (defun org-tree-view/make-base-buffer-name (&optional tree-view-buffer)
   (let ((tree-view-buffer

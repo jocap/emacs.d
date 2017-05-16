@@ -106,6 +106,7 @@
  '(org-src-fontify-natively t)
  '(org-src-tab-acts-natively t)
  '(org-startup-indented t)
+ '(org-tree-view/level 6)
  '(package-selected-packages
    (quote
     (company helm-flx helm-projectile helm-org-rifle emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
