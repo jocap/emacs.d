@@ -1198,12 +1198,240 @@ left. The cloned buffer, called the /tree view/, has the following properties:
 
 Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el= string manipulation library]].
 
-# TODO:
-# - Replace (kill-buffer) + (delete-window) with (quit-window)
-
 #+NAME: c:org:fun
 #+BEGIN_SRC emacs-lisp :noweb yes :exports none
 <<c:org-tree-view>>
+#+END_SRC
+
+**** Source
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(defvar org-tree-view-mode-map (make-keymap))
+
+(define-key org-tree-view-mode-map (kbd "<return>") #'org-tree-view/open-headline-at-point)
+(define-key org-tree-view-mode-map (kbd "C-g")      #'org-tree-view/close)
+
+(define-minor-mode org-tree-view-mode
+  ""
+  nil
+  :lighter " tree-view"
+  org-tree-view-mode-map)
+
+(provide 'org-tree-view-mode)
+#+END_SRC
+
+#+NAME: c:org-tree-view
+#+BEGIN_SRC emacs-lisp
+(require 's) ; move to function
+
+(defun org-tree-view/get-headlines (&optional level &optional base-buffer)
+  "Get a list of all headlines in `base-buffer' of a level less
+than or equal to provided `level'. Includes headlines outside of
+any potential narrowing."
+  (let ((level (or level org-tree-view/level))
+        (base-buffer
+         (or base-buffer
+             (if (org-tree-view/is-tree-view)
+                 (get-buffer (org-tree-view/make-base-buffer-name))
+               (current-buffer))))
+        (headlines))
+    (with-current-buffer base-buffer
+      (let ((widened-buffer
+             (clone-indirect-buffer
+              (concat "<widened>" (buffer-name base-buffer)) nil)))
+        (with-current-buffer widened-buffer
+          (widen)
+          (setq headlines (org-element-map (org-element-parse-buffer 'headline) 'headline
+                            (lambda (headline)
+                              (when (<= (org-element-property :level headline) level)
+                                headline)))))
+        (kill-buffer widened-buffer)))
+    headlines))
+
+(defun org-tree-view/draw-headline (headline)
+  "Return a string of the headline to be printed, with the proper
+face and its position in the base buffer encoded as the
+`org-tree-view-headline-pos' text property."
+  (let* ((title (org-element-property :raw-value headline))
+         (level (org-element-property :level headline))
+         (begin (org-element-property :begin headline))
+         (org-tree-view-level-face (intern
+                          (concat "org-tree-view/level-"
+                                  (number-to-string level))))
+         (text (concat (apply #'concat (make-list (* 2 (1- level)) " "))
+                       "* "
+                       (s-replace "\"" "" title)))) ; remove \" from title
+
+    ;; Text properties
+    (put-text-property ; org-tree-view-level-N
+     0 (length text)
+     'face org-tree-view-level-face
+     text)
+    (setq text (org-tree-view/draw-string-like-org text))
+    (put-text-property ; encode headling position in base buffer
+     0 (length text)
+     'org-tree-view-headline-pos begin
+     text)
+
+    ;; Pad headline with spaces
+    (let ((end (1- (length text))))
+      (setq text (concat text
+                         (apply #'concat (make-list (* 2 org-tree-view/width) " "))))
+      (put-text-property
+       end (length text)
+       'face org-tree-view-level-face
+       text))
+    text))
+
+(defun org-tree-view/draw-string-like-org (text)
+  "Add, as Org would, proper faces for italic, bold and verbatim
+text. Regardless of Org settings,
+remove the markup for said
+types. Return the text with the new properties."
+  (let* ((text (concat text " ")) ; this is needed in case the string ends with one of the `types'
+         (types-faces
+          '(italic italic bold bold verbatim org-verbatim))
+         (types (--filter it
+                          (-map-indexed
+                           (lambda (i x) (if (= (% i 2) 0) x)) types-faces)))
+         (data (org-element-parse-secondary-string text types)))
+    (org-element-map data types
+      (lambda (object)
+        (let* ((type (org-element-type object))
+               (value (org-element-property :raw-value object))
+               (begin (1- (org-element-property :begin object)))
+               (end (1- (org-element-property :end object)))
+               (face (plist-get types-faces type)))
+          (message "%s" type)
+          (put-text-property ; add face for type
+           begin end
+           'face `(,face ,(get-text-property begin 'face text))
+           text)
+          (put-text-property ; remove first piece of markup
+           begin (1+ begin)
+           'display ""
+           text)
+          (put-text-property ; remove second piece of markup
+           (- end 2) (if (= end (length text)) end (1- end))
+           'display ""
+           text))))
+    text))
+
+(defun org-tree-view/insert-headlines (&optional level &optional base-buffer)
+  "Insert all drawn headlines at the current position."
+  (let ((headlines (org-tree-view/get-headlines level base-buffer)))
+    (cl-loop for headline in headlines
+             do (insert (concat
+                         (org-tree-view/draw-headline headline)
+                         "\n")))))
+
+(defun org-tree-view/refresh ()
+  (let* ((original-point (point))
+         (refresh `(progn
+                     (setq-local buffer-read-only nil)
+                     (set-window-fringes (get-buffer-window) 8 1)
+                     (erase-buffer)
+                     (org-tree-view/insert-headlines)
+                     (goto-char ,original-point)
+                     (setq-local buffer-read-only t))))
+    (if (org-tree-view/is-tree-view)
+        (eval (macroexpand refresh))
+      (if (org-tree-view/has-tree-view)
+          (with-current-buffer (org-tree-view/make-tree-view-buffer-name)
+            (eval (macroexpand refresh)))))))
+
+(defun org-tree-view/open-headline-at-point (&optional base-buffer)
+  (interactive)
+  (let* ((base-buffer (or base-buffer (org-tree-view/make-base-buffer-name)))
+         (position (get-text-property (point) 'org-tree-view-headline-pos)))
+    (condition-case nil
+        (select-window (car (get-buffer-window-list base-buffer)))
+      (error (other-window 1)
+             (switch-to-buffer base-buffer)))
+    (if position
+        (progn (unless (eq (mark) (point))) (push-mark (point))
+               (goto-char position))
+      (error "No headline found!"))))
+
+(defun org-tree-view/switch-to-base-buffer ()
+  (interactive)
+  (when (org-tree-view/is-tree-view)
+    (if (get-buffer-window (org-tree-view/make-base-buffer-name))
+        (select-window (get-buffer-window (org-tree-view/make-base-buffer-name)))
+      (other-window 1)
+      (switch-to-buffer (org-tree-view/make-base-buffer-name) nil :force-same-window)))) ; this last part doesn't work?
+
+(defun org-tree-view/open (&optional arg)
+  ""
+  (interactive "p")
+  (let ((tree-view-buffer-name (org-tree-view/make-tree-view-buffer-name))
+        (base-buffer (current-buffer))
+        (tree-view-buffer))
+
+    (if (and (org-tree-view/has-tree-view)
+             (get-buffer-window tree-view-buffer-name))
+        (progn
+          (select-window (get-buffer-window tree-view-buffer-name))
+          (setq tree-view-buffer (get-buffer tree-view-buffer-name)))
+      (if (org-tree-view/has-tree-view)
+          (kill-buffer (org-tree-view/make-tree-view-buffer-name)))
+      (if (equal org-tree-view/side 'left)
+          (split-window-right org-tree-view/width)
+        (split-window-right (* -1 org-tree-view/width))
+        (other-window 1))
+      (setq tree-view-buffer (generate-new-buffer tree-view-buffer-name)))
+
+    ;; Switch to tree view buffer
+    (switch-to-buffer tree-view-buffer)
+    (org-tree-view/refresh)
+
+    ;; (org-mode)
+    ;; (org-mode)
+    ;; (setq-local org-indent-mode nil) ; move to org-tree-view-mode?
+    ;; (outline-show-all)
+    (setq-local buffer-read-only t)
+    (org-tree-view-mode)))
+
+(defun org-tree-view/close (&optional tree-view-buffer &optional base-buffer)
+  "Close `tree-view-buffer' for `base-buffer'. Defaults to the current buffer."
+  (interactive)
+  (let* ((base-buffer
+          (get-buffer (or base-buffer
+                          (if (org-tree-view/is-tree-view)
+                              (org-tree-view/make-base-buffer-name)
+                            (current-buffer)))))
+         (tree-view-buffer
+          (get-buffer (or tree-view-buffer
+                          (org-tree-view/make-tree-view-buffer-name base-buffer))))
+         (tree-view-window))
+    (if tree-view-buffer
+        (progn (if (setq tree-view-window (get-buffer-window tree-view-buffer))
+                   (delete-window tree-view-window))
+               (kill-buffer tree-view-buffer))
+      (error "No tree view found!"))))
+
+(defun org-tree-view/make-base-buffer-name (&optional tree-view-buffer)
+  (let ((tree-view-buffer
+         (get-buffer (or tree-view-buffer
+                         (current-buffer)))))
+    (s-chop-prefix "<tree>" (buffer-name tree-view-buffer))))
+
+(defun org-tree-view/make-tree-view-buffer-name (&optional base-buffer)
+  (let ((base-buffer
+         (get-buffer (or base-buffer
+                         (current-buffer)))))
+    (concat "<tree>" (buffer-name base-buffer))))
+
+(defun org-tree-view/is-tree-view (&optional buffer)
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (bufferp (get-buffer (org-tree-view/make-base-buffer-name buffer))))))
+
+(defun org-tree-view/has-tree-view (&optional buffer)
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (bufferp (get-buffer (org-tree-view/make-tree-view-buffer-name buffer))))))
 #+END_SRC
 
 **** Customizable options
@@ -1217,7 +1445,7 @@ options that can be set:
   "A window providing easy access to all headings in an Org document."
   :group 'org-mode)
 
-(defcustom org-tree-view/levels 3
+(defcustom org-tree-view/level 3
   "The highest level headings to show in the tree view. Think of
 each asterisk preceding a heading as a level."
   :group 'org-tree-view
@@ -1235,365 +1463,28 @@ each asterisk preceding a heading as a level."
           (const :tag "Left" left)
           (const :tag "Right" right)))
 
-(defcustom org-tree-view/key-binding "C-c C-t"
+(defcustom org-tree-view/open-key-binding "C-c C-t"
   "The key binding to open the tree view."
   :group 'org-tree-view
   :type 'string
   :set (lambda (option value)
          (define-key org-mode-map (kbd value)
-           #'org-tree-view/open)))
-#+END_SRC
+           #'org-tree-view/open)
+         (define-key org-tree-view-mode-map (kbd value)
+           #'org-tree-view/switch-to-base-buffer)))
 
-**** Source
-
-***** /org-tree-view/open-heading/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/open-heading (&optional no-bind-exit)
-  "Switch to a cloned buffer's base buffer and narrow in on the
-selected subtree."
-  (interactive)
-  (org-tree-view/beginning-of-line)
-  (if (not (buffer-base-buffer))
-      (error "You need to be in a cloned buffer!")
-    (let* ((heading-pos (point))
-           (base-buffer (buffer-base-buffer))
-           (base-window (get-buffer-window base-buffer)))
-      (if base-window
-          (select-window base-window)
-        (other-window 1)
-        (switch-to-buffer base-buffer))
-      (widen) ; first widen any potential narrowing
-      (goto-char heading-pos)
-      (org-narrow-to-subtree) ; narrow to org subtree
-      (outline-show-all) ; show everything
-      (unless no-bind-exit (org-tree-view/bind-exit)))))
-#+END_SRC
-
-***** /org-tree-view/refresh/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/refresh (&optional &rest r)
-  "Refresh the tree view."
-  (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
-    (when (get-buffer-window tree-view-buffer-name)
-      (with-current-buffer tree-view-buffer-name
-        (outline-show-all)
-        ;; Show appropriate levels of headings
-        (let ((current-prefix-arg
-               (if (and (boundp 'org-tree-view/show-all) org-tree-view/show-all)
-                   99 ; show all
-                 org-tree-view/levels)) ; default
-              (inhibit-message t))
-          (call-interactively #'org-shifttab))
-        (outline-hide-body)
-        (org-tree-view/beginning-of-line)
-        (scroll-right 999)
-        (set-window-fringes nil 8 1))))) ; don't set to 0 unless you want to see $'s
-#+END_SRC
-
-***** /org-tree-view/toggle-show-all/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/toggle-show-all ()
-  "Toggle between showing all headings and the levels of headings
-set in `org-tree-view/levels'."
-  (interactive)
-  (if (and (boundp 'org-tree-view/show-all) org-tree-view/show-all)
-      (setq-local org-tree-view/show-all nil)
-    (setq-local org-tree-view/show-all t))
-  (org-tree-view/refresh))
-#+END_SRC
-
-***** /org-tree-view/buffer-name/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/buffer-name ()
-  "Return the appropriate name for the current file's tree view buffer."
-  (if (s-starts-with? "<tree>" (buffer-name))
-      (buffer-name)
-    (concat "<tree>" (buffer-name))))
-#+END_SRC
-
-***** /org-tree-view/base-buffer-name/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/base-buffer-name ()
-  "Return the appropriate base buffer name for the tree view."
-  (s-chop-prefix "<tree>" (buffer-name)))
-#+END_SRC
-
-***** /org-tree-view/beginning-of-line/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/beginning-of-line (&optional &rest r)
-  "Go to the beginning of the current heading and be smart about it."
-  (org-end-of-line)
-  (org-beginning-of-line))
-#+END_SRC
-
-***** /org-tree-view/start-search/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/start-search (N)
-  (interactive "p")
-  ;; Scroll to top of window
-  (goto-char (point-min))
-  ;; Run isearch-forward with typed letter as search string
-  (let* ((char (string-to-char (this-command-keys)))
-         (unread-command-events (append unread-command-events (list char))))
-    (isearch-forward)))
-#+END_SRC
-
-***** /org-tree-view/isearch-return/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/isearch-return ()
-  (interactive)
-  (when (s-starts-with? "<tree>" (buffer-name))
-    (org-tree-view/open-heading :no-bind-exit))
-  (run-with-timer 0 nil (lambda () (org-tree-view/bind-exit (kbd "<S-return>"))))
-  (let ((inhibit-message t)) (isearch-exit)))
-#+END_SRC
-
-The =run-with-timer= call is a hack to make =org-tree-view/bind-exit= be called
-normally, because normally, =isearch-exit= seems to interfere with it. I tell you,
-there's something weird going on with =isearch-exit=.
-
-***** /org-tree-view/self-insert-command/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/self-insert-command (oldfun N)
-  (interactive "p")
-  (if (s-starts-with? "<tree>" (buffer-name))
-      (call-interactively #'org-tree-view/start-search)
-    (call-interactively oldfun)))
-#+END_SRC
-
-***** /org-tree-view/exit/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/exit ()
-  "Kill the tree view."
-  (interactive)
-
-  (let* ((tree-view-buffer-name (org-tree-view/buffer-name))
-         (tree-view-window (get-buffer-window tree-view-buffer-name))
-         (base-window (get-buffer-window (org-tree-view/base-buffer-name))))
-    (kill-buffer tree-view-buffer-name)
-    (delete-window tree-view-window)
-    (select-window base-window))
-
-  ;; Cleanup
-  (remove-hook 'after-save-hook #'org-tree-view/refresh)
-  (advice-remove #'org-self-insert-command
-                 #'org-tree-view/self-insert-command)
-  (advice-remove #'org-move-subtree-up #'org-tree-view/refresh)
-  (advice-remove #'org-move-subtree-down #'org-tree-view/refresh))
-#+END_SRC
-
-***** /org-tree-view/bind-exit/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/bind-exit (&optional key)
-  (let* ((key (or key (this-command-keys-vector)))
-         (original-binding (local-key-binding key))
-         (reset-key `(local-set-key ,key (quote ,original-binding)))
-         (base-buffer (org-tree-view/base-buffer-name)))
-    (unless (s-contains? "mouse" (key-description key))
-      (message "Press %s again to close the tree view." (key-description key))
-      (eval
-       (macroexpand
-        `(progn
-           (local-set-key ,key (lambda () (interactive)
-                                 ,reset-key
-                                 (org-tree-view/exit)))
-           (run-with-timer 1 nil (lambda ()
-                                   (message " ") ; clear
-                                   (with-current-buffer ,base-buffer
-                                     ,reset-key)))))))))
-#+END_SRC
-
-This function binds =(this-command-keys-vector)= (or, if provided, =key=) to
-=org-tree-view/exit= for 1 second, after which it returns the key binding to its
-original function. Flexible!
-
-***** /org-tree-view/open/
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defun org-tree-view/open ()
-  "Open a clone of the current buffer to the left, resize it to
-30 columns, and bind RET to jump to the same position in the base
-buffer."
-  (interactive)
-  (require 's)
-  (unless (eq (mark) (point)) (push-mark)) ; in case user gets lost
-
-  (if (buffer-base-buffer)
-      (error "Tree view can only be opened from a base buffer!")
-    (let ((tree-view-buffer-name (org-tree-view/buffer-name)))
-      (if (get-buffer-window tree-view-buffer-name)
-          ;; Use existing tree buffer
-          (progn
-            (select-window (get-buffer-window tree-view-buffer-name))
-            (org-tree-view/refresh))
-
-        ;; Make new tree buffer
-        ;; ********************
-
-        (if (equal org-tree-view/side 'left)
-            (split-window-right org-tree-view/width) ; left
-          (split-window-right (- (frame-width) org-tree-view/width)) ; right
-          (other-window 1))
-        (clone-indirect-buffer tree-view-buffer-name nil :norecord)
-        (switch-to-buffer tree-view-buffer-name)
-
-        ;; Basic setup
-        ;; ***********
-
-        (widen)                           ; widen if possible
-        (org-tree-view/refresh)           ; show only headings
-        (setq-local truncate-lines t)     ; ensure truncated lines
-        (setq-local scroll-margin 0)      ; disable scroll-margin for buffer
-        (setq-local search-invisible nil) ; search only visible text
-
-        ;; Remove ellipsis at hidden content - see https://emacs.stackexchange.com/a/17815
-        (let ((display-table
-               (if buffer-display-table
-                   buffer-display-table
-                 (make-display-table))))
-          (unless buffer-display-table
-            (setq buffer-display-table display-table))
-          (set-display-table-slot
-           display-table 4
-           (vconcat (mapcar
-                     (lambda (c)
-                       (make-glyph-code c 'font-lock-keyword-face))
-                     (apply #'concat (make-list (* 2 org-tree-view/width) " "))))))
-
-        ;; Go to top of tree view
-        (goto-char (point-min))      ; go to beginning of buffer
-        (org-next-visible-heading 1) ; go to first heading
-        (recenter 0)                 ; put top of window at point
-
-        ;; Hide everything above tree view
-        (narrow-to-region (window-start) (point-max))
-
-        ;; Go to smart beginning of line, if enabled
-        (org-tree-view/beginning-of-line)
-
-        ;; Refresh tree view on save
-        (add-hook 'after-save-hook #'org-tree-view/refresh)
-
-        ;; Automatically run isearch-forward on any key
-        (advice-add #'org-self-insert-command :around
-                    #'org-tree-view/self-insert-command)
-
-        ;; Make sure to be at the beginning of line before moving subtrees
-        (advice-add #'org-move-subtree-up   :before #'org-tree-view/beginning-of-line)
-        (advice-add #'org-move-subtree-down :before #'org-tree-view/beginning-of-line)
-
-        ;; Automatically refresh tree view after moving subtrees
-        (advice-add #'org-move-subtree-up   :after #'org-tree-view/refresh)
-        (advice-add #'org-move-subtree-down :after #'org-tree-view/refresh)
-
-        ;; Go to smart beginning of line after jumping between headings
-        (advice-add #'org-forward-heading-same-level :after #'org-tree-view/beginning-of-line)
-        (advice-add #'org-backward-heading-same-level :after #'org-tree-view/beginning-of-line)
-
-        ;; Keybindings
-        ;; ***********
-
-        ;; Use org-mode-map as base
-        (use-local-map (copy-keymap org-mode-map))
-
-        ;; Press <S-return> from isearch to directly open matching heading
-        (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return)
-
-        ;; Browse headings more easily
-        (local-set-key (kbd "C-M-n") #'org-forward-heading-same-level)
-        (local-set-key (kbd "C-M-p") #'org-backward-heading-same-level)
-
-        ;; Show all headings
-        (local-set-key (kbd "<tab>") #'org-tree-view/toggle-show-all)
-
-        ;; Quit tree view
-        (local-set-key (kbd "Q") #'org-tree-view/exit)
-        (local-set-key (kbd "C-g") #'org-tree-view/exit)
-
-        ;; Switch back to base buffer
-        (local-set-key (kbd "C-c C-t")
-                       (lambda ()
-                         (interactive)
-                         (select-window (get-buffer-window (buffer-base-buffer)))))
-
-        ;; Press <S-return> to open heading, press it again to exit tree view
-        (local-set-key (kbd "<S-return>") #'org-tree-view/open-heading)
-
-        ;; Open heading in base buffer
-        (mapc (lambda (key)
-                (local-set-key (kbd key) #'org-tree-view/open-heading))
-              '("<mouse-1>" "<return>"))))))
-#+END_SRC
-
-***** Variables
-
-#+NAME: c:org-tree-view
-#+BEGIN_SRC emacs-lisp
-(defvar org-tree-view/show-all nil
-  "Local variable telling org-tree-view/refresh to show all levels.")
+;; Define org-tree-view/level-N faces
+(dotimes (i 8)
+  (let* ((num (number-to-string (1+ i)))
+         (org-tree-view-face (intern (concat "org-tree-view/level-" num)))
+         (org-face (intern (concat "org-level-" num))))
+    (eval (macroexpand
+           `(defface ,org-tree-view-face
+              '((t . (:inherit ,org-face)))
+              (format "Face for level %s headlines." num))))))
 #+END_SRC
 
 **** Issues
-
-***** Window configuration
-
-When exiting the tree view for an Org document in the right window, the original
-width of the right window will be shrunk.
-
-#+BEGIN_SRC
-|----- LEFT WINDOW -----|--------- RIGHT WINDOW ----------|
-#+END_SRC
-
-#+BEGIN_SRC
-|----- LEFT WINDOW -----|- tree -|----- RIGHT WINDOW -----|
-#+END_SRC
-
-#+BEGIN_SRC
-|---------- LEFT WINDOW ---------|----- RIGHT WINDOW -----|
-#+END_SRC
-
-***** Searching
-
-When searching for the last word in a heading, you only see the following:
-
-#+CAPTION: Searching for "configuration", matching a heading ending with "configuration"
-#+NAME: fig:org-tree-view:bug:searching
-[[./resources/org-tree-view-bug.png]]
-
-To alleviate the issue in the meantime, you can press ~C-r~ whenever this happens
-and you will see the the word you're searching for.
-
-I'm not quite sure how to fix it yet. It could possibly be fixed by appending
-some searchable text (I'm thinking spaces) to every heading, but which isn't
-actual text inserted and saved into the buffer. This doesn't seem to be possible
-using text properties or overlays, as those aren't searchable. The issue really
-lies with =isearch=.
-
-A possible solution could be advising =isearch-search-and-update= to scroll the
-screen to the left after its done.
 
 *** Automatic Wiktionary links
 :PROPERTIES:
