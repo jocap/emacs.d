@@ -1685,29 +1685,16 @@ probably edit that.
 (defun org-babel-tangle-config ()
   (interactive)
 
-  (clone-indirect-buffer "<tangle>config" nil :norecord)
-  (switch-to-buffer "<tangle>config")
-  (widen)
-  (setq-local search-invisible t)
-  (when (search-forward ; find c:config-all
-         (concat "#+NAME: "
-                 "c:config-all"))
-    (forward-line 2) ; go down to source block
-
-    ;; Tangle the block at point
-    (let ((current-prefix-arg '(4)))
-      (call-interactively 'org-babel-tangle))))
+  (let ((tangle-buffer (clone-indirect-buffer "<tangle>config" nil :norecord)))
+    (with-current-buffer tangle-buffer
+      (widen)
+      (goto-char (org-babel-find-named-block "c:config-all"))
+      (let ((current-prefix-arg '(4)))
+        (call-interactively #'org-babel-tangle)))
+    (kill-buffer tangle-buffer))
+  (byte-compile-file "config.el"))
 
 (define-key org-mode-map (kbd "C-c C-v M-t") #'org-babel-tangle-config)
-#+END_SRC
-
-#+NAME: c:org:fun
-#+BEGIN_SRC emacs-lisp
-(add-hook 'org-babel-post-tangle-hook
-          (lambda ()
-            (when (s-ends-with? "config.el" (buffer-file-name))
-              (kill-buffer "<tangle>config")
-              (byte-compile-file (buffer-file-name)))))
 #+END_SRC
 
 *** Adjusting /org-beginning-of-line/
