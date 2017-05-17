@@ -1203,7 +1203,7 @@ respectively, but they have developed into something quite solid.
 
 #+CAPTION: /org-tree-view/ in combination with the theme /leuven/
 #+NAME: fig:org-tree-view
-[[./resources/org-tree-view.png]]
+[[./resources/org-tree-view-new.png]]
 
 It works by opening a clone of the current Org buffer in a new window to the
 left. The cloned buffer, called the /tree view/, has the following properties:
@@ -1238,6 +1238,8 @@ Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el=
 (define-key org-tree-view-mode-map (kbd "<mouse-1>") #'org-tree-view/open-headline-at-point)
 (define-key org-tree-view-mode-map (kbd "C-g")       #'org-tree-view/close)
 (define-key org-tree-view-mode-map (kbd "<tab>")     #'org-tree-view/toggle-visibility)
+(define-key org-tree-view-mode-map [remap end-of-buffer]
+  (lambda () (interactive) (goto-char (point-max)) (move-beginning-of-line 1)))
 
 ;; Re-define self-insert-command
 (map-keymap (lambda (key fun)
@@ -1295,6 +1297,7 @@ face and its position in the base buffer encoded as the
   (let* ((title (org-element-property :raw-value headline))
          (level (org-element-property :level headline))
          (begin (org-element-property :begin headline))
+         (end (org-element-property :end headline))
          (org-tree-view-level-face (intern
                           (concat "org-tree-view/level-"
                                   (number-to-string level))))
@@ -1392,32 +1395,37 @@ syntax and return the resulting string."
                text))))))
     text))
 
-(defun org-tree-view/insert-headlines (&optional level &optional base-buffer)
+(defun org-tree-view/insert-headlines ()
   "Insert all drawn headlines at the current position."
-  (let ((headlines (org-tree-view/get-headlines level base-buffer)))
+  (let ((headlines (org-tree-view/get-headlines)))
     (cl-loop for headline in headlines
-             do (insert (concat
-                         (org-tree-view/draw-headline headline)
-                         "\n")))))
+       do (insert (concat
+                   (org-tree-view/draw-headline headline)
+                   "\n")))
+    ;; Delete final newline
+    (backward-delete-char 1)))
 
-(defun org-tree-view/refresh (&optional new-line)
-  (let* ((orig-line (or new-line (string-to-number (format-mode-line "%l"))))
-         (orig-window-start (window-start))
+(defun org-tree-view/refresh (&optional no-set-window-start)
+  (let* ((orig-window-start (window-start))
+         (orig-window-line  (+ (count-lines (window-start) (point))
+                               (if (= (current-column) 0) 1 0)
+                               -1))
+         ;; ^ see http://www.delorie.com/gnu/docs/elisp-manual-21/elisp_478.html
          (refresh `(progn
                      (setq-local buffer-read-only nil)
                      (set-window-fringes (get-buffer-window) 8 1)
                      (erase-buffer)
                      (org-tree-view/insert-headlines)
-                     (goto-line ,orig-line)
-                     (move-beginning-of-line 1)
                      (set-window-start (get-buffer-window) orig-window-start)
+                     (goto-char (window-start))
+                     (forward-line orig-window-line)
+                     (move-beginning-of-line 1)
                      (setq-local buffer-read-only t))))
     (if (org-tree-view/is-tree-view)
         (eval (macroexpand refresh))
       (if (org-tree-view/has-tree-view)
           (with-current-buffer (org-tree-view/make-tree-view-buffer-name)
             (eval (macroexpand refresh)))))))
-
 #+END_SRC
 
 **** Interacting with the tree view
@@ -1464,7 +1472,8 @@ syntax and return the resulting string."
     (if tree-view-buffer
         (progn (if (setq tree-view-window (get-buffer-window tree-view-buffer))
                    (delete-window tree-view-window))
-               (kill-buffer tree-view-buffer))
+               (kill-buffer tree-view-buffer)
+               (org-tree-view/cleanup))
       (error "No tree view found!"))))
 
 (defun org-tree-view/bind-close-after (&optional key)
@@ -1505,7 +1514,11 @@ also call `org-tree-view/bind-close-after' before finishing."
       (error (other-window 1)
              (switch-to-buffer base-buffer)))
     (if position
-        (progn (goto-char position)
+        (progn (widen)
+               (goto-char position)
+               (outline-show-all)
+               (org-cycle-hide-drawers 'all)
+               (org-narrow-to-subtree)
                (if bind-close-after (org-tree-view/bind-close-after)))
       (error "No headline found!"))))
 
@@ -1525,7 +1538,7 @@ also call `org-tree-view/bind-close-after' before finishing."
     (if (/= org-tree-view/level (default-value 'org-tree-view/level))
         (setq-local org-tree-view/level (default-value 'org-tree-view/level))
       (setq-local org-tree-view/level 2)))
-  (org-tree-view/refresh))
+  (org-tree-view/refresh :no-set-window-start))
 #+END_SRC
 
 ***** Searching the tree view
@@ -1560,10 +1573,11 @@ character in the search."
   (font-lock-mode)
   (org-tree-view/refresh)
   (setq-local buffer-read-only t)
+  (setq-local scroll-margin 0)
   (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return))
 
 (defun org-tree-view/cleanup ()
-  (define-key isearch-mode-map (kbd "<S-return>" nil)))
+  (define-key isearch-mode-map (kbd "<S-return>") nil))
 
 (defun org-tree-view/make-base-buffer-name (&optional tree-view-buffer)
   (let ((tree-view-buffer
@@ -1640,6 +1654,10 @@ each asterisk preceding a heading as a level."
 
 **** Issues
 
+- Currently, after making edits with the tree view open, it seems that
+  =org-tree-view/open-headline-at-point= will, for many headlines, move to the
+  wrong position in the base buffer. Upon closing and re-opening the tree view,
+  the bug disappears.
 *** Automatic Wiktionary links
 :PROPERTIES:
 :CUSTOM_ID: org-make-wiktionary-link
