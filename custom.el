@@ -26,6 +26,7 @@
  '(eziam-scale-other nil)
  '(fci-rule-color "#eee8d5")
  '(fill-column 80)
+ '(frame-resize-pixelwise t)
  '(fringe-mode nil nil (fringe))
  '(global-hl-line-mode nil)
  '(helm-M-x-fuzzy-match t)
