@@ -3,6 +3,7 @@
 #+LANGUAGE: en
 #+OPTIONS: H:4 num:2 ':t todo:nil
 #+PROPERTY: header-args :tangle no :results value silent
+#+TODO: TODO(t) FIXME(f) | DONE(d)
 
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
@@ -30,6 +31,7 @@ of quick links to the most interesting sections of this document.
 - [[#org-tree-view][org-tree-view]] :: A sidebar for conveniently browsing all the headings in an
      Org document. The resulting package is as interesting, I would say, as some
      of the underlying code.
+
 
 * Packages
 
@@ -109,6 +111,9 @@ here with a short description of why I like them.
 
 - buffer-move :: Lets me switch buffers between two windows - pretty handy.
 
+- aggressive-indent :: Makes Emacs indent all the things, all the time. I
+     personally only use it for Lisp modes, though.
+
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp :exports none
 (use-package rainbow-delimiters
@@ -128,6 +133,7 @@ here with a short description of why I like them.
   (popwin-mode 1))
 
 (use-package helm-org-rifle
+  :disabled
   :bind (("C-c f" . helm-org-rifle-current-buffer)
          ("C-c F" . helm-org-rifle)))
 
@@ -138,6 +144,9 @@ here with a short description of why I like them.
          ("C-c <left>"  . buf-move-left)
          ("C-c <right>" . buf-move-right)))
 
+(use-package aggressive-indent
+  :init
+  (add-hook 'lisp-mode-hook #'aggressive-indent-mode))
 #+END_SRC
 
 
@@ -186,6 +195,7 @@ prevent that.
 (setq recentf-save-file (state-dir "recentf"))
 (setq ido-save-directory-list-file (state-dir "ido.last"))
 (setq eshell-directory-name (state-dir "eshell"))
+(setq nsm-settings-file (state-dir "network-security.data"))
 (setq backup-directory-alist
       `((".*" . ,(state-dir "saves"))))
 
@@ -221,11 +231,14 @@ headline. Most of them are based on built-in functions.
 
 #+NAME: c:keybindings
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "M-<f1>") 'menu-bar-mode)
+(global-set-key (kbd "M-<f1>") #'menu-bar-mode)
 
-(global-set-key (kbd "M-]") 'other-window)
+(global-set-key (kbd "M-]") #'other-window)
 (global-set-key (kbd "M-[") (lambda (n) (interactive "p")
-                                  (other-window (* -1 n))))
+                                    (other-window (* -1 n))))
+
+(global-set-key (kbd "<S-home>") #'previous-buffer)
+(global-set-key (kbd "<S-end>") #'next-buffer)
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
@@ -432,7 +445,7 @@ language-agnostic method of aligning comments. How useful!
 :CUSTOM_ID: lisp
 :END:
 
-*** Paredit
+*** FIXME Paredit
 :PROPERTIES:
 :CUSTOM_ID: paredit
 :END:
@@ -448,6 +461,10 @@ with =paredit-raise-sexp=. To fix this, as you can see below, I have created a n
 keybinding, ~M-R~, and put it inside a =use-package= /:bind/-clause. This way, as long
 as I have Paredit installed, =use-package= binds ~M-R~ to the original function of
 ~M-r~.
+
+# FIXME: paredit-delete-indentation
+# ------ Account for there being a comment on the joined line. Right now it will
+#        end up before the comment on the upper line.
 
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
@@ -498,6 +515,28 @@ current line."
   :bind (("M-R" . move-to-window-line-top-bottom)
          ("M-^" . paredit-delete-indentation)
          ("M-Q" . paredit-reindent-defun)))
+#+END_SRC
+
+*** Common Lisp indentation
+:PROPERTIES:
+:CUSTOM_ID: common-lisp-indent
+:END:
+
+I like using the =cl-lib= library, which adds a whole bunch of Common Lisp
+functions, prefixed with /cl-/. Unfortunately, Emacs doesn't indent some of the
+/cl-/ functions correctly. For that reason, I use the =common-lisp-indent-function=
+instead of the normal =lisp-indent-function=.
+
+This might break a few things, though. For me, it broke =use-package= intentation.
+Luckily, you can change the indentation rules yourself, as demonstrated below.
+
+#+NAME: c:basic-prefs
+#+BEGIN_SRC emacs-lisp
+(setf lisp-indent-function 'common-lisp-indent-function)
+
+;; Fix custom indentation
+(with-eval-after-load "cl-indent"
+  (put 'use-package 'common-lisp-indent-function 1))
 #+END_SRC
 
 ** Working with regions
@@ -630,7 +669,7 @@ automatically indent after killing the line. This will not remove the
 indentation, but it will ensure upon deleting an (apart from indentation) empty
 line, that the indentation doesn't spread to the next line.
 
-#+NAME: c:basic-prefs
+# #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
 (defun indent-after-kill-line (&optional &rest r)
   (indent-according-to-mode))
@@ -955,6 +994,19 @@ anything as reliable. Believe me, [[#custom-hooks][I've tried]].
 (add-hook 'emacs-lisp-mode-hook #'prettify-symbols-mode)
 #+END_SRC
 
+** /which-key/
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :config
+  ;; Use minibuffer instead of window (note: this sets `which-key-popup-type'
+  ;; automatically to `minibuffer')
+  ;; (which-key-setup-minibuffer)
+  )
+#+END_SRC
+
+
 * Helpful tools
 
 ** Helm
@@ -981,9 +1033,15 @@ be anywhere in the s-expression.
 Helm is big, but it does its job /very/ well, and it makes common actions /very/
 simple. Ivy is evidence that smaller doesn't always mean simpler.
 
+*Update:* I have reverted back to my old configuration to give Ivy a second
+chance. I've gotten a bit more used to it now - there are some things I still
+don't like about it, but for now, I'll keep using it. Thus, I've disabled Helm
+below, using the /:disabled/ keyword.
+
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package helm
+  :disabled
   :commands helm-command-prefix
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
@@ -1010,6 +1068,49 @@ simple. Ivy is evidence that smaller doesn't always mean simpler.
                 (define-key eshell-mode-map [remap eshell-pcomplete] #'helm-esh-pcomplete)))))
 #+END_SRC
 
+** Ivy
+:PROPERTIES:
+:CUSTOM_ID: ivy
+:END:
+
+# TODO: documentation
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :init
+  (ivy-mode 1)
+  :config
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t)
+  (setq ivy-re-builders-alist
+        '((swiper . ivy--regex-plus)
+          (t . ivy--regex-fuzzy)))
+  :bind (("C-s"     . swiper)
+
+         ("C-c C-r" . ivy-resume)
+         ("<f6>"    . ivy-resume)
+
+         ("M-x"     . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("<f1> f"  . counsel-describe-function)
+         ("<f1> v"  . counsel-describe-variable)
+         ("<f1> l"  . counsel-find-library)
+         ("<f2> i"  . counsel-info-lookup-symbol)
+         ("<f2> u"  . counsel-unicode-char)
+         ("C-c k"   . counsel-ag)
+
+         ("C-x l"   . counsel-locate)
+         ("C-x b"   . ivy-switch-buffer)
+         ("C-x C-b" . ibuffer))
+  :bind (:map read-expression-map
+              ("C-r" . counsel-expression-history)))
+
+(use-package counsel-projectile
+  :init
+  (counsel-projectile-on))
+#+END_SRC
+
 ** Swiper
 :PROPERTIES:
 :CUSTOM_ID: swiper
@@ -1025,8 +1126,8 @@ it's needed by Swiper.
 
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
-(use-package ivy
-  :defer t)
+;; (use-package ivy
+;;   :defer t)
 
 (use-package swiper
   :bind (("C-s" . swiper)))
@@ -1187,7 +1288,7 @@ functions - they are defined further down.
 )
 #+END_SRC
 
-*** /org-tree-view/
+*** FIXME /org-tree-view/
 :PROPERTIES:
 :CUSTOM_ID: org-tree-view
 :END:
@@ -1658,6 +1759,23 @@ each asterisk preceding a heading as a level."
   =org-tree-view/open-headline-at-point= will, for many headlines, move to the
   wrong position in the base buffer. Upon closing and re-opening the tree view,
   the bug disappears.
+
+**** Planned features
+
+- Keyword integration (TODO, DONE, ...)
+
+*** Publishing my blog through /org-page/
+:PROPERTIES:
+:CUSTOM_ID: org-page
+:END:
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package org-page
+  :config
+  (setf op/hashover-comments t))
+#+END_SRC
+
 *** Automatic Wiktionary links
 :PROPERTIES:
 :CUSTOM_ID: org-make-wiktionary-link
@@ -1887,6 +2005,81 @@ updates.
 
 
 
+* E-mail
+:PROPERTIES:
+:CUSTOM_ID: e-mail
+:END:
+
+Because I like living in Emacs, I like to read my e-mail in Emacs.
+
+** Gnus
+
+For my Gnus configuration, see the =config/gnus.el= file.
+
+** /notmuch/
+
+*Note to self:* Should this configuration even be stored in this document?
+Probably not. It is more suitable as part of a blog post. Now I just need to
+start a blog ...
+
+
+*** Personal /mail/ shell script
+
+#+BEGIN_SRC sh :tangle ~/bin/mail :shebang #!/usr/bin/zsh
+case $1 in
+    pull)
+        mbsync -a;
+        echo "Press any key to continue...";
+        read; # in case mbsync fails, give user chance to abort and try again
+        notmuch new;
+        afew --tag --new;;
+    push)
+        afew --move-mail --new;
+        mbsync -a;;
+    *)
+        echo "Usage: mail {pull|push}";
+        exit 1;;
+esac
+#+END_SRC
+
+*** Refresh status message
+
+#+NAME: c:e-mail
+#+BEGIN_SRC emacs-lisp
+(defvar notmuch-hello-refresh-count 0)
+
+(defun notmuch-hello-refresh-status-message ()
+  (let* ((new-count
+          (string-to-number
+           (car (process-lines notmuch-command "count"))))
+         (diff-count (- new-count notmuch-hello-refresh-count)))
+    (cond
+      ((= notmuch-hello-refresh-count 0)
+       (message "You have %s messages."
+                (notmuch-hello-nice-number new-count)))
+      ((> diff-count 0)
+       (message "You have %s more messages since last refresh."
+                (notmuch-hello-nice-number diff-count)))
+      ((< diff-count 0)
+       (message "You have %s fewer messages since last refresh."
+                (notmuch-hello-nice-number (- diff-count)))))
+    (setq notmuch-hello-refresh-count new-count)))
+
+(add-hook 'notmuch-hello-refresh-hook 'notmuch-hello-refresh-status-message)
+#+END_SRC
+
+*** Helm completion
+
+#+NAME: c:e-mail
+#+BEGIN_SRC emacs-lisp
+(setq notmuch-address-selection-function
+      (lambda (prompt collection initial-input)
+        (completing-read prompt (cons initial-input collection) nil t nil 'notmuch-address-history)))
+#+END_SRC
+
+This does not seem to work.
+
+
 * Custom hooks
 :PROPERTIES:
 :CUSTOM_ID: custom-hooks
@@ -1992,8 +2185,8 @@ The function depends on the following variables being set:
 
 #+NAME: c:theme:config
 #+BEGIN_SRC emacs-lisp
-(setq light-theme 'eziam-light
-      dark-theme  'eziam-dark)
+(setq light-theme 'leuven
+      dark-theme  'zenburn)
 #+END_SRC
 
 To set the default theme on startup, I use the following code:
@@ -2036,8 +2229,12 @@ background.
 
 #+NAME: c:theme:config
 #+BEGIN_SRC emacs-lisp
+(defvar current-theme)
+
 (defun theme-do-all (theme)
   "Actions to perform whenever a theme is loaded."
+
+  (setf current-theme theme)
 
   (require 'color) ; for color-* functions
 
@@ -2080,6 +2277,13 @@ background.
                                (face-attribute 'default :foreground) 20) 90)
          :weight (face-attribute 'default :weight)
          :slant (face-attribute 'default :slant)))
+
+    ;; * fix italic faces
+    (mapc
+     (lambda (face)
+       (when (eq (face-attribute face :slant) 'italic)
+         (set-face-attribute face nil :family "Fira Mono Medium")))
+     (face-list))
 
     ;; * Reset fci-mode
     (let ((inhibit-message t))
@@ -2136,6 +2340,13 @@ background.
                     (custom-theme-set-faces
                      theme
                      (list (intern face-name) `((t (:foreground ,color))))))))))
+
+(defun theme-reload ()
+  (interactive)
+  (if (boundp 'current-theme)
+      (theme-do-all current-theme)))
+
+(global-set-key (kbd "C-c R") #'theme-reload)
 #+END_SRC
 
 It may look a bit busy, but that's because of the nature of setting face
@@ -2311,9 +2522,11 @@ export LAUNCH_AT_START=0 # prevent launched program to launch more programs
 
 case "$LAUNCH_PROGRAM" in
     emacs)
-        nohup emacs &> /dev/null & disown;;
+        nohup emacs &> /dev/null & disown; exit;;
     gnome-terminal)
-        nohup gnome-terminal &> /dev/null & disown;;
+        nohup gnome-terminal &> /dev/null & disown; exit;;
+    i3)
+        nohup i3 &> /dev/null & disown; exit;;
 esac
 #+END_SRC
 
@@ -2447,6 +2660,11 @@ with other systems, where I don't use my =wsl-browser= script.
 ;; =============================================================================
 
 <<c:theme:config>>
+
+;; E-mail
+;; =============================================================================
+
+<<c:e-mail>>
 
 ;; Language configuration
 ;; =============================================================================

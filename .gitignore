@@ -3,3 +3,4 @@ secret/
 .org-id-locations
 config/config.el
 config/config.elc
+elpa/*-readme.txt
