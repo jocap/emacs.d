@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         Buffer-menu-delete
+        c-electric-slash
         delete-horizontal-space
         electric-pair-delete-pair
         indent-for-tab-command
@@ -22,8 +23,10 @@
         paredit-newline
         paredit-open-round
         paredit-semicolon
+        paredit-splice-sexp
         smart-open-line-above
         smarter-move-beginning-of-line
+        smarter-move-end-of-line
         upcase-region
         ))
 
