@@ -1,17 +1,19 @@
 ;; =============================================================================
 ;; Basic preferences
 
+(require 's)
+
 (setq user-mail-address "john@ankarstrom.se"
       user-full-name "John Ankarström")
 
 (setq gnus-select-method '(nnnil))
 
-(setq my-server '(nnimap "mail.ankarstrom.se"
-                  (nnimap-address "mail.ankarstrom.se")
-                  (nnimap-server-port "imaps")
-                  (nnimap-stream ssl)))
+(setq mail-server '(nnimap "mail.ankarstrom.se"
+                    (nnimap-address "mail.ankarstrom.se")
+                    (nnimap-server-port "imaps")
+                    (nnimap-stream ssl)))
 
-(setq gnus-secondary-select-methods (list my-server))
+(setq gnus-secondary-select-methods (list mail-server))
 
 ;; Use expire function to archive mail
 (setq nnmail-expiry-target "nnimap+mail.ankarstrom.se:Archive"
@@ -22,7 +24,7 @@
       smtpmail-stream-type  'starttls
       smtpmail-smtp-service 587)
 
-(setq gnus-message-archive-method my-server
+(setq gnus-message-archive-method mail-server
       gnus-message-archive-group "Sent")
 
 (setq gnus-gcc-mark-as-read t)
@@ -41,25 +43,18 @@
 ;; Group display names
 
 (setq gnus-group-line-format "%M%S%5y/%-5t: %uG %D\n")
-(defun gnus-user-format-function-G (arg)
-  (let ((mapped-name (assoc gnus-tmp-group group-name-map)))
-    (if (null mapped-name)
-        gnus-tmp-group
-      (cdr mapped-name))))
 
-(setq group-name-map '(("nnimap+mail.ankarstrom.se:INBOX"   . "Inbox")
-                       ("nnimap+mail.ankarstrom.se:Archive" . "Archive")
-                       ("nnimap+mail.ankarstrom.se:Drafts"  . "Drafts")
-                       ("nnimap+mail.ankarstrom.se:Sent"    . "Sent")
-                       ("nnimap+mail.ankarstrom.se:Trash"   . "Trash")
-                       ("nnimap+mail.ankarstrom.se:Junk"    . "Junk")
-                       ("nnimap+mail.ankarstrom.se:Lists"   . "(all)")
-                       ("nnimap+mail.ankarstrom.se:Lists.help-gnu-emacs"
-                        . "help-gnu-emacs")
-                       ("nnimap+mail.ankarstrom.se:Lists.postfix-users"
-                        . "postfix-users")
-                       ("nnimap+mail.ankarstrom.se:Lists.info-gnus-english"
-                        . "info-gnus-english")))
+(defun gnus-user-format-function-G (arg)
+  (let* ((prefix (format "nnimap+%s:" (plist-get mail-server 'nnimap)))
+         (list-prefix (concat prefix "Lists."))
+         (actual-prefix))
+    (if (s-starts-with? list-prefix gnus-tmp-group)   ; mailing list
+        (setq actual-prefix list-prefix)
+      (if (s-starts-with? prefix gnus-tmp-group)      ; non-list
+          (setq actual-prefix prefix)))
+    (if (equal gnus-tmp-group (concat prefix "Lists"))
+        "(all)"                                       ; parent folder for lists
+      (s-chop-prefix actual-prefix gnus-tmp-group)))) ; remove any prefix
 
 ;; -----------------------------------------------------------------------------
 ;; Window configuration
