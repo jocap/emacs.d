@@ -64,7 +64,7 @@
     name))
 
 ;; Summary
-(setf gnus-summary-line-format "%1z%U%R %I %N.%* %f %[%L%] %(%s%)\n")
+(setf gnus-summary-line-format "%1z%U%R %I %d.%* %f %[%L%] %(%s%)\n")
 ;; (setf gnus-summary-line-format "%U%R%z%I%(%[%4L: %-23,23f%]%) %s\n")
 
 ;; -----------------------------------------------------------------------------
@@ -78,6 +78,9 @@
 
 ;; -----------------------------------------------------------------------------
 ;; Scoring
+
+(setf gnus-use-adaptive-scoring t
+      gnus-decay-scores t)
 
 ;; Increase group score on summary exit
 (add-hook 'gnus-summary-exit-hook #'gnus-summary-bubble-group)
@@ -98,6 +101,7 @@
       nnfolder-directory          (gnus-dir "mail/archive/")
       gnus-startup-file           (gnus-dir "newsrc")
       gnus-home-score-file        (gnus-dir "gnus.SCORE")
+      gnus-global-score-files     (list (gnus-dir "all.SCORE"))
       gnus-agent-directory        (gnus-dir "agent/")
       gnus-article-save-directory (gnus-dir "news")
       gnus-cache-directory        (gnus-dir "news/cache")
