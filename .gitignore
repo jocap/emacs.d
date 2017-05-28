@@ -4,3 +4,6 @@ secret/
 config/config.el
 config/config.elc
 elpa/*-readme.txt
+gnus/mail/
+gnus/news/
+gnus/newsrc.eld

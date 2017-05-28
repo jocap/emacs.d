@@ -2,39 +2,40 @@
 ;; Basic preferences
 
 (require 's)
+(require 'dash)
 
-(setq user-mail-address "john@ankarstrom.se"
+(setf user-mail-address "john@ankarstrom.se"
       user-full-name "John Ankarström")
 
-(setq gnus-select-method '(nnnil))
+(setf gnus-select-method '(nnnil))
 
-(setq mail-server '(nnimap "mail.ankarstrom.se"
+(setf mail-server '(nnimap "mail.ankarstrom.se"
                     (nnimap-address "mail.ankarstrom.se")
                     (nnimap-server-port "imaps")
                     (nnimap-stream ssl)))
 
-(setq gnus-secondary-select-methods (list mail-server))
+(setf gnus-secondary-select-methods (list mail-server))
 
 ;; Use expire function to archive mail
-(setq nnmail-expiry-target "nnimap+mail.ankarstrom.se:Archive"
+(setf nnmail-expiry-target "nnimap+mail.ankarstrom.se:Archive"
       nnmail-expiry-wait   'immediate)
 
-(setq send-mail-function    'smtpmail-send-it
+(setf send-mail-function    'smtpmail-send-it
       smtpmail-smtp-server  "mail.ankarstrom.se"
       smtpmail-stream-type  'starttls
       smtpmail-smtp-service 587)
 
-(setq gnus-message-archive-method mail-server
+(setf gnus-message-archive-method mail-server
       gnus-message-archive-group "Sent")
 
-(setq gnus-gcc-mark-as-read t)
+(setf gnus-gcc-mark-as-read t)
 
 ;; -----------------------------------------------------------------------------
 ;; Topics
 
-(add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+(add-hook 'gnus-group-mode-hook #'gnus-topic-mode)
 
-(setq gnus-topic-topology '(("Gnus" visible)
+(setf gnus-topic-topology '(("Gnus" visible)
                             (("mail" visible nil nil))
                             (("lists" visible nil nil))
                             (("misc" invisible nil nil))))
@@ -42,19 +43,48 @@
 ;; -----------------------------------------------------------------------------
 ;; Group display names
 
-(setq gnus-group-line-format "%M%S%5y/%-5t: %uG %D\n")
+(setf gnus-group-line-format "%M%S%5y/%-5t: %uG %D\n")
 
 (defun gnus-user-format-function-G (arg)
-  (let* ((prefix (format "nnimap+%s:" (plist-get mail-server 'nnimap)))
+  (let* ((prefix      (format "nnimap+%s:" (plist-get mail-server 'nnimap)))
          (list-prefix (concat prefix "Lists."))
-         (actual-prefix))
-    (if (s-starts-with? list-prefix gnus-tmp-group)   ; mailing list
-        (setq actual-prefix list-prefix)
-      (if (s-starts-with? prefix gnus-tmp-group)      ; non-list
-          (setq actual-prefix prefix)))
-    (if (equal gnus-tmp-group (concat prefix "Lists"))
-        "(all)"                                       ; parent folder for lists
-      (s-chop-prefix actual-prefix gnus-tmp-group)))) ; remove any prefix
+         (name        gnus-tmp-group))
+    (--map (setf name (s-chop-prefix it name))
+           (list list-prefix prefix))
+    (if (equal name "Lists")
+        (setf name "(all)")) ; parent folder for lists
+    name))
+
+;; -----------------------------------------------------------------------------
+;; Scoring & sorting
+
+;; Increase group score on summary exit
+(add-hook 'gnus-summary-exit-hook #'gnus-summary-bubble-group)
+(setf gnus-group-sort-function #'gnus-group-sort-by-score)
+
+;; Sort summary buffer (best first)
+(setf gnus-thread-sort-functions
+      '(gnus-thread-sort-by-subject            ; 1) a-z
+        gnus-thread-sort-by-most-recent-number ; 2) highest number
+        gnus-thread-sort-by-total-score))      ; 3) highest score
+
+;; -----------------------------------------------------------------------------
+;; Directories
+
+;; NB: Be sure to set `gnus-startup-file' in main Emacs configuration.
+
+(setf gnus-home-directory         (gnus-dir)
+      message-directory           (gnus-dir "mail/")
+      gnus-directory              (gnus-dir "news/")
+      nnfolder-directory          (gnus-dir "mail/archive/")
+      gnus-init-file              (gnus-dir "gnus.el")
+      gnus-home-score-file        (gnus-dir "gnus.SCORE")
+      gnus-agent-directory        (gnus-dir "agent/")
+      gnus-article-save-directory (gnus-dir "news")
+      gnus-cache-directory        (gnus-dir "news/cache")
+      gnus-cache-active-file      (gnus-dir "news/cache/active")
+      gnus-kill-files-directory   (gnus-dir "news")
+      nndraft-directory           (gnus-dir "drafts/"))
 
 ;; -----------------------------------------------------------------------------
 ;; Window configuration
@@ -83,7 +113,7 @@
 
 (with-eval-after-load 'gnus-group
   (defhydra hydra-gnus-group (:color blue)
-    "Do"
+    "Group"
     ("a" gnus-group-list-active "REMOTE groups A A")
     ("l" gnus-group-list-all-groups "LOCAL groups L")
     ("c" gnus-topic-catchup-articles "Read all c")

@@ -145,6 +145,7 @@ here with a short description of why I like them.
          ("C-c <right>" . buf-move-right)))
 
 (use-package aggressive-indent
+  :demand
   :init
   (add-hook 'lisp-mode-hook #'aggressive-indent-mode))
 #+END_SRC
@@ -281,6 +282,32 @@ is no comment, return nil."
         (setq comment (delete-and-extract-region (point) (point-at-eol)))
         (delete-horizontal-space)))
     (if (s-blank-str? comment) nil comment)))
+
+(defmacro fcase (form &rest arg-then)
+  "For each `arg-then', evaluate `form' with the car of
+`arg-then' exposed as `it'. For the first `arg-then' for which
+the evaluation of `form' returns true, evaluate and return then
+cdr of `arg-then'.
+
+If the car of `arg-then' is `else', its cdr will be always be
+evaluated, if no `arg-then' before has resulted in a true
+evaluation of `form'.
+
+   (fcase (string-prefix-p it my-string)
+          (\"prefix-\"       (message \"Prefix: prefix-\"))
+          (\"other-prefix-\" (message \"Prefix; other-prefix-\"))
+          (else            (message \"No prefix\")))"
+  (declare (debug (form form arg-then form)))
+  `(cl-loop
+      for it-then in ',arg-then
+      do (let ((it   (car it-then))
+               (then (cdr it-then)))
+           (unless (eq it 'else) (setf it (eval it)))
+           (if (or (eq it 'else) ,form)
+               (cl-return
+                 (car (last (mapcar
+                             (lambda (exp) (eval exp))
+                             then))))))))
 #+END_SRC
 
 ** Session management
@@ -2014,7 +2041,13 @@ Because I like living in Emacs, I like to read my e-mail in Emacs.
 
 ** Gnus
 
-For my Gnus configuration, see the =config/gnus.el= file.
+For my Gnus configuration, see the =gnus/gnus.el= file.
+
+#+NAME: c:e-mail
+#+BEGIN_SRC emacs-lisp
+(defun gnus-dir (&optional path) (concat user-emacs-directory "gnus/" path))
+(setf gnus-startup-file (gnus-dir "newsrc"))
+#+END_SRC
 
 ** /notmuch/
 
