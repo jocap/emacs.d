@@ -244,6 +244,9 @@ headline. Most of them are based on built-in functions.
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
+;; Use for Info-mode too
+(define-key Info-mode-map (kbd "M-n") (lookup-key global-map (kbd "M-n")))
+(define-key Info-mode-map (kbd "M-p") (lookup-key global-map (kbd "M-p")))
 
 (global-set-key (kbd "<C-tab>") #'completion-at-point)
 #+END_SRC
@@ -1133,6 +1136,14 @@ below, using the /:disabled/ keyword.
          ("C-x C-b" . ibuffer))
   :bind (:map read-expression-map
               ("C-r" . counsel-expression-history)))
+
+(use-package counsel
+  :bind
+  ;; Courtesy of Pragmatic Emacs
+  ;; (see http://pragmaticemacs.com/emacs/counsel-yank-pop-with-a-tweak/)
+  (("M-y" . counsel-yank-pop)
+   :map ivy-minibuffer-map
+   ("M-y" . ivy-next-line)))
 
 (use-package counsel-projectile
   :init

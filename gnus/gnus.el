@@ -47,6 +47,8 @@
                             (("misc" invisible nil nil))))
 
 ;; -----------------------------------------------------------------------------
+;; Formatting
+
 ;; Group display names
 
 (setf gnus-group-line-format "%M%S%5y/%-5t: %uG %D\n")
@@ -60,6 +62,10 @@
     (if (equal name "Lists")
         (setf name "(all)")) ; parent folder for lists
     name))
+
+;; Summary
+(setf gnus-summary-line-format "%1z%U%R %I %N. %f%* %[%L%] %(%s%)\n")
+;; (setf gnus-summary-line-format "%U%R%z%I%(%[%4L: %-23,23f%]%) %s\n")
 
 ;; -----------------------------------------------------------------------------
 ;; Sorting
