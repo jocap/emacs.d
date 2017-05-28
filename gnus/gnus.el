@@ -26,9 +26,15 @@
       smtpmail-smtp-service 587)
 
 (setf gnus-message-archive-method mail-server
-      gnus-message-archive-group "Sent")
+      gnus-message-archive-group  "Sent"
+      gnus-gcc-mark-as-read       t)
 
-(setf gnus-gcc-mark-as-read t)
+(setf gnus-visible-headers
+      (concat "^From:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Followup-To:\\"
+              "|^Reply-To:\\|^Organization:\\|^Summary:\\|^Keywords:\\|^To:\\"
+              "|^[BGF]?Cc:\\|^Posted-To:\\|^Mail-Copies-To:\\"
+              "|^Mail-Followup-To:\\|^Apparently-To:\\|^Gnus-Warning:\\"
+              "|^Resent-From:\\|^User-Agent:\\|^X-Mailer:"))
 
 ;; -----------------------------------------------------------------------------
 ;; Topics
@@ -56,17 +62,24 @@
     name))
 
 ;; -----------------------------------------------------------------------------
-;; Scoring & sorting
-
-;; Increase group score on summary exit
-(add-hook 'gnus-summary-exit-hook #'gnus-summary-bubble-group)
-(setf gnus-group-sort-function #'gnus-group-sort-by-score)
+;; Sorting
 
 ;; Sort summary buffer (best first)
 (setf gnus-thread-sort-functions
       '(gnus-thread-sort-by-subject            ; 1) a-z
         gnus-thread-sort-by-most-recent-number ; 2) highest number
         gnus-thread-sort-by-total-score))      ; 3) highest score
+
+;; -----------------------------------------------------------------------------
+;; Scoring
+
+;; Increase group score on summary exit
+(add-hook 'gnus-summary-exit-hook #'gnus-summary-bubble-group)
+(setf gnus-group-sort-function #'gnus-group-sort-by-score)
+
+;; Increase the score for followups to a sent article
+(add-hook 'message-sent-hook 'gnus-score-followup-article)
+(add-hook 'message-sent-hook 'gnus-score-followup-thread)
 
 ;; -----------------------------------------------------------------------------
 ;; Directories
@@ -89,7 +102,7 @@
 ;; -----------------------------------------------------------------------------
 ;; Window configuration
 
-(let ((group-width   40)
+(let ((group-width   35)
       (article-width 80))
   (gnus-add-configuration
    `(article

@@ -147,7 +147,8 @@ here with a short description of why I like them.
 (use-package aggressive-indent
   :demand
   :init
-  (add-hook 'lisp-mode-hook #'aggressive-indent-mode))
+  (add-hook 'emacs-lisp-mode-hook
+            (lambda () (aggressive-indent-mode))))
 #+END_SRC
 
 
