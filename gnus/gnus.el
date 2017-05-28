@@ -84,13 +84,13 @@
 ;; -----------------------------------------------------------------------------
 ;; Directories
 
-;; NB: Be sure to set `gnus-startup-file' in main Emacs configuration.
+;; NB: Be sure to set `gnus-init-file' in main Emacs configuration.
 
 (setf gnus-home-directory         (gnus-dir)
       message-directory           (gnus-dir "mail/")
       gnus-directory              (gnus-dir "news/")
       nnfolder-directory          (gnus-dir "mail/archive/")
-      gnus-init-file              (gnus-dir "gnus.el")
+      gnus-startup-file           (gnus-dir "newsrc")
       gnus-home-score-file        (gnus-dir "gnus.SCORE")
       gnus-agent-directory        (gnus-dir "agent/")
       gnus-article-save-directory (gnus-dir "news")

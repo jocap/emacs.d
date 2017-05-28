@@ -2047,7 +2047,7 @@ For my Gnus configuration, see the =gnus/gnus.el= file.
 #+NAME: c:e-mail
 #+BEGIN_SRC emacs-lisp
 (defun gnus-dir (&optional path) (concat user-emacs-directory "gnus/" path))
-(setf gnus-startup-file (gnus-dir "newsrc"))
+(setf gnus-init-file (gnus-dir "gnus.el"))
 #+END_SRC
 
 ** /notmuch/
