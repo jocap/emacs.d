@@ -64,7 +64,7 @@
     name))
 
 ;; Summary
-(setf gnus-summary-line-format "%1z%U%R %I %N. %f%* %[%L%] %(%s%)\n")
+(setf gnus-summary-line-format "%1z%U%R %I %N.%* %f %[%L%] %(%s%)\n")
 ;; (setf gnus-summary-line-format "%U%R%z%I%(%[%4L: %-23,23f%]%) %s\n")
 
 ;; -----------------------------------------------------------------------------
