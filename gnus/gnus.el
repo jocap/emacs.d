@@ -20,7 +20,7 @@
 (setf nnmail-expiry-target "nnimap+mail.ankarstrom.se:Archive"
       nnmail-expiry-wait   'immediate)
 
-(setf send-mail-function    'smtpmail-send-it
+(setf send-mail-function    #'smtpmail-send-it
       smtpmail-smtp-server  "mail.ankarstrom.se"
       smtpmail-stream-type  'starttls
       smtpmail-smtp-service 587)
@@ -54,17 +54,18 @@
 (setf gnus-group-line-format "%M%S%5y/%-5t: %uG %D\n")
 
 (defun gnus-user-format-function-G (arg)
-  (let* ((prefix      (format "nnimap+%s:" (plist-get mail-server 'nnimap)))
-         (list-prefix (concat prefix "Lists."))
+  (let* ((imap-prefix (format "nnimap+%s:" (plist-get mail-server 'nnimap)))
+         (list-prefix (concat imap-prefix "Lists."))
          (name        gnus-tmp-group))
-    (--map (setf name (s-chop-prefix it name))
-           (list list-prefix prefix))
+    (mapc (lambda (prefix)
+            (setf name (s-chop-prefix prefix name)))
+          (list list-prefix imap-prefix))
     (if (equal name "Lists")
         (setf name "(all)")) ; parent folder for lists
     name))
 
 ;; Summary
-(setf gnus-summary-line-format "%1z%U%R %*%I %d. %f %[%L%] %s\n")
+(setf gnus-summary-line-format "%1z%U%R %I %d.%* %f %[%L%] %s\n")
 
 ;; -----------------------------------------------------------------------------
 ;; Sorting
@@ -86,8 +87,8 @@
 (setf gnus-group-sort-function #'gnus-group-sort-by-score)
 
 ;; Increase the score for followups to a sent article
-(add-hook 'message-sent-hook 'gnus-score-followup-article)
-(add-hook 'message-sent-hook 'gnus-score-followup-thread)
+(add-hook 'message-sent-hook #'gnus-score-followup-article)
+(add-hook 'message-sent-hook #'gnus-score-followup-thread)
 
 ;; -----------------------------------------------------------------------------
 ;; Directories
@@ -186,4 +187,4 @@
     ("ca" mml-attach-file "Attach C-c C-a")
     ("cc" message-send-and-exit "Send C-c C-c")
     ("q" nil "cancel"))
-  (global-set-key (kbd "C-c v") 'hydra-message/body))
+  (define-key message-mode-map (kbd "C-c v") 'hydra-message/body))

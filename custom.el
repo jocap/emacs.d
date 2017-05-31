@@ -26,7 +26,6 @@
  '(default-input-method "russian-computer")
  '(display-time-24hr-format t)
  '(enable-recursive-minibuffers t)
- '(epa-pinentry-mode (quote loopback))
  '(eziam-scale-headings nil)
  '(eziam-scale-other nil)
  '(fci-rule-color "#eee8d5")
@@ -205,5 +204,4 @@
  '(relative-line-numbers ((t (:inherit (linum default)))))
  '(relative-line-numbers-current-line ((t (:inherit relative-line-numbers))))
  '(trailing-whitespace ((t (:background "#be4848"))))
- '(variable-pitch ((t (:height 110 :family "FreeSans"))))
  '(widget-field ((t (:background "#eee8d5" :foreground "dim gray"))) nil "Made text visible."))
