@@ -32,7 +32,7 @@ pre.src { padding-top: 8pt !important; }
 /* Basic design & layout (html, body, wrapper) {{{ */
 
 /* To change size of layout, change this: */
-html { font-size: 10px; }
+html { font-size: 9px; }
 
 body {
     /* font-size: 2 * 8px (html font-size) = 16px */

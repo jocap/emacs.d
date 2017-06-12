@@ -1119,7 +1119,9 @@ below, using the /:disabled/ keyword.
 
   ;; counsel-everything
 
-  (require 's)
+  ;; TODO: Add support for ignoring absolute paths
+  ;; TODO: Move counsel-everything to own section
+
   (defun counsel-everything (&optional dir)
     "Find all files in the current directory, including subdirectories.
 If DIR is non-nil, use that directory instead of current one.
@@ -1129,8 +1131,8 @@ directory, relative to DIR."
     (interactive)
     (let* ((dir (or dir "."))
            (ignored-dirs '("*/.git"
-                           "./elpa"
-                           "./state"))
+                           "*/elpa"
+                           "*/state"))
            (ignored-dirs-string (mapconcat
                                  (lambda (dir)
                                    (concat "-not \\( -path " dir " -prune \\)"))
@@ -1183,6 +1185,10 @@ directory, relative to DIR."
                           (lambda ()
                             (counsel-everything (format "%s.." ,dir))))))
     (minibuffer-keyboard-quit))
+
+  (global-set-key (kbd "C-x C-M-f") #'counsel-everything)
+
+  ;; (end of counsel-everything)
 
   :bind (("C-s"     . swiper)
 
