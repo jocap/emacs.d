@@ -284,7 +284,7 @@ is no comment, return nil."
       (when (skip-syntax-forward "^<" (point-at-eol))
         (setq comment (delete-and-extract-region (point) (point-at-eol)))
         (delete-horizontal-space)))
-    (if (s-blank-str? comment) nil comment)))
+    (if (string-equal "" comment) nil comment)))
 
 (defmacro --fcase (form &rest arg-then)
   "For each `arg-then', evaluate `form' with the car of
@@ -1143,7 +1143,7 @@ directory, relative to DIR."
                                 ;; Ignore errors from `find' (usually about
                                 ;; permissions):
                                 nil
-                              (s-chop-prefix (concat dir "/") file))))
+                              (string-remove-prefix (concat dir "/") file))))
                         (split-string
                          (shell-command-to-string (concat "find " dir " "
                                                           ignored-dirs-string))
@@ -1428,8 +1428,6 @@ left. The cloned buffer, called the /tree view/, has the following properties:
 - Within =isearch=, ~<S-return>~ opens the currently selected matching heading in
   the base buffer
 
-Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el= string manipulation library]].
-
 #+NAME: c:org:fun
 #+BEGIN_SRC emacs-lisp :noweb yes :exports none
 <<c:org-tree-view>>
@@ -1471,7 +1469,7 @@ Note that =org-tree-view= requires the [[https://github.com/magnars/s.el][=s.el=
 
 #+NAME: c:org-tree-view
 #+BEGIN_SRC emacs-lisp
-(require 's) ; move to function
+(require 'subr-x)
 
 (defun org-tree-view/get-headlines (&optional level &optional base-buffer)
   "Get a list of all headlines in `base-buffer' of a level less
@@ -1506,11 +1504,11 @@ face and its position in the base buffer encoded as the
          (begin (org-element-property :begin headline))
          (end (org-element-property :end headline))
          (org-tree-view-level-face (intern
-                          (concat "org-tree-view/level-"
-                                  (number-to-string level))))
+                                    (concat "org-tree-view/level-"
+                                            (number-to-string level))))
          (text (concat (apply #'concat (make-list (* 2 (1- level)) " "))
                        "* "
-                       (s-replace "\"" "" title)))) ; remove \" from title
+                       (replace-regexp-in-string "\"" "" title nil t)))) ; remove \" from title
 
     ;; Text properties
     (put-text-property ; org-tree-view-level-N
@@ -1561,7 +1559,7 @@ syntax and return the resulting string."
                   code           org-code)))
 
           ;; Figure out real end of object
-          (let ((substr (s-trim-right (substring text begin end))))
+          (let ((substr (string-trim-right (substring text begin end))))
             (setq end (+ begin (length substr))))
 
           ;; Handle faces
@@ -1695,7 +1693,7 @@ view, but only for 1 second."
         (setq base-buffer (org-tree-view/make-base-buffer-name))
       (if (org-tree-view/has-tree-view)
           (setq base-buffer (current-buffer))))
-    (when (and base-buffer (not (s-contains? "mouse" (key-description key))))
+    (when (and base-buffer (not (string-match-p "mouse" (key-description key))))
       (message "Press %s again to close the tree view." (key-description key))
       (eval
        (macroexpand
@@ -1790,7 +1788,7 @@ character in the search."
   (let ((tree-view-buffer
          (get-buffer (or tree-view-buffer
                          (current-buffer)))))
-    (s-chop-prefix "<tree>" (buffer-name tree-view-buffer))))
+    (string-remove-prefix "<tree>" (buffer-name tree-view-buffer))))
 
 (defun org-tree-view/make-tree-view-buffer-name (&optional base-buffer)
   (let ((base-buffer

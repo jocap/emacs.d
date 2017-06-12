@@ -1,7 +1,7 @@
 ;; =============================================================================
 ;; Basic preferences
 
-(require 's)
+(require 'subr-x)
 (require 'dash)
 
 (setf user-mail-address "john@ankarstrom.se"
@@ -58,7 +58,7 @@
          (list-prefix (concat imap-prefix "Lists."))
          (name        gnus-tmp-group))
     (mapc (lambda (prefix)
-            (setf name (s-chop-prefix prefix name)))
+            (setf name (string-remove-prefix prefix name)))
           (list list-prefix imap-prefix))
     (if (equal name "Lists")
         (setf name "(all)")) ; parent folder for lists
@@ -185,5 +185,6 @@
     "Do"
     ("ca" mml-attach-file "Attach C-c C-a")
     ("cc" message-send-and-exit "Send C-c C-c")
+    ("cm" message-mark-inserted-region "Mark inserted region C-c M-m")
     ("q" nil "cancel"))
   (define-key message-mode-map (kbd "C-c v") 'hydra-message/body))
