@@ -7,7 +7,7 @@
 
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" />
-#+HTML_HEAD: <link rel="stylesheet" href="file:///C:/Users/JohnAJ/AppData/Local/lxss/home/john/.config/emacs/config/config.css" type="text/css" />
+#+HTML_HEAD: <link rel="stylesheet" href="config.css" type="text/css" />
 
 # Things from old config yet to be added:
 # - tty-shell-command functions (incl. dynamic cursor shape for terminal)
@@ -184,34 +184,33 @@ prevent that.
 
 #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
-(setq custom-file (concat user-emacs-directory "custom.el"))
+(setf custom-file (concat user-emacs-directory "custom.el"))
 
-(setq emacs-state-directory (expand-file-name "state/" user-emacs-directory))
+(setf emacs-state-directory (expand-file-name "state/" user-emacs-directory))
 (defun state-dir (file)
   (concat emacs-state-directory file))
 
 ;; - Various places
 
-(setq auto-save-list-file-prefix (state-dir "auto-save-list/.saves~"))
-(setq save-place-file (state-dir "save-place"))
-(setq recentf-save-file (state-dir "recentf"))
-(setq ido-save-directory-list-file (state-dir "ido.last"))
-(setq eshell-directory-name (state-dir "eshell"))
-(setq nsm-settings-file (state-dir "network-security.data"))
-(setq backup-directory-alist
-      `((".*" . ,(state-dir "saves"))))
+(setf auto-save-list-file-prefix   (state-dir "auto-save-list/.saves~")
+      save-place-file              (state-dir "save-place")
+      recentf-save-file            (state-dir "recentf")
+      ido-save-directory-list-file (state-dir "ido.last")
+      eshell-directory-name        (state-dir "eshell")
+      nsm-settings-file            (state-dir "network-security.data")
+      backup-directory-alist       `((".*" . ,(state-dir "saves"))))
 
 ;; - Tramp
-(setq tramp-backup-directory-alist backup-directory-alist)
-(setq tramp-auto-save-directory (state-dir
+(setf tramp-backup-directory-alist backup-directory-alist)
+(setf tramp-auto-save-directory (state-dir
                                         "tramp/auto-save/"))
-(setq tramp-persistency-file-name (state-dir
+(setf tramp-persistency-file-name (state-dir
                                           "tramp/persistency.el"))
 
 ;; - Projectile
-(setq projectile-cache-file (concat emacs-state-directory
+(setf projectile-cache-file (concat emacs-state-directory
                                     "projectile/cache.el"))
-(setq projectile-known-projects-file
+(setf projectile-known-projects-file
       (concat emacs-state-directory
               "projectile/known-projects.el"))
 
@@ -287,7 +286,7 @@ is no comment, return nil."
         (delete-horizontal-space)))
     (if (s-blank-str? comment) nil comment)))
 
-(defmacro fcase (form &rest arg-then)
+(defmacro --fcase (form &rest arg-then)
   "For each `arg-then', evaluate `form' with the car of
 `arg-then' exposed as `it'. For the first `arg-then' for which
 the evaluation of `form' returns true, evaluate and return then
@@ -297,10 +296,10 @@ If the car of `arg-then' is `else', its cdr will be always be
 evaluated, if no `arg-then' before has resulted in a true
 evaluation of `form'.
 
-   (fcase (string-prefix-p it my-string)
-          (\"prefix-\"       (message \"Prefix: prefix-\"))
-          (\"other-prefix-\" (message \"Prefix; other-prefix-\"))
-          (else            (message \"No prefix\")))"
+   (--fcase (string-prefix-p it my-string)
+            (\"prefix-\"       (message \"Prefix: prefix-\"))
+            (\"other-prefix-\" (message \"Prefix; other-else-\"))
+            (prefix            (message \"No prefix\")))"
   (declare (debug (form form arg-then form)))
   `(cl-loop
       for it-then in ',arg-then
@@ -1117,6 +1116,74 @@ below, using the /:disabled/ keyword.
   (setq ivy-re-builders-alist
         '((swiper . ivy--regex-plus)
           (t . ivy--regex-fuzzy)))
+
+  ;; counsel-everything
+
+  (require 's)
+  (defun counsel-everything (&optional dir)
+    "Find all files in the current directory, including subdirectories.
+If DIR is non-nil, use that directory instead of current one.
+
+From the minibuffer, C-<backspace> can be pressed to go up a
+directory, relative to DIR."
+    (interactive)
+    (let* ((dir (or dir "."))
+           (ignored-dirs '("*/.git"
+                           "./elpa"
+                           "./state"))
+           (ignored-dirs-string (mapconcat
+                                 (lambda (dir)
+                                   (concat "-not \\( -path " dir " -prune \\)"))
+                                 ignored-dirs " "))
+           (candidates (mapcar
+                        (lambda (file)
+                          (if (equal dir file)
+                              nil
+                            (if (string-prefix-p "find: " file)
+                                ;; Ignore errors from `find' (usually about
+                                ;; permissions):
+                                nil
+                              (s-chop-prefix (concat dir "/") file))))
+                        (split-string
+                         (shell-command-to-string (concat "find " dir " "
+                                                          ignored-dirs-string))
+                         "\n" t))))
+      (setf counsel-everything--dir dir) ; set global dir value (for counsel-everything-up-directory)
+      (ivy-read (format "(%s) Find everything: " dir) candidates
+                :matcher #'counsel--find-file-matcher
+                :action (lambda (file)
+                          (with-ivy-window
+                            (find-file file)))
+                :keymap (make-counsel-everything-map)
+                :require-match 'confirm-after-completion
+                :caller #'counsel-everything)))
+
+  (ivy-set-actions
+   #'counsel-everything
+   '(("j" find-file-other-window "other window")
+     ("x" counsel-find-file-extern "open externally")
+     ("r" counsel-find-file-as-root "open as root")))
+
+  (defvar counsel-everything--dir nil
+    "Internal variable used by counsel-everything-up-directory.")
+
+  (defun make-counsel-everything-map ()
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "C-DEL")         #'counsel-everything-up-directory)
+      (define-key map (kbd "C-<backspace>") #'counsel-everything-up-directory)
+      map))
+
+  (defun counsel-everything-up-directory ()
+    (interactive)
+    (let ((dir ""))
+      (if (and (boundp 'counsel-everything--dir)
+               (not (equal counsel-everything--dir ".")))
+          (setf dir (concat counsel-everything--dir "/")))
+      (eval `(run-at-time nil nil
+                          (lambda ()
+                            (counsel-everything (format "%s.." ,dir))))))
+    (minibuffer-keyboard-quit))
+
   :bind (("C-s"     . swiper)
 
          ("C-c C-r" . ivy-resume)
@@ -2311,24 +2378,39 @@ background.
 
     ;; * org-block-begin-line, org-block-end-line
     (cl-loop
-     for face in '(org-block-begin-line org-block-end-line)
-     do (set-face-attribute
-         face nil
-         :background (color-desaturate-name
-                      (color-darken-name
-                       (face-attribute 'default :background) 15) 50)
-         :foreground (color-desaturate-name
-                      (funcall intensify
-                               (face-attribute 'default :foreground) 20) 90)
-         :weight (face-attribute 'default :weight)
-         :slant (face-attribute 'default :slant)))
+       for face in '(org-block-begin-line org-block-end-line)
+       do (set-face-attribute
+           face nil
+           :background (color-desaturate-name
+                        (color-darken-name
+                         (face-attribute 'default :background) 15) 50)
+           :foreground (color-desaturate-name
+                        (funcall intensify
+                                 (face-attribute 'default :foreground) 20) 90)
+           :weight (face-attribute 'default :weight)
+           :slant (face-attribute 'default :slant)))
+
+    ;; * ivy-current-match -> remove underline and add background
+    (when (eq (face-attribute 'ivy-current-match :underline) t)
+      (set-face-attribute 'ivy-current-match nil :underline 'unspecified)
+      (when (eq (face-attribute 'ivy-current-match :background) 'unspecified)
+        (let* ((default-bg (face-attribute 'default :background))
+               (bg-1       (funcall intensify default-bg 15))
+               (bg-2       (funcall anti-intensify default-bg 15))
+               ;; Ensure background isn't too dark or light:
+               (final-bg   (if (if (eq bg 'dark)
+                                   (> (color-distance bg-1 "#000000") 5000)
+                                 (> (color-distance bg-1 "#FFFFFF") 5000))
+                               bg-1
+                             bg-2)))
+          (set-face-attribute 'ivy-current-match nil :background final-bg))))
 
     ;; * fix italic faces
-    (mapc
-     (lambda (face)
-       (when (eq (face-attribute face :slant) 'italic)
-         (set-face-attribute face nil :family "Fira Mono Medium")))
-     (face-list))
+    ;; (mapc
+    ;;  (lambda (face)
+    ;;    (when (eq (face-attribute face :slant) 'italic)
+    ;;      (set-face-attribute face nil :family "Fira Mono Medium")))
+    ;;  (face-list))
 
     ;; * Reset fci-mode
     (let ((inhibit-message t))

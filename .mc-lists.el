@@ -22,6 +22,7 @@
         paredit-kill
         paredit-newline
         paredit-open-round
+        paredit-raise-sexp
         paredit-semicolon
         paredit-splice-sexp
         smart-open-line-above

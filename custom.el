@@ -103,6 +103,9 @@
  '(nrepl-message-colors
    (quote
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
+ '(ns-alternate-modifier (quote super))
+ '(ns-command-modifier (quote meta))
+ '(ns-use-native-fullscreen t)
  '(op/repository-directory "/home/john/dev/org-page")
  '(op/site-domain "https://john.ankarstrom.se/")
  '(op/site-main-title "John")
@@ -124,11 +127,13 @@
  '(org-special-ctrl-a/e t)
  '(org-src-fontify-natively t)
  '(org-src-tab-acts-natively t)
+ '(org-src-window-setup (quote current-window))
  '(org-startup-indented t)
  '(org-tree-view/level 6)
  '(package-selected-packages
    (quote
-    (aggressive-indent-mode ws-butler aggressive-indent undo-tree counsel-projectile zenburn-theme ivy-hydra hydra which-key counsel tramp-term php-mode org-page apache-mode lua-mode form-feed notmuch company helm-flx helm-projectile helm-org-rifle emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (f aggressive-indent-mode ws-butler aggressive-indent undo-tree counsel-projectile zenburn-theme ivy-hydra hydra which-key counsel tramp-term php-mode org-page apache-mode lua-mode form-feed notmuch company emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme popwin nlinum openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters origami multiple-cursors markdown-mode gruvbox-theme expand-region)))
+ '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(popwin-mode t)
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
