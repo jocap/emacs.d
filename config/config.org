@@ -1569,7 +1569,7 @@ syntax and return the resulting string."
             (setq end (+ begin (length substr))))
 
           ;; Handle faces
-          (when (-contains? faces type)
+          (when (member type faces)
             (let* ((face (plist-get faces type))
                    (existing-face (get-text-property begin 'font-lock-face text))
                    (new-face (if existing-face
