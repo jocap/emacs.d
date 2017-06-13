@@ -11,6 +11,7 @@
  '(canlock-password "be2823e7d498a33803cffe058356861618f4c7ea")
  '(column-number-mode t)
  '(comment-column 0)
+ '(company-idle-delay 0)
  '(compilation-message-face (quote default))
  '(confirm-kill-emacs (quote y-or-n-p))
  '(cua-global-mark-cursor-color "#2aa198")

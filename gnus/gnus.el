@@ -46,6 +46,8 @@
                             (("lists" visible nil nil))
                             (("misc" invisible nil nil))))
 
+;; TODO: Automatically divide groups into topics
+
 ;; -----------------------------------------------------------------------------
 ;; Formatting
 

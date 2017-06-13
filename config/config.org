@@ -1117,79 +1117,6 @@ below, using the /:disabled/ keyword.
         '((swiper . ivy--regex-plus)
           (t . ivy--regex-fuzzy)))
 
-  ;; counsel-everything
-
-  ;; TODO: Add support for ignoring absolute paths
-  ;; TODO: Move counsel-everything to own section
-
-  (defun counsel-everything (&optional dir)
-    "Find all files in the current directory, including subdirectories.
-If DIR is non-nil, use that directory instead of current one.
-
-From the minibuffer, C-<backspace> can be pressed to go up a
-directory, relative to DIR."
-    (interactive)
-    (let* ((dir (or dir "."))
-           (ignored-dirs '("*/.git"
-                           "*/elpa"
-                           "*/state"))
-           (ignored-dirs-string (mapconcat
-                                 (lambda (dir)
-                                   (concat "-not \\( -path " dir " -prune \\)"))
-                                 ignored-dirs " "))
-           (candidates (mapcar
-                        (lambda (file)
-                          (if (equal dir file)
-                              nil
-                            (if (string-prefix-p "find: " file)
-                                ;; Ignore errors from `find' (usually about
-                                ;; permissions):
-                                nil
-                              (string-remove-prefix (concat dir "/") file))))
-                        (split-string
-                         (shell-command-to-string (concat "find " dir " "
-                                                          ignored-dirs-string))
-                         "\n" t))))
-      (setf counsel-everything--dir dir) ; set global dir value (for counsel-everything-up-directory)
-      (ivy-read (format "(%s) Find everything: " dir) candidates
-                :matcher #'counsel--find-file-matcher
-                :action (lambda (file)
-                          (with-ivy-window
-                            (find-file file)))
-                :keymap (make-counsel-everything-map)
-                :require-match 'confirm-after-completion
-                :caller #'counsel-everything)))
-
-  (ivy-set-actions
-   #'counsel-everything
-   '(("j" find-file-other-window "other window")
-     ("x" counsel-find-file-extern "open externally")
-     ("r" counsel-find-file-as-root "open as root")))
-
-  (defvar counsel-everything--dir nil
-    "Internal variable used by counsel-everything-up-directory.")
-
-  (defun make-counsel-everything-map ()
-    (let ((map (make-sparse-keymap)))
-      (define-key map (kbd "C-DEL")         #'counsel-everything-up-directory)
-      (define-key map (kbd "C-<backspace>") #'counsel-everything-up-directory)
-      map))
-
-  (defun counsel-everything-up-directory ()
-    (interactive)
-    (let ((dir ""))
-      (if (and (boundp 'counsel-everything--dir)
-               (not (equal counsel-everything--dir ".")))
-          (setf dir (concat counsel-everything--dir "/")))
-      (eval `(run-at-time nil nil
-                          (lambda ()
-                            (counsel-everything (format "%s.." ,dir))))))
-    (minibuffer-keyboard-quit))
-
-  (global-set-key (kbd "C-x C-M-f") #'counsel-everything)
-
-  ;; (end of counsel-everything)
-
   :bind (("C-s"     . swiper)
 
          ("C-c C-r" . ivy-resume)
@@ -1223,6 +1150,89 @@ directory, relative to DIR."
   (counsel-projectile-on))
 #+END_SRC
 
+*** /counsel-everything/
+:PROPERTIES:
+:CUSTOM_ID: counsel-everything
+:END:
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'ivy
+  ;; TODO: Add support for ignoring absolute paths
+
+  (defun counsel-everything (&optional dir)
+    "Find all files in the current directory, including subdirectories.
+If DIR is non-nil, use that directory instead of current one.
+
+From the minibuffer, C-<backspace> can be pressed to go up a
+directory, relative to DIR. Note that by default, you cannot go
+up to /, as processing this directory takes a long time and is
+rarely desirable."
+    (interactive)
+    (let* ((dir (or dir "."))
+           (abs-path (file-truename dir))
+           (dir-name (file-name-nondirectory (directory-file-name abs-path)))
+           (ignored-dirs '("*/.git"
+                           "*/elpa"
+                           "*/state"))
+           (ignored-dirs-string (mapconcat
+                                 (lambda (dir)
+                                   (concat "-not \\( -path " dir " -prune \\)"))
+                                 ignored-dirs " "))
+           (candidates (mapcar
+                        (lambda (file)
+                          (if (equal dir file)
+                              nil
+                            (if (string-prefix-p "find: " file)
+                                ;; Ignore errors from `find' (usually about
+                                ;; permissions):
+                                nil
+                              (string-remove-prefix (concat dir "/") file))))
+                        (split-string
+                         (shell-command-to-string (concat "find " dir " "
+                                                          ignored-dirs-string))
+                         "\n" t))))
+      (setf counsel-everything--dir dir) ; set global dir value (for counsel-everything-up-directory)
+      (ivy-read (format "(%s) Find everything: " dir-name) candidates
+                :matcher #'counsel--find-file-matcher
+                :action (lambda (file)
+                          (with-ivy-window
+                            (find-file (expand-file-name file counsel-everything--dir))))
+                :keymap (make-counsel-everything-map)
+                :require-match 'confirm-after-completion
+                :caller #'counsel-everything)))
+
+  (ivy-set-actions
+   #'counsel-everything
+   '(("j" find-file-other-window "other window")
+     ("x" counsel-find-file-extern "open externally")
+     ("r" counsel-find-file-as-root "open as root")))
+
+  (defvar counsel-everything--dir nil
+    "Internal variable used by counsel-everything-up-directory.")
+
+  (defun make-counsel-everything-map ()
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "C-DEL")         #'counsel-everything-up-directory)
+      (define-key map (kbd "C-<backspace>") #'counsel-everything-up-directory)
+      map))
+
+  (defun counsel-everything-up-directory ()
+    (interactive)
+    (let ((dir "")
+          (up-dir))
+      (if (and (boundp 'counsel-everything--dir)
+               (not (equal counsel-everything--dir ".")))
+          (setf dir (concat counsel-everything--dir "/")))
+      (setf up-dir (format "%s.." dir))
+      (unless (string-equal (file-truename up-dir) "/")
+        (eval `(run-at-time nil nil
+                            (lambda ()
+                              (counsel-everything ,up-dir))))
+        (minibuffer-keyboard-quit))))
+
+  (global-set-key (kbd "C-x C-M-f") #'counsel-everything))
+#+END_SRC
 ** Swiper
 :PROPERTIES:
 :CUSTOM_ID: swiper
@@ -2588,7 +2598,7 @@ code, surely copied from the internet, fixes that:
 :END:
 
 
-* Non-Emacs Emacs-related configuration
+* Operating systems
 
 ** Windows Subsystem for Linux (WSL)
 :PROPERTIES:
@@ -2762,6 +2772,29 @@ In Emacs, my default browser is =firefox=, so that it remains compatible
 with other systems, where I don't use my =wsl-browser= script.
 
 
+** Mac OS X
+:PROPERTIES:
+:CUSTOM_ID: osx
+:END:
+
+I very rarely use Mac OS X, but when I do, I like my Emacs configuration to
+work - and nicely, at that! The following code exists in addition to some
+NeXTSTEP-specific stuff in =custom.el=.
+
+#+NAME: c:osx
+#+BEGIN_SRC emacs-lisp
+(when (eq system-type 'darwin)
+  ;; Replace Sans Serif with Lucida Grande
+  (mapc
+   (lambda (face)
+     (when (string-equal (face-attribute face :family) "Sans Serif")
+       (set-face-attribute face nil :family "Lucida Grande")))
+   (face-list)))
+#+END_SRC
+
+Note to self: the above method of changing fonts is rather flexible and probably
+suitable for the configuration of other operating systems as well.
+
 * Credits
 
 #+NAME: c:config-all
@@ -2806,6 +2839,11 @@ with other systems, where I don't use my =wsl-browser= script.
 ;; =============================================================================
 
 <<c:custom-hooks>>
+
+;; Operating systems
+;; =============================================================================
+
+<<c:osx>>
 
 ;; Lastly
 ;; =============================================================================
