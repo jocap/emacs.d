@@ -243,9 +243,10 @@ headline. Most of them are based on built-in functions.
 
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
-;; Use for Info-mode too
-(define-key Info-mode-map (kbd "M-n") (lookup-key global-map (kbd "M-n")))
-(define-key Info-mode-map (kbd "M-p") (lookup-key global-map (kbd "M-p")))
+;; Use for other modes too
+(define-key message-mode-map (kbd "M-n") (lookup-key global-map (kbd "M-n")))
+(define-key Info-mode-map    (kbd "M-n") (lookup-key global-map (kbd "M-n")))
+(define-key Info-mode-map    (kbd "M-p") (lookup-key global-map (kbd "M-p")))
 
 (global-set-key (kbd "<C-tab>") #'completion-at-point)
 #+END_SRC
@@ -683,31 +684,6 @@ end of the line."
 (global-set-key (kbd "C-;") 'comment-dwim-line)
 #+END_SRC
 
-** Indent after /kill-line/
-:PROPERTIES:
-:CUSTOM_ID: indent-after-kill-line
-:END:
-
-Because I mostly use ~C-a~ as an alias for =back-to-indentation= (see section on
-context-sensitive ~C-a~ and ~C-e~), I usually never go to the actual beginning of
-lines. This makes using =kill-line= rather annoying. When trying to delete empty
-lines, I'd like the indentation to be deleted as well.
-
-I've been thinking about re-writing =kill-line=. For now, though, I have a simpler
-solution. I simply advise =kill-line= (and the equivalent =paredit-kill=) to
-automatically indent after killing the line. This will not remove the
-indentation, but it will ensure upon deleting an (apart from indentation) empty
-line, that the indentation doesn't spread to the next line.
-
-# #+NAME: c:basic-prefs
-#+BEGIN_SRC emacs-lisp
-(defun indent-after-kill-line (&optional &rest r)
-  (indent-according-to-mode))
-
-(advice-add #'kill-line    :after #'indent-after-kill-line)
-(advice-add #'paredit-kill :after #'indent-after-kill-line)
-#+END_SRC
-
 
 * Movement
 
@@ -802,6 +778,7 @@ buffer, stop there."
     (when (/= arg 1)
       (let ((line-move-visual nil))
         (forward-line (1- arg))))
+
     (let ((orig-point (point)))
       (back-to-indentation)
       (when (= orig-point (point))
@@ -818,18 +795,17 @@ there."
     (when (/= arg 1)
       (let ((line-move-visual nil))
         (forward-line (1- arg))))
+
     (let ((orig-point (point)))
       (back-to-indentation)
       (let ((bol-point (point)))
-        (skip-syntax-forward "^<" (point-at-eol))
-        (if (= bol-point (point))
-            (move-end-of-line 1)
-          (backward-char)
-          (if (looking-at "\s")
-              (re-search-backward "^\\|[^[:space:]]"))
-          (forward-char)
-          (when (= orig-point (point))
-            (move-end-of-line 1)))))))
+        (let ((comment-start (comment-search-forward (point-at-eol) t)))
+          (if comment-start
+              (progn (goto-char comment-start)
+                     (skip-syntax-backward " " (point-at-bol)))
+            (move-end-of-line 1)))
+        (when (= orig-point (point))
+          (move-end-of-line 1))))))
 #+END_SRC
 
 #+NAME: c:basic-prefs
