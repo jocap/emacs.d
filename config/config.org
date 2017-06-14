@@ -762,6 +762,20 @@ combination with any of the arrow keys.
 :CUSTOM_ID: beginning-end-of-line
 :END:
 
+These are two functions that make Emacs feel a lot more friendly, especially for
+an old Vim user. The =smarter-move-beginning-of-line= is based heavily on the
+function with the same name from Emacs Redux, but =smarter-move-end-of-line= is
+mostly a creation of my own, with inspiration from the [[https://www.emacswiki.org/emacs/EndOfLineNoComments][EmacsWiki]]. It works
+better and more reliably than any other solutions that I've seen.
+
+To summarize the behavior of the functions, =smarter-move-beginning-of-line=
+toggles between Vim's =$= and =0= (indentation and real BOL), whereas
+=smarter-move-end-of-line= toggles between the last non-space character before any
+comment and the real EOL.
+
+If you use tabs, you might want to replace the space-based =skip-syntax-backward=
+call with a regex that includes all whitespace.
+
 #+NAME: c:basic-prefs
 #+BEGIN_SRC emacs-lisp
 (defun smarter-move-beginning-of-line (&optional &rest args)
