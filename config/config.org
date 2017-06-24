@@ -2832,6 +2832,8 @@ NeXTSTEP-specific stuff in =custom.el=.
 #+BEGIN_SRC emacs-lisp
 (defun osx-theme-do-all (&optional r)
   (when (eq system-type 'darwin)
+    ;; Fix selections
+    (defalias 'x-selection-owner-p 'ns-selection-owner-p)
     ;; Replace Sans Serif with Lucida Grande
     (mapc
      (lambda (face)
@@ -2839,8 +2841,6 @@ NeXTSTEP-specific stuff in =custom.el=.
          (set-face-attribute face nil :family "Lucida Grande")))
      (face-list))))
 (advice-add #'theme-do-all :after #'osx-theme-do-all)
-
-(defalias 'x-selection-owner-p 'ns-selection-owner-p)
 #+END_SRC
 
 Note to self: the above method of changing fonts is rather flexible and probably
