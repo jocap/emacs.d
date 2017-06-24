@@ -111,9 +111,6 @@ here with a short description of why I like them.
 
 - buffer-move :: Lets me switch buffers between two windows - pretty handy.
 
-- aggressive-indent :: Makes Emacs indent all the things, all the time. I
-     personally only use it for Lisp modes, though.
-
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp :exports none
 (use-package rainbow-delimiters
@@ -143,12 +140,6 @@ here with a short description of why I like them.
          ("C-c <down>"  . buf-move-down)
          ("C-c <left>"  . buf-move-left)
          ("C-c <right>" . buf-move-right)))
-
-(use-package aggressive-indent
-  :demand
-  :init
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda () (aggressive-indent-mode))))
 #+END_SRC
 
 
@@ -235,8 +226,9 @@ headline. Most of them are based on built-in functions.
 (global-set-key (kbd "M-<f1>") #'menu-bar-mode)
 
 (global-set-key (kbd "M-]") #'other-window)
-(global-set-key (kbd "M-[") (lambda (n) (interactive "p")
-                                    (other-window (* -1 n))))
+(global-set-key (kbd "M-[") (lambda (n)
+                              (interactive "p")
+                              (other-window (* -1 n))))
 
 (global-set-key (kbd "<S-home>") #'previous-buffer)
 (global-set-key (kbd "<S-end>") #'next-buffer)
@@ -244,9 +236,11 @@ headline. Most of them are based on built-in functions.
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 ;; Use for other modes too
-(define-key message-mode-map (kbd "M-n") (lookup-key global-map (kbd "M-n")))
 (define-key Info-mode-map    (kbd "M-n") (lookup-key global-map (kbd "M-n")))
 (define-key Info-mode-map    (kbd "M-p") (lookup-key global-map (kbd "M-p")))
+(add-hook 'message-mode-hook
+	  (lambda ()
+	    (define-key message-mode-map (kbd "M-n") (lookup-key global-map (kbd "M-n")))))
 
 (global-set-key (kbd "<C-tab>") #'completion-at-point)
 #+END_SRC
@@ -502,13 +496,14 @@ as I have Paredit installed, =use-package= binds ~M-R~ to the original function 
 (use-package paredit
   :init
   (autoload 'enable-paredit-mode
-    "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+      "paredit" "Turn on pseudo-structural editing of Lisp code." t)
   (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
   (add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
   (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
   (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
   (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
   (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
+  (add-hook 'racket-mode-hook           #'enable-paredit-mode)
 
   :config
   (defun paredit-delete-indentation (&optional arg)
@@ -548,6 +543,30 @@ current line."
          ("M-Q" . paredit-reindent-defun)))
 #+END_SRC
 
+*** Aggressive indentation
+:PROPERTIES:
+:CUSTOM_ID: aggressive-indent
+:END:
+
+=aggressive-indent= is a package that makes Emacs indent all the things, all the
+time. I personally only use it for Lisp modes.
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package aggressive-indent
+  :demand
+  :init
+  (defun enable-aggressive-indent-mode ()
+    (aggressive-indent-mode))
+  (add-hook 'emacs-lisp-mode-hook       #'enable-aggressive-indent-mode)
+  (add-hook 'eval-expression-minibuffer-setup-hook #'enable-aggressive-indent-mode)
+  (add-hook 'ielm-mode-hook             #'enable-aggressive-indent-mode)
+  (add-hook 'lisp-mode-hook             #'enable-aggressive-indent-mode)
+  (add-hook 'lisp-interaction-mode-hook #'enable-aggressive-indent-mode)
+  (add-hook 'scheme-mode-hook           #'enable-aggressive-indent-mode)
+  (add-hook 'racket-mode-hook           #'enable-aggressive-indent-mode))
+#+END_SRC
+
 *** Common Lisp indentation
 :PROPERTIES:
 :CUSTOM_ID: common-lisp-indent
@@ -567,7 +586,8 @@ Luckily, you can change the indentation rules yourself, as demonstrated below.
 
 ;; Fix custom indentation
 (with-eval-after-load "cl-indent"
-  (put 'use-package 'common-lisp-indent-function 1))
+  (put 'use-package 'common-lisp-indent-function 1)
+  (put 'use-package-as-one 'common-lisp-indent-function 1))
 #+END_SRC
 
 ** Working with regions
@@ -1167,7 +1187,7 @@ rarely desirable."
                            "*/state"))
            (ignored-dirs-string (mapconcat
                                  (lambda (dir)
-                                   (concat "-not \\( -path " dir " -prune \\)"))
+                                   (concat "-not \\( -path '" dir "' -prune \\)"))
                                  ignored-dirs " "))
            (candidates (mapcar
                         (lambda (file)
@@ -1785,6 +1805,7 @@ character in the search."
   (org-tree-view/refresh)
   (setq-local buffer-read-only t)
   (setq-local scroll-margin 0)
+  (setq-local case-fold-search t) ; ignore case
   (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return))
 
 (defun org-tree-view/cleanup ()
@@ -2064,6 +2085,40 @@ This works well, but of course it will block any potential future changes to
 =org-beginning-of-line= by the Org developers. On the other hand, it's unlikely
 that such a basic and well-working function should recieve any significant
 updates.
+
+** Racket
+:PROPERTIES:
+:CUSTOM_ID: racket-mode
+:END:
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package racket-mode
+  :bind (:map racket-repl-mode-map
+              ("<f5>" . /racket-repl-run))
+  :bind (:map racket-mode-map
+              ("<S-f5>" . /racket-interrupt-run))
+  :config
+  (defun /racket-repl-run ()
+    "From any buffer (usually the Racket REPL buffer), run the
+    Racket program in the first buffer found whose name ends with
+    \".rkt\"."
+    (interactive)
+    (let ((rkt-buffer (car (cl-remove-if-not
+                            (lambda (buffer)
+                              (string-suffix-p ".rkt" (buffer-name buffer)))
+                            (buffer-list))))) ; assume first .rkt buffer
+      (with-current-buffer rkt-buffer
+        (racket-run))))
+  (defun /racket-interrupt-run ()
+    "Run the Racket program in the current buffer, after sending
+    an interrupt signal to the Racket REPL (C-c)."
+    (interactive)
+    (with-current-buffer racket--repl-buffer-name
+      (comint-interrupt-subjob))
+    (racket-run))
+  (add-hook 'racket-repl-mode-hook #'toggle-truncate-lines))
+#+END_SRC
 
 ** LaTeX
 
@@ -2771,19 +2826,26 @@ I very rarely use Mac OS X, but when I do, I like my Emacs configuration to
 work - and nicely, at that! The following code exists in addition to some
 NeXTSTEP-specific stuff in =custom.el=.
 
+*** Fonts
+
 #+NAME: c:osx
 #+BEGIN_SRC emacs-lisp
-(when (eq system-type 'darwin)
-  ;; Replace Sans Serif with Lucida Grande
-  (mapc
-   (lambda (face)
-     (when (string-equal (face-attribute face :family) "Sans Serif")
-       (set-face-attribute face nil :family "Lucida Grande")))
-   (face-list)))
+(defun osx-theme-do-all (&optional r)
+  (when (eq system-type 'darwin)
+    ;; Replace Sans Serif with Lucida Grande
+    (mapc
+     (lambda (face)
+       (when (string-equal (face-attribute face :family) "Sans Serif")
+         (set-face-attribute face nil :family "Lucida Grande")))
+     (face-list))))
+(advice-add #'theme-do-all :after #'osx-theme-do-all)
+
+(defalias 'x-selection-owner-p 'ns-selection-owner-p)
 #+END_SRC
 
 Note to self: the above method of changing fonts is rather flexible and probably
 suitable for the configuration of other operating systems as well.
+
 
 * Credits
 
