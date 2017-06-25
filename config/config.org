@@ -2316,9 +2316,9 @@ This does not seem to work.
 #+END_SRC
 
 
-* Themes
+* Visuals
 :PROPERTIES:
-:CUSTOM_ID: themes
+:CUSTOM_ID: visuals
 :END:
 
 ** Theme configuration
@@ -2567,6 +2567,24 @@ code, surely copied from the internet, fixes that:
           (lambda () (defadvice load-theme
                          (before theme-dont-propagate activate)
                        (mapc #'disable-theme custom-enabled-themes))))
+#+END_SRC
+
+** Fonts
+
+#+BEGIN_SRC emacs-lisp
+(defun /setup-fonts (&optional r)
+  (let ((sans-serif-font (cl-case system-type
+                           ('darwin    "Lucida Grande")
+                           ('gnu/linux "Verdana"))))
+    (when (eq system-type 'darwin)
+      ;; Replace Sans Serif with Lucida Grande
+      (mapc
+       (lambda (face)
+         (when (string-equal (face-attribute face :family) "Sans Serif")
+           (set-face-attribute face nil :family sans-serif-font)))
+       (face-list)))))
+
+(advice-add #'theme-do-all :after #'/setup-fonts)
 #+END_SRC
 
 
@@ -2832,28 +2850,16 @@ with other systems, where I don't use my =wsl-browser= script.
 :END:
 
 I very rarely use Mac OS X, but when I do, I like my Emacs configuration to
-work - and nicely, at that! The following code exists in addition to some
-NeXTSTEP-specific stuff in =custom.el=.
+work - and nicely, at that!
 
 *** Fonts
 
 #+NAME: c:osx
 #+BEGIN_SRC emacs-lisp
-(defun osx-theme-do-all (&optional r)
-  (when (eq system-type 'darwin)
-    ;; Fix selections
-    (defalias 'x-selection-owner-p 'ns-selection-owner-p)
-    ;; Replace Sans Serif with Lucida Grande
-    (mapc
-     (lambda (face)
-       (when (string-equal (face-attribute face :family) "Sans Serif")
-         (set-face-attribute face nil :family "Lucida Grande")))
-     (face-list))))
-(advice-add #'theme-do-all :after #'osx-theme-do-all)
+(when (eq system-type 'darwin)
+  ;; Fix selections
+  (defalias 'x-selection-owner-p 'ns-selection-owner-p))
 #+END_SRC
-
-Note to self: the above method of changing fonts is rather flexible and probably
-suitable for the configuration of other operating systems as well.
 
 
 * Credits
