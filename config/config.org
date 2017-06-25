@@ -1400,6 +1400,15 @@ functions - they are defined further down.
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
   (add-hook 'org-shiftright-final-hook 'windmove-right)
 
+  ;; Export to exports/ subdirectory
+  (defun /org-export-to-subdirectory (orig-fun &rest args)
+    (shell-command (concat "mkdir -p exports"))
+    (apply orig-fun
+           (pop args)                     ; backend
+           (concat "exports/" (pop args)) ; file
+           args))
+  (advice-add #'org-export-to-file :around #'/org-export-to-subdirectory)
+
   ;; Remove keybindings that I already use
   (define-key org-mode-map (kbd "C-'") nil)
 
