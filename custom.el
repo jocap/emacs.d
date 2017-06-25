@@ -159,7 +159,6 @@
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
  '(solarized-scale-org-headlines nil)
  '(solarized-use-variable-pitch nil)
- '(split-width-threshold 80 nil nil "Prefer vertical split over horizontal split")
  '(tab-width 4)
  '(term-default-bg-color nil)
  '(term-default-fg-color nil)
