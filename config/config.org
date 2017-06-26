@@ -834,7 +834,8 @@ there."
       (back-to-indentation)
       (let ((bol-point (point)))
         (let ((comment-start (comment-search-forward (point-at-eol) t)))
-          (if comment-start
+          (if (and comment-start
+                   (not (eq comment-start bol-point)))
               (progn (goto-char comment-start)
                      (skip-syntax-backward " " (point-at-bol)))
             (move-end-of-line 1)))
