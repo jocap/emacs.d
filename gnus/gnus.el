@@ -125,8 +125,8 @@
   (gnus-add-configuration
    `(article
      (horizontal 1.0
-                 (summary 1.0 point)
-                 (article ,article-width))))
+                 (article ,article-width)
+                 (summary 1.0 point))))
 
   (gnus-add-configuration
    `(summary

@@ -1,12 +1,4 @@
-((decay 736512)
+((decay 736525)
  ("subject"
   ("[O] Bug:" -1000 nil s))
- ("references"
-  ("<87a84op2e3.fsf@ankarstrom.se>[ 	]*$" 950 736511 r)
-  ("<87a84op2e3.fsf@ankarstrom.se>" 950 736511 s)
-  ("<87lgogotgr.fsf@ankarstrom.se>[ 	]*$" 696 736505 r)
-  ("<87lgogotgr.fsf@ankarstrom.se>" 696 736505 s)
-  ("<878tkhndn6.fsf@ankarstrom.se>[ 	]*$" 696 736505 r)
-  ("<878tkhndn6.fsf@ankarstrom.se>" 696 736505 s)
-  ("<87zicxtkx5.fsf@ankarstrom.se>[ 	]*$" 661 736505 r)
-  ("<87zicxtkx5.fsf@ankarstrom.se>" 661 736505 s)))
+ ("references"))

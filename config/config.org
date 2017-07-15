@@ -1350,7 +1350,6 @@ functions - they are defined further down.
 #+BEGIN_SRC emacs-lisp
 (use-package org
   :mode (("\\.org$" . org-mode))
-  :ensure org-plus-contrib
   :demand
   :config
   ;; Make ' and " work in inline code
