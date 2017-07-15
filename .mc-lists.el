@@ -7,8 +7,6 @@
         c-electric-slash
         delete-horizontal-space
         electric-pair-delete-pair
-        evil-insert
-        evil-normal-state
         indent-for-tab-command
         ivy-done
         iy-go-to-char--command
@@ -42,9 +40,6 @@
         counsel-M-x
         electric-newline-and-maybe-indent
         eval-print-last-sexp
-        evil-forward-char
-        evil-paste-last-insertion
-        evil-scroll-up
         multiple-cursors-hydra/body
         multiple-cursors-hydra/mc/edit-lines-and-exit
         multiple-cursors-hydra/mc/mark-all-like-this
