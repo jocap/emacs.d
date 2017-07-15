@@ -100,9 +100,6 @@ here with a short description of why I like them.
 - ace-link :: Nice little extension to /avy/ that does the same thing, but for
               links in help buffers.
 
-- nlinum :: Line numbers, but faster than =linum=. I don't use this much, but it's
-            nice to have when you need it.
-
 - popwin :: Makes popup windows /so/ much easier to work with - this is a
             must-have.
 
@@ -120,9 +117,6 @@ here with a short description of why I like them.
   :after avy
   :config
   (ace-link-setup-default))
-
-(use-package nlinum
-  :bind (("C-c l" . nlinum-mode)))
 
 (use-package popwin
   :init
@@ -1875,18 +1869,6 @@ each asterisk preceding a heading as a level."
 **** Planned features
 
 - Keyword integration (TODO, DONE, ...)
-
-*** Publishing my blog through /org-page/
-:PROPERTIES:
-:CUSTOM_ID: org-page
-:END:
-
-#+NAME: c:pkg:config
-#+BEGIN_SRC emacs-lisp
-(use-package org-page
-  :config
-  (setf op/hashover-comments t))
-#+END_SRC
 
 *** Automatic Wiktionary links
 :PROPERTIES:
