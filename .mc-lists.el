@@ -7,15 +7,21 @@
         c-electric-slash
         delete-horizontal-space
         electric-pair-delete-pair
+        evil-insert
+        evil-normal-state
         indent-for-tab-command
+        ivy-done
         iy-go-to-char--command
         kill-region
+        org-beginning-of-line
         org-delete-char
         org-self-insert-command
         paredit-backslash
+        paredit-backward
         paredit-backward-kill-word
         paredit-close-round
         paredit-doublequote
+        paredit-forward
         paredit-forward-delete
         paredit-forward-kill-word
         paredit-forward-slurp-sexp
@@ -33,6 +39,20 @@
 
 (setq mc/cmds-to-run-once
       '(
+        counsel-M-x
         electric-newline-and-maybe-indent
         eval-print-last-sexp
+        evil-forward-char
+        evil-paste-last-insertion
+        evil-scroll-up
+        multiple-cursors-hydra/body
+        multiple-cursors-hydra/mc/edit-lines-and-exit
+        multiple-cursors-hydra/mc/mark-all-like-this
+        multiple-cursors-hydra/mc/mark-next-like-this
+        multiple-cursors-hydra/mc/mark-previous-like-this
+        multiple-cursors-hydra/mc/skip-to-next-like-this
+        multiple-cursors-hydra/mc/unmark-next-like-this
+        multiple-cursors-hydra/mc/unmark-previous-like-this
+        multiple-cursors-hydra/mc/vertical-align-with-space-and-exit
+        multiple-cursors-hydra/nil
         ))

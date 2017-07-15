@@ -11,7 +11,7 @@
 
 # Things from old config yet to be added:
 # - tty-shell-command functions (incl. dynamic cursor shape for terminal)
-  
+
 * Introduction
 
 Welcome to my Emacs configuration. It is written in the style of literate
@@ -117,7 +117,7 @@ here with a short description of why I like them.
   :config (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
 (use-package ace-link
-  :ensure avy
+  :after avy
   :config
   (ace-link-setup-default))
 
@@ -233,6 +233,8 @@ headline. Most of them are based on built-in functions.
 (global-set-key (kbd "<S-home>") #'previous-buffer)
 (global-set-key (kbd "<S-end>") #'next-buffer)
 
+(global-set-key (kbd "C-h C-t") #'toggle-debug-on-error)
+
 (global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
 (global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
 ;; Use for other modes too
@@ -293,8 +295,8 @@ evaluation of `form'.
 
    (--fcase (string-prefix-p it my-string)
             (\"prefix-\"       (message \"Prefix: prefix-\"))
-            (\"other-prefix-\" (message \"Prefix; other-else-\"))
-            (prefix            (message \"No prefix\")))"
+            (\"other-prefix-\" (message \"Prefix: other-prefix-\"))
+            (else              (message \"No prefix\")))"
   (declare (debug (form form arg-then form)))
   `(cl-loop
       for it-then in ',arg-then
@@ -374,11 +376,34 @@ need to be tracked on a per-cursor basis."
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
-  :bind (("C-c c" . mc/edit-lines)
-         ("C-c >" . mc/mark-next-like-this)
-         ("C-c <" . mc/mark-previous-like-this)
-         ("C-c ?" . mc/mark-all-like-this))
-  :config (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos))
+  :config
+  (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos)
+  (defhydra multiple-cursors-hydra (:hint nil)
+    "
+      ^Up^            ^Down^        ^Other^
+ ----------------------------------------------
+ [_p_]   Next    [_n_]   Next    [_/_] Edit lines
+ [_P_]   Skip    [_N_]   Skip    [_?_] Mark all
+ [_M-p_] Unmark  [_M-n_] Unmark  [_r_] Mark by regexp
+ ^ ^             ^ ^             [_a_] Align
+ ^ ^             ^ ^             [_q_] Quit
+"
+    ("/"   mc/edit-lines :exit t)
+    ("?"   mc/mark-all-like-this)
+    ("n"   mc/mark-next-like-this)
+    ("N"   mc/skip-to-next-like-this)
+    ("M-n" mc/unmark-next-like-this)
+    ("p"   mc/mark-previous-like-this)
+    ("P"   mc/skip-to-previous-like-this)
+    ("M-p" mc/unmark-previous-like-this)
+    ("r"   mc/mark-all-in-region-regexp)
+    ("a"   mc/vertical-align-with-space :exit t)
+    ("q"   nil))
+
+  (with-eval-after-load 'undo-tree
+    (define-key undo-tree-map (kbd "C-/") nil)
+    (define-key undo-tree-map (kbd "C-?") nil))
+  (global-set-key (kbd "C-/") 'multiple-cursors-hydra/body))
 #+END_SRC
 
 For a good and easy-to-reproduce example of how powerful =multiple-cursors=
@@ -742,21 +767,16 @@ and =F=. Works well, without any problems.
 #+BEGIN_SRC emacs-lisp
 (use-package avy
   :commands avy-isearch
-  :init (global-set-key (kbd "M-'") nil) ; reset M-'
-  :config (define-key isearch-mode-map (kbd "M-'") 'avy-isearch)
-  :bind (("C-M-'"   . abbrev-prefix-mark) ; re-bind default M-'
-         ("M-' M-'" . avy-goto-line)
-         ("M-' '"   . avy-goto-char)
-         ("M-' s"   . avy-goto-char-timer)
-         ("M-' w"   . avy-goto-word-1)))
+  :config (define-key isearch-mode-map (kbd "M-g") 'avy-isearch)
+  :bind (("M-g M-g" . avy-goto-line)
+         ("M-g M-c"   . avy-goto-char)
+         ("M-g M-s"   . avy-goto-char-timer)
+         ("M-g M-w"   . avy-goto-word-1)))
 #+END_SRC
 
 *avy* is the successor to /ace-jump-mode/. It lets you jump to things
-visually, but using the keyboa-rd. Smart man who came up with the original
+visually, but using the keyboard. Smart man who came up with the original
 idea.
-
-For /avy/ I have dedicated the ~M-'~ keybinding. The default function tied
-to ~M-'~ I have remapped to ~C-M-'~.
 
 ** Moving between windows: /windmove/
 :PROPERTIES:
@@ -977,57 +997,6 @@ buffer whose mode descends from /prog-mode/.
 (add-hook 'prog-mode-hook (lambda ()
                             (setq-local show-trailing-whitespace t)))
 #+END_SRC
-
-** Dynamic cursor shape
-:PROPERTIES:
-:CUSTOM_ID: dynamic-cursor-shape
-:END:
-
-One of the things I struggle with while using Emacs is identifying which window
-is currently active. Highlighting the mode line helps, but it's usually not
-enough for me. Previously, I have used =hl-line= with success, but I found that
-the package was quite unoptimized and that it didn't play nice with some modes.
-
-One of the solutions I have found is setting the cursor shape differently for
-focused and unfocused windows.
-
-I define the following functions to change the cursor shape to a hollow block
-when a window becomes unfocused, and back to the default shape (that is, the
-current cursor type when Emacs ran my configuration) when a window becomes
-focused.
-
-#+NAME: c:basic-prefs
-#+BEGIN_SRC emacs-lisp
-(defvar default-cursor-shape cursor-type)
-
-(defun cursor-focused ()
-  (setq-local cursor-type default-cursor-shape))
-(defun cursor-unfocused ()
-  (setq-local cursor-type 'block))
-#+END_SRC
-
-The above functions are called from a function called =cursor-set-focus=, which is
-added to =post-command-hook=. It loops through all of the frame's windows and
-calls =cursors-focused= if the window's buffer matches the current buffer.
-Otherwise it calls =cursor-unfocused=.
-
-#+NAME: c:basic-prefs
-#+BEGIN_SRC emacs-lisp
-(defun cursor-set-focus ()
-  (cl-loop
-   for window in (window-list)
-   do (let ((current-buffer (window-buffer)))
-        (with-current-buffer (window-buffer window)
-          (if (equal (window-buffer window) current-buffer)
-              (cursor-focused)
-            (cursor-unfocused))))))
-
-(add-hook 'post-command-hook 'cursor-set-focus)
-#+END_SRC
-
-This is a pretty nice way of checking the active window. I am usually against
-using =post-command-hook=, because of how often it is run, but there isn't
-anything as reliable. Believe me, [[#custom-hooks][I've tried]].
 
 ** Prettify symbols mode
 
@@ -1295,7 +1264,7 @@ and the file finder.
 #+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
 (use-package magit
-  :bind ("C-c g"   . magit-status))
+  :bind ("C-c g" . magit-status))
 #+END_SRC
 
 The fact that *magit* requires this little configuration, yet is so
@@ -1815,6 +1784,8 @@ character in the search."
   (org-tree-view/refresh)
   (setq-local buffer-read-only t)
   (setq-local scroll-margin 0)
+  ;; If evil-mode is enabled, enable emacs state:
+  (if (and (boundp 'evil-mode) evil-mode) (evil-emacs-state))
   (setq-local case-fold-search t) ; ignore case
   (define-key isearch-mode-map (kbd "<S-return>") #'org-tree-view/isearch-return))
 
@@ -1959,7 +1930,7 @@ have set it to always bring up the Russian definition, but if you copy this
 function to your own configuration, you can just set =wiktionary-language= to
 ='english= or something, or even ='non-existent-language= if you don't want to look
 up any specific language.
-     
+
 I have written it because I study Russian and write down all the words I
 learn in an Org file. For more language-related settings, see the section
 on [[#lang][non-English languages]].
@@ -2132,34 +2103,41 @@ updates.
 
 ** LaTeX
 
+#+NAME: c:pkg:config
 #+BEGIN_SRC emacs-lisp
-(use-package auctex
+(use-package tex
+  :defer t
+  :ensure auctex
   :config
-  (defun start-update-viewer ()
+  (require 'auctex-latexmk)
+  (auctex-latexmk-setup)
+
+  (defun /start-update-viewer ()
     "Starts/updates PDF viewer."
     (interactive)
     (if (string-match "no process found"
                       (shell-command-to-string "killall -HUP mupdf-x11"))
-        (start-process-shell-command
-         "mupdf"          ; process name
-         "mupdf"          ; process buffer
-         (concat "mupdf " ; shell command
-                 (expand-file-name
-                  (concat "output/"
-                          (file-name-base (buffer-file-name))
-                          ".pdf"))))))
+        (error "PDF viewer is not running")))
 
-  (defun save-run ()
-    "Saves the document and processes it."
+  (defun /run-view ()
+    "Saves the current LaTeX document, processes it and finally runs it."
     (interactive)
     (save-buffer)
-    (TeX-command-run-all nil))
+    (let ((process (TeX-run-TeX "LaTeX"
+                                (format "latexmk -xelatex %s" (buffer-file-name))
+                                (file-name-base (buffer-file-name)))))
+      (set-process-sentinel process (lambda (process sentinel)
+                                      (when (= 0 (process-exit-status process))
+                                        (/start-update-viewer))))))
 
-  (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+  (defun /view-after-run (&rest r)
+    (/start-update-viewer))
+
+  (advice-add #'Latexmk-sentinel :after #'/view-after-run)
+  (add-hook 'TeX-mode-hook (lambda () (setf TeX-command-default "LatexMk")))
 
   :bind (:map LaTeX-mode-map
-              ("C-c C-u" . start-update-viewer)))
-
+              ("C-c C-u" . /start-update-viewer)))
 #+END_SRC
 
 ** Python
@@ -2366,8 +2344,8 @@ The function depends on the following variables being set:
 
 #+NAME: c:theme:config
 #+BEGIN_SRC emacs-lisp
-(setq light-theme 'leuven
-      dark-theme  'zenburn)
+(setf light-theme 'leuven
+      dark-theme  'gruvbox-dark-hard)
 #+END_SRC
 
 To set the default theme on startup, I use the following code:
@@ -2594,35 +2572,42 @@ code, surely copied from the internet, fixes that:
 :CUSTOM_ID: lang
 :END:
 
-** TODO Spelling
+** Spelling
 :PROPERTIES:
 :CUSTOM_ID: spelling
 :END:
 
-# add NAME when done
+#+NAME: c:lang:config
 #+BEGIN_SRC emacs-lisp
-(require 'ispell)
-(add-to-list 'ispell-dictionary-alist
-             '("swedish-hunspell"
-               "[[:alpha:]]"
-               "[^[:alpha:]]"
-               "[']"
-               t
-               ("-d" "sv_SE")
-               nil
-               utf-8))
+;; (add-to-list 'ispell-dictionary-alist
+;;              '("swedish-hunspell"
+;;                "[[:alpha:]]"
+;;                "[^[:alpha:]]"
+;;                "[']"
+;;                t
+;;                ("-d" "sv_SE")
+;;                nil
+;;                utf-8))
 
-(add-to-list 'ispell-dictionary-alist
-             '("english-hunspell"
-               "[[:alpha:]]"
-               "[^[:alpha:]]"
-               "[']"
-               t
-               ("-d" "en_US")
-               nil
-               utf-8))
-(setq ispell-program-name "hunspell"
-      ispell-dictionary   "swedish-hunspell")
+;; (add-to-list 'ispell-dictionary-alist
+;;              '("english-hunspell"
+;;                "[[:alpha:]]"
+;;                "[^[:alpha:]]"
+;;                "[']"
+;;                t
+;;                ("-d" "en_US")
+;;                nil
+;;                utf-8))
+;; (setq ispell-program-name "hunspell"
+;;       ispell-dictionary   "swedish-hunspell")
+
+;; Ignore the following Org markup:
+
+(add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_SRC ". "#\\+END_SRC$"))
+(add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_EXAMPLE ". "#\\+END_EXAMPLE$"))
+(add-to-list 'ispell-skip-region-alist '("\:PROPERTIES\:$" . "\:END\:$"))
+(add-to-list 'ispell-skip-region-alist '("\\[fn:.+:" . "\\]"))
+(add-to-list 'ispell-skip-region-alist '("=.*" . ".*=")) ; org verbatim
 #+END_SRC
 
 ** Swedish mode

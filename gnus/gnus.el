@@ -67,7 +67,13 @@
     name))
 
 ;; Summary
-(setf gnus-summary-line-format "%1z%U%R %I %d.%* %f %[%L%] %s\n")
+
+(setf gnus-summary-line-format "%1z%U%R %>%>%>%> %d.%* %f %[%L%] %s\n")
+;; (setf gnus-summary-line-format "%1z%U%R %>%>%>%> %d.%* %f %[%L%] %s\n%ue\n")
+
+(defun gnus-user-format-function-e (header)
+  "Return article excerpt."
+  "")
 
 ;; -----------------------------------------------------------------------------
 ;; Sorting

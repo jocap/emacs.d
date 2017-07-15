@@ -3,6 +3,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(TeX-engine (quote xetex))
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
  '(ansi-color-names-vector
@@ -12,6 +13,7 @@
  '(case-fold-search nil)
  '(column-number-mode t)
  '(comment-column 0)
+ '(company-global-modes (quote (not org-mode markdown-mode)))
  '(company-idle-delay 0)
  '(compilation-message-face (quote default))
  '(confirm-kill-emacs (quote y-or-n-p))
@@ -22,7 +24,7 @@
  '(cursor-type (quote box))
  '(custom-safe-themes
    (quote
-    ("bfdcbf0d33f3376a956707e746d10f3ef2d8d9caa1c214361c9c08f00a1c8409" "ed4f603e56aa85f6885b86de49394eda021d38f4768671b8b27bacc06f5a5fa1" "228b21af874cf3ba1df3d6a684a63e33089aa200ad2ab65df747ffaca6b43419" "d29231b2550e0d30b7d0d7fc54a7fb2aa7f47d1b110ee625c1a56b30fea3be0f" "3cddc1775f6c26573a69315dacd5fd45a6cd04df539b6354281d316985f254f3" "74dd165fb35d6605d833cb756250a95134d3bdf8342689866308e14a8891d092" "b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
+    ("3eb2b5607b41ad8a6da75fe04d5f92a46d1b9a95a202e3f5369e2cdefb7aac5c" "f66edc956ad84fd071604c402c8582549d8d3823ef21b578e93771768ef8adff" "2d16a5d1921feb826a6a9b344837c1ab3910f9636022fa6dc1577948694b7d84" "24685b60b28b071596be6ba715f92ed5e51856fb87114cbdd67775301acf090d" "f23a961abba42fc5d75bf94c46b5688c52683c02b3a81313dd0738b4d48afd1d" "5673c365c8679addfb44f3d91d6b880c3266766b605c99f2d9b00745202e75f6" "8d3c5e9ba9dcd05020ccebb3cc615e40e7623b267b69314bdb70fe473dd9c7a8" "bfdcbf0d33f3376a956707e746d10f3ef2d8d9caa1c214361c9c08f00a1c8409" "ed4f603e56aa85f6885b86de49394eda021d38f4768671b8b27bacc06f5a5fa1" "228b21af874cf3ba1df3d6a684a63e33089aa200ad2ab65df747ffaca6b43419" "d29231b2550e0d30b7d0d7fc54a7fb2aa7f47d1b110ee625c1a56b30fea3be0f" "3cddc1775f6c26573a69315dacd5fd45a6cd04df539b6354281d316985f254f3" "74dd165fb35d6605d833cb756250a95134d3bdf8342689866308e14a8891d092" "b85fc9f122202c71b9884c5aff428eb81b99d25d619ee6fde7f3016e08515f07" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "10e231624707d46f7b2059cc9280c332f7c7a530ebc17dba7e506df34c5332c4" default)))
  '(debug-on-error nil)
  '(default-frame-alist (quote ((font . "Fira Mono Medium-10"))))
  '(default-input-method "russian-computer")
@@ -122,7 +124,16 @@
  '(org-cycle-separator-lines 2)
  '(org-directory "~/dropbox/org")
  '(org-edit-src-content-indentation 0)
+ '(org-export-with-smart-quotes t)
  '(org-hide-emphasis-markers t)
+ '(org-html-footnote-format "<sup>%s</sup>")
+ '(org-html-footnotes-section
+   "<div id=\"footnotes\">
+<h2>%s</h2>
+<div id=\"text-footnotes\">
+%s
+</div>
+</div>")
  '(org-log-done (quote time))
  '(org-pretty-entities t)
  '(org-replace-disputed-keys t)
