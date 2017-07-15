@@ -100,11 +100,8 @@ here with a short description of why I like them.
 - ace-link :: Nice little extension to /avy/ that does the same thing, but for
               links in help buffers.
 
-- nlinum :: Line numbers, but faster than =linum=. I don't use this much, but it's
-            nice to have when you need it.
-
-- popwin :: Makes popup windows /so/ much easier to work with - this is a
-            must-have.
+- linum-relative :: Relative line numbers, because I've begun to use /evil./ It's
+                    far from perfect.
 
 - helm-org-rifle :: Makes it /a bit/ easier to browse through Org documents - not
                     perfect though.
@@ -121,8 +118,36 @@ here with a short description of why I like them.
   :config
   (ace-link-setup-default))
 
-(use-package nlinum
-  :bind (("C-c l" . nlinum-mode)))
+(use-package linum-relative
+  ;; Thanks to PythonNut @ Emacs SE for these modifications!
+  :config
+  ;; truncate current line to four digits
+  ;; FIXME: not displaying correct number over 999
+  (defun linum-relative (line-number)
+    (let* ((diff1 (abs (- line-number linum-relative-last-pos)))
+           (diff (if (cl-minusp diff1)
+                     diff1
+                   (+ diff1 linum-relative-plusp-offset)))
+           (current-p (= diff linum-relative-plusp-offset))
+           (current-symbol (if (and linum-relative-current-symbol current-p)
+                               (if (string= "" linum-relative-current-symbol)
+                                   (number-to-string (% line-number 1000))
+                                 linum-relative-current-symbol)
+                             (number-to-string diff)))
+           (face (if current-p 'linum-relative-current-face 'linum)))
+      (propertize (format linum-relative-format current-symbol) 'face face)))
+
+  (setf linum-relative-current-symbol ""
+        linum-relative-format " %3s "
+        linum-delay t)
+
+  (set-face-attribute 'linum-relative-current-face nil
+                      :weight 'extra-bold
+                      :foreground nil
+                      :background nil
+                      :inherit '(hl-line default))
+
+  (define-key leader-map "l" #'linum-relative-mode))
 
 (use-package popwin
   :init
@@ -495,7 +520,7 @@ language-agnostic method of aligning comments. How useful!
 :CUSTOM_ID: lisp
 :END:
 
-*** FIXME Paredit
+*** FIXME Paredit (and /evil-cleverparens/)
 :PROPERTIES:
 :CUSTOM_ID: paredit
 :END:
@@ -562,6 +587,9 @@ current line."
 
   ;; Disable keybindings already used
   (define-key paredit-mode-map (kbd "M-q") nil)
+
+  ;; TODO: Remap Paredit movement to evil-cp bindings - don't use evil-cp's lousy defaults ...
+  (add-hook 'paredit-mode-hook #'evil-cleverparens-mode)
 
   :bind (("M-R" . move-to-window-line-top-bottom)
          ("M-^" . paredit-delete-indentation)
@@ -750,9 +778,15 @@ methods I use to quickly jump to any position in the current window.
 #+BEGIN_SRC emacs-lisp
 (use-package iy-go-to-char
   :bind (("M-m" . iy-go-to-char)
-         ("M-M" . iy-go-to-char-backward)
-         ("C-." . iy-go-to-char-continue)
-         ("C-," . iy-go-to-char-continue-backward)))
+         ("M-M" . iy-go-to-char-backward))
+  :config
+  ;; Go to one character before match, instead
+  (defun /iy-go-back-char (&optional &rest r)
+    (forward-char -1))
+  (defun /iy-go-forward-char (&optional &rest r)
+    (forward-char))
+  (advice-add #'iy-go-to-char :after #'/iy-go-back-char)
+  (advice-add #'iy-go-to-char-continue :after #'/iy-go-back-char))
 #+END_SRC
 
 *iy-go-to-char* is a simple tool that provides functionality like Vim's =f=
@@ -2066,6 +2100,46 @@ This works well, but of course it will block any potential future changes to
 =org-beginning-of-line= by the Org developers. On the other hand, it's unlikely
 that such a basic and well-working function should recieve any significant
 updates.
+
+** Evil
+:PROPERTIES:
+:CUSTOM_ID: evil
+:END:
+
+#+NAME: c:first-and-foremost
+#+BEGIN_SRC emacs-lisp
+(defvar leader-map (make-sparse-keymap) "Keymap for shortcuts using the leader key.")
+#+END_SRC
+#+END_SRC
+
+#+NAME: c:pkg:config
+#+BEGIN_SRC emacs-lisp
+(use-package evil
+  :init
+  (setf evil-insert-state-cursor '(bar . 1))
+  (require 'evil)
+  (evil-mode 1)
+  :config
+  (define-key evil-insert-state-map (kbd "RET") #'evil-normal-state)
+  (dolist (map (list evil-normal-state-map
+                     evil-visual-state-map
+                     evil-motion-state-map))
+    (define-key map (kbd ",") leader-map)
+    (define-key map (kbd "DEL") #'evil-scroll-up)
+    (define-key map (kbd "=") #'evil-scroll-down)
+    (define-key map (kbd ":") #'evil-repeat-find-char)
+    (define-key map (kbd ";") #'evil-ex)))
+
+(use-package evil-org
+  :ensure nil
+  :after org
+  :load-path "packages/evil-org"
+  :config
+  (add-hook 'org-mode-hook #'evil-org-mode)
+  (add-hook 'evil-org-mode-hook
+            (lambda ()
+              (evil-org-set-key-theme '(navigation insert textobjects additional)))))
+#+END_SRC
 
 ** Racket
 :PROPERTIES:
