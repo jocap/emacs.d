@@ -1,1 +1,1 @@
-/home/john/.config/emacs/config/config.el
+config.el

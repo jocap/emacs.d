@@ -14,6 +14,7 @@
         org-beginning-of-line
         org-delete-char
         org-self-insert-command
+        outshine-self-insert-command
         paredit-backslash
         paredit-backward
         paredit-backward-kill-word
