@@ -103,24 +103,18 @@
               (lambda (&rest args) (unless (outline-on-heading-p t)
                                      (outline-previous-visible-heading 1)))))
 
-(use-package navi-mode
-  :bind (("s-n" . navi-search-and-switch))
-  :bind (:map navi-mode-map
-              ("C-s" . isearch-forward))
-  :config
-  (add-hook 'navi-mode-hook (lambda ()
-                              (face-remap-set-base 'match
-                                                   :background 'none))))
-
 ;; NOTE: Advice to `outshine-narrow-to-subtree' is courtesy of Eric Kaschalk
 ;; (http://www.modernemacs.com/post/outline-ivy/)
 
 (use-package outline-ivy
-  :disabled ; the faces don't work for some reason ...
   :ensure nil
   :load-path "packages/outline-ivy"
+  :bind (:map outline-minor-mode-map
+              ("s-o" . oi-jump))
   :init
-  (defalias 'cadar #'cl-cadar))
+  (defalias 'cadar #'cl-cadar)
+  ;; Fix default match face (not set with light themes in mind):
+  (set-face-attribute 'oi-match-face nil :background "black"))
 
 ;;;; `multiple-cursors'
 
@@ -255,6 +249,7 @@ current line."
          ("C-c C-r" . ivy-resume)
          ("<f6>"    . ivy-resume)
 
+         ;; NOTE: Install `smex' to sort counsel-M-x by recently used
          ("M-x"     . counsel-M-x)
          ("C-x C-f" . counsel-find-file)
          ("<f1> f"  . counsel-describe-function)
@@ -1216,8 +1211,8 @@ there."
                               (interactive "p")
                               (other-window (* -1 n))))
 
-(global-set-key (kbd "<S-home>") #'previous-buffer)
-(global-set-key (kbd "<S-end>") #'next-buffer)
+(global-set-key (kbd "<S-home>") #'next-buffer)
+(global-set-key (kbd "<S-end>") #'previous-buffer)
 
 (global-set-key (kbd "C-h C-t") #'toggle-debug-on-error)
 
