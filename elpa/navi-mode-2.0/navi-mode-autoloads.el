@@ -1,9 +1,9 @@
-;;; outshine-autoloads.el --- automatically extracted autoloads
+;;; navi-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil nil ("outshine.el") (22891 46776 200612 960000))
+;;;### (autoloads nil nil ("navi-mode.el") (22891 41324 310230 94000))
 
 ;;;***
 
@@ -12,4 +12,4 @@
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
 ;; End:
-;;; outshine-autoloads.el ends here
+;;; navi-mode-autoloads.el ends here

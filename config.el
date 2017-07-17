@@ -91,15 +91,47 @@
   (openwith-mode t)
   (setq openwith-associations '(("\\.pdf\\'" "mupdf" (file)))))
 
+;;;; `outline-mode'
+
 (use-package outshine
+  :demand
+  :ensure nil
+  :load-path "packages/outshine"
+  :bind (("<backtab>" . outshine-cycle-buffer)
+         ("M-RET"     . outshine-insert-heading))
   :config
   (add-hook 'outline-minor-mode-hook #'outshine-hook-function)
-  (add-hook 'prog-mode-hook #'outline-minor-mode))
+  (add-hook 'prog-mode-hook #'outline-minor-mode)
 
-;;;; multiple-cursors
+  ;; Narrowing now works within the headline rather than requiring to be on it:
+  (advice-add 'outshine-narrow-to-subtree :before
+              (lambda (&rest args) (unless (outline-on-heading-p t)
+                                     (outline-previous-visible-heading 1)))))
+
+(use-package navi-mode
+  :bind (("s-n" . navi-search-and-switch))
+  :bind (:map navi-mode-map
+              ("C-s" . isearch-forward))
+  :config
+  (add-hook 'navi-mode-hook (lambda ()
+                              (face-remap-set-base 'match
+                                                   :background 'none))))
+
+;; NOTE: Advice to `outshine-narrow-to-subtree' is courtesy of Eric Kaschalk
+;; (http://www.modernemacs.com/post/outline-ivy/)
+
+(use-package outline-ivy
+  :disabled ; the faces don't work for some reason ...
+  :ensure nil
+  :load-path "packages/outline-ivy"
+  :init
+  (defalias 'cadar #'cl-cadar))
+
+;;;; `multiple-cursors'
 
 (use-package multiple-cursors
   :config
+  (require 'hydra)
   (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos)
   (defhydra multiple-cursors-hydra (:hint nil)
     "
@@ -128,7 +160,7 @@
     (define-key undo-tree-map (kbd "C-?") nil))
   (global-set-key (kbd "C-/") 'multiple-cursors-hydra/body))
 
-;;;; visual-regexp
+;;;; `visual-regexp'
 
 (use-package visual-regexp
   :defer) ; prevent loading this package before visual-regexp-steroids!
@@ -142,6 +174,20 @@
          ("C-M-r" . vr/isearch-backward)
          ("C-M-s" . vr/isearch-forward))
   :config (setq vr/engine 'pcre2el))
+
+;;;; `expand-region'
+
+(use-package expand-region
+  :bind (("C-' r"  . er/expand-region)
+         ("C-' w"  . er/mark-word)
+         ("C-' '"  . er/mark-inside-quotes)
+         ("C-' \"" . er/mark-outside-quotes)
+         ("C-' p"  . er/mark-inside-pairs)
+         ("C-' P"  . er/mark-outside-pairs)
+         ("C-' c"  . er/mark-comment)
+         ("C-' t"  . er/mark-inner-tag)
+         ("C-' T"  . er/mark-outer-tag)
+         ("C-' f"  . er/mark-defun)))
 
 ;;;; Paredit
 
@@ -193,20 +239,6 @@ current line."
   :bind (("M-R" . move-to-window-line-top-bottom)
          ("M-^" . paredit-delete-indentation)
          ("M-Q" . paredit-reindent-defun)))
-
-;;;; expand-region
-
-(use-package expand-region
-  :bind (("C-' r"  . er/expand-region)
-         ("C-' w"  . er/mark-word)
-         ("C-' '"  . er/mark-inside-quotes)
-         ("C-' \"" . er/mark-outside-quotes)
-         ("C-' p"  . er/mark-inside-pairs)
-         ("C-' P"  . er/mark-outside-pairs)
-         ("C-' c"  . er/mark-comment)
-         ("C-' t"  . er/mark-inner-tag)
-         ("C-' T"  . er/mark-outer-tag)
-         ("C-' f"  . er/mark-defun)))
 
 ;;;; Swiper, Ivy and Counsel
 
@@ -909,7 +941,7 @@ rarely desirable."
     (racket-run))
   (add-hook 'racket-repl-mode-hook #'toggle-truncate-lines))
 
-;;;;; LaTeX
+;;;; LaTeX
 
 (use-package tex
   :defer t
@@ -1504,7 +1536,7 @@ Depends on the script `sun' being found in path."
 (advice-add 'read-no-blanks-input :before 'run-before-minibuffer-hook)
 (advice-add 'read-string          :before 'run-before-minibuffer-hook)
 
-;;; `before-helm-hook', `after-helm-hook'
+;;;; `before-helm-hook', `after-helm-hook'
 
 (defun run-before-helm-hook (&optional &rest args)
   (run-hooks 'before-helm-hook))
