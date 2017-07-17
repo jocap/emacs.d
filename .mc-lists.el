@@ -51,4 +51,5 @@
         multiple-cursors-hydra/mc/unmark-previous-like-this
         multiple-cursors-hydra/mc/vertical-align-with-space-and-exit
         multiple-cursors-hydra/nil
+        overwrite-mode
         ))

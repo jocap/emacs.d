@@ -60,14 +60,6 @@
          ("C-." . iy-go-to-char-continue)
          ("C-," . iy-go-to-char-continue-backward)))
 
-(use-package avy
-  :commands avy-isearch
-  :config (define-key isearch-mode-map (kbd "M-g") 'avy-isearch)
-  :bind (("M-g M-g" . avy-goto-line)
-         ("M-g M-c"   . avy-goto-char)
-         ("M-g M-s"   . avy-goto-char-timer)
-         ("M-g M-w"   . avy-goto-word-1)))
-
 (use-package windmove
   :init (windmove-default-keybindings))
 
@@ -110,18 +102,15 @@
   :ensure nil
   :load-path "packages/outline-ivy"
   :bind (:map outline-minor-mode-map
-              ("s-o" . oi-jump))
-  :init
-  (defalias 'cadar #'cl-cadar)
-  ;; Fix default match face (not set with light themes in mind):
-  (set-face-attribute 'oi-match-face nil :background "black"))
+              ("s-o" . oi-jump)))
 
 ;;;; `multiple-cursors'
 
 (use-package multiple-cursors
   :config
-  (require 'hydra)
   (add-to-list 'mc/cursor-specific-vars 'iy-go-to-char-start-pos)
+
+  (require 'hydra)
   (defhydra multiple-cursors-hydra (:hint nil)
     "
       ^Up^            ^Down^        ^Other^
@@ -167,16 +156,57 @@
 ;;;; `expand-region'
 
 (use-package expand-region
-  :bind (("C-' r"  . er/expand-region)
-         ("C-' w"  . er/mark-word)
-         ("C-' '"  . er/mark-inside-quotes)
-         ("C-' \"" . er/mark-outside-quotes)
-         ("C-' p"  . er/mark-inside-pairs)
-         ("C-' P"  . er/mark-outside-pairs)
-         ("C-' c"  . er/mark-comment)
-         ("C-' t"  . er/mark-inner-tag)
-         ("C-' T"  . er/mark-outer-tag)
-         ("C-' f"  . er/mark-defun)))
+  :config
+  (require 'hydra)
+  (defhydra expand-region-hydra (:hint nil)
+    "
+ Mark:            |  inside ~~~~~~ outside
+ -----------------|-----------------------
+ [_r_]   Region     |   [_'_]   Quotes   [_\"_]
+ [_f_]   Function   |   [_p_]   Parens   [_P_]
+ [_c_]   Comment    |   [_t_]    Tags    [_T_]
+ [_c_]   Word       |   ^ ^
+ -----------------|-----------------------
+ [_q_]   Quit       |
+   "
+    ("r"  er/expand-region       :exit t)
+    ("w"  er/mark-word           :exit t)
+    ("'"  er/mark-inside-quotes  :exit t)
+    ("\"" er/mark-outside-quotes :exit t)
+    ("p"  er/mark-inside-pairs   :exit t)
+    ("P"  er/mark-outside-pairs  :exit t)
+    ("c"  er/mark-comment        :exit t)
+    ("t"  er/mark-inner-tag      :exit t)
+    ("T"  er/mark-outer-tag      :exit t)
+    ("f"  er/mark-defun          :exit t)
+    ("q" nil))
+
+  :bind ("s-x" . expand-region-hydra/body))
+
+;;;; Avy
+
+(use-package avy
+  :commands avy-isearch
+  :config
+  (define-key isearch-mode-map (kbd "M-g") 'avy-isearch)
+
+  (require 'hydra)
+  (defhydra avy-hydra (:hint nil)
+    "
+ Go to:
+ -----------------------------------
+ [_l_]   Line    [_L_]   Line number
+ [_c_]   Char    [_s_]   Search
+ [_w_]   Word    [_q_]   Quit
+   "
+    ("l" avy-goto-line       :exit t)
+    ("L" goto-line           :exit t)
+    ("s" avy-goto-char-timer :exit t)
+    ("c" avy-goto-char       :exit t)
+    ("w" avy-goto-word       :exit t)
+    ("q" nil))
+
+  :bind (("s-v" . avy-hydra/body)))
 
 ;;;; Paredit
 
@@ -1066,7 +1096,9 @@ is no comment, return nil."
 ;; Fix custom indentation
 (with-eval-after-load "cl-indent"
   (put 'use-package 'common-lisp-indent-function 1)
-  (put 'use-package-as-one 'common-lisp-indent-function 1))
+  (put 'use-package-as-one 'common-lisp-indent-function 1)
+  (put 'defface 'common-lisp-indent-function 1))
+
 ;;;; Functions
 
 (defmacro --fcase (form &rest arg-then)
@@ -1243,7 +1275,7 @@ there."
 ;;;; Daylight-dependent default theme
 
 (setf light-theme 'leuven
-      dark-theme  'gruvbox-dark-hard)
+      dark-theme  'gruvbox-dark-soft)
 
 (defun /daylight-sets-color ()
   "Sets a light theme for day and a dark theme for night.
@@ -1413,7 +1445,6 @@ Depends on the script `sun' being found in path."
                        (mapc #'disable-theme custom-enabled-themes))))
 
 ;;; E-mail
-
 ;;;; Gnus
 
 ;; For complete configuration, see ~/.config/emacs/gnus/gnus.el.
@@ -1448,7 +1479,6 @@ Depends on the script `sun' being found in path."
         (completing-read prompt (cons initial-input collection) nil t nil 'notmuch-address-history)))
 
 ;;; Language configuration
-
 ;;;; `ispell'
 
 ;; Ignore the following Org markup:
@@ -1489,7 +1519,6 @@ Depends on the script `sun' being found in path."
 (global-set-key (kbd "C-c 8 '") (lambda () (interactive) (insert-char 769)))
 
 ;;; Custom hooks
-
 ;;;; `window-focus-out-hook', `window-focus-in-hook'
 
 (defun run-window-focus-out-hook (window &optional norecord)
@@ -1538,7 +1567,6 @@ Depends on the script `sun' being found in path."
 (advice-add 'helm-keyboard-quit :after 'run-after-helm-hook)
 
 ;;; Operating systems
-
 ;;;; Fix selection on OS X
 
 (when (eq system-type 'darwin)
