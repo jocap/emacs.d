@@ -1,3 +1,6 @@
 [submodule "packages/outline-ivy"]
 	path = packages/outline-ivy
 	url = git@github.com:jocap/outline-ivy-mirror.git
+[submodule "packages/outshine"]
+	path = packages/outshine
+	url = git@github.com:jocap/outshine.git
