@@ -1,2 +1,0 @@
-mv outline-ivy.el .outline-ivy.el.backup
-wget https://raw.githubusercontent.com/ekaschalk/.spacemacs.d/master/layers/personal/local/outline-ivy/outline-ivy.el
