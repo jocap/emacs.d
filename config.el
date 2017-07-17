@@ -1227,6 +1227,21 @@ there."
 (global-set-key [remap move-end-of-line]
                 'smarter-move-end-of-line)
 
+;;;; Modes
+;;;;; xmodmap-mode
+
+;; NOTE: Courtesy of the EmacsWiki
+;; (See https://www.emacswiki.org/emacs/XModMapMode)
+
+(define-generic-mode 'xmodmap-mode
+  '(?!)
+  '("add" "clear" "keycode" "keysym" "pointer" "remove")
+  nil
+  '("[xX]modmap\\(rc\\)?\\'")
+  nil
+  "Simple mode for xmodmap files.")
+(add-to-list 'auto-mode-alist '("\\.Xmodmap\\'" . xmodmap-mode))
+
 ;;; Keybindings
 
 (global-set-key (kbd "C-x 4 e") ; open eshell in split to the right
