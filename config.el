@@ -1544,17 +1544,17 @@ Depends on the script `sun' being found in path."
 (advice-add 'select-window :before 'run-window-focus-out-hook)
 (advice-add 'select-window :after 'run-window-focus-in-hook)
 
-;;* NOTE: This doesn't always play nice with magit. For example, select-window
-;;* seems to be run when opening the commit message buffer, but *not* when
-;;* returning to the magit status buffer. I'm not quite sure why, but I suppose
-;;* I could add an exception for it. I'd have to look at the magit source.
-;;* Perhaps I could just run a function upon switch-to-buffer that checks
-;;* whether the current-window is different from the previous-current-window
-;;* (saved in a variable); that might be the most simple solution, similar to
-;;* what hl-line does, but as I've said before, more efficient than attaching
-;;* everything to post-command-hook ...
 
 ;; TODO: Add exception for magit buffer switching.
+;; NOTE: This doesn't always play nice with magit. For example, select-window
+;; seems to be run when opening the commit message buffer, but *not* when
+;; returning to the magit status buffer. I'm not quite sure why, but I suppose I
+;; could add an exception for it. I'd have to look at the magit source. Perhaps
+;; I could just run a function upon switch-to-buffer that checks whether the
+;; current-window is different from the previous-current-window (saved in a
+;; variable); that might be the most simple solution, similar to what hl-line
+;; does, but as I've said before, more efficient than attaching everything to
+;; post-command-hook ...
 
 ;;;; `before-minibuffer-hook', `after-minibuffer-hook'
 
