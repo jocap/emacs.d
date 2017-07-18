@@ -1274,6 +1274,29 @@ there."
 (global-set-key [remap move-end-of-line]
                 'smarter-move-end-of-line)
 
+;;;;; Switching back and forth between two buffers
+
+(defvar /previous-buffer nil
+  "The previous buffer switched to.")
+
+(defun adv/set-previous-buffer (&optional &rest r)
+  (setf /previous-buffer (current-buffer)))
+(dolist (fun '(switch-to-buffer
+               next-buffer
+               previous-buffer))
+  (advice-add fun :before #'adv/set-previous-buffer))
+
+(defun /back-and-forth ()
+  "Function for switching back and forth between two buffers."
+  (interactive)
+  (let ((old-previous-buffer /previous-buffer))
+    (setf /previous-buffer (current-buffer))
+    (if old-previous-buffer
+        (switch-to-buffer old-previous-buffer)
+      (next-buffer))))
+
+(global-set-key (kbd "s-b") #'/back-and-forth)
+
 ;;;; Modes
 ;;;;; xmodmap-mode
 
