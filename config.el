@@ -26,6 +26,11 @@
   :config
   (ace-link-setup-default))
 
+(use-package popwin
+  :init
+  (require 'popwin)
+  (popwin-mode 1))
+
 (use-package helm-org-rifle
   :disabled
   :bind (("C-c f" . helm-org-rifle-current-buffer)
