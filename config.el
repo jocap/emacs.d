@@ -1286,6 +1286,8 @@ there."
                previous-buffer))
   (advice-add fun :before #'adv/set-previous-buffer))
 
+;; TODO: Perhaps advice `set-buffer' and `set-window-buffer' only.
+
 (defun /back-and-forth ()
   "Function for switching back and forth between two buffers."
   (interactive)
