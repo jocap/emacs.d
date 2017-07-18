@@ -349,8 +349,9 @@ current line."
     (interactive)
     (cl-letf (((symbol-function 'ivy-thing-at-point)
                (lambda ()
-                 (-> (variable-at-point)
-                     (symbol-name)))))
+                 (--> (variable-at-point)
+                      (if (eq it 0) (intern "") it)
+                      (symbol-name it)))))
       (call-interactively oldfun)))
   (advice-add #'counsel-describe-variable :around #'adv/counsel-describe-variable))
 
