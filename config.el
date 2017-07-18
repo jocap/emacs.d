@@ -1321,9 +1321,6 @@ there."
                             (interactive "p")
                             (other-window (* -1 n))))
 
-                   ("<S-home>" next-buffer)
-                   ("<S-end>"  previous-buffer)
-
                    ("C-h C-t" toggle-debug-on-error)
 
                    ("M-n" (lambda (n) (interactive "p") (scroll-up n)))
