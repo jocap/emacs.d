@@ -90,6 +90,25 @@
 (setf gnus-use-adaptive-scoring t
       gnus-decay-scores t)
 
+(setf gnus-default-adaptive-score-alist
+      '((gnus-read-mark
+         (from 4)
+         (subject 30))
+        (gnus-ticked-mark
+         (from 8)
+         (subject 50))
+        (gnus-expirable-mark
+         (subject -8))
+        (gnus-catchup-mark
+         (subject -10))
+        (gnus-killed-mark
+         (subject -20))
+        (gnus-del-mark
+         (subject -15))
+        ;; No scoring:
+        (gnus-kill-file-mark)
+        (gnus-unread-mark)))
+
 ;; Increase group score on summary exit
 (add-hook 'gnus-summary-exit-hook #'gnus-summary-bubble-group)
 (setf gnus-group-sort-function #'gnus-group-sort-by-score)
@@ -121,7 +140,7 @@
 ;; Window configuration
 
 (let ((group-width   35)
-      (article-width 80))
+      (article-width 82)) ; just in case
   (gnus-add-configuration
    `(article
      (horizontal 1.0
