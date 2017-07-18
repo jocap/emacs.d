@@ -1291,36 +1291,50 @@ there."
 
 ;;; Keybindings
 
-(global-set-key (kbd "C-x 4 e") ; open eshell in split to the right
-                (lambda ()
-                  (interactive)
-                  (split-window-right)
-                  (other-window 1)
-                  (eshell)))
+(dolist (key-def `(("M-<f1>" menu-bar-mode)
 
-(global-set-key (kbd "M-<f1>") #'menu-bar-mode)
+                   ("M-]" other-window)
+                   ("M-[" (lambda (n)
+                            (interactive "p")
+                            (other-window (* -1 n))))
 
-(global-set-key (kbd "M-]") #'other-window)
-(global-set-key (kbd "M-[") (lambda (n)
-                              (interactive "p")
-                              (other-window (* -1 n))))
+                   ("<S-home>" next-buffer)
+                   ("<S-end>"  previous-buffer)
 
-(global-set-key (kbd "<S-home>") #'next-buffer)
-(global-set-key (kbd "<S-end>") #'previous-buffer)
+                   ("C-h C-t" toggle-debug-on-error)
 
-(global-set-key (kbd "C-h C-t") #'toggle-debug-on-error)
+                   ("M-n" (lambda (n) (interactive "p") (scroll-up n)))
+                   ("M-p" (lambda (n) (interactive "p") (scroll-down n)))
 
-(global-set-key (kbd "M-n") (lambda (n) (interactive "p") (scroll-up n)))
-(global-set-key (kbd "M-p") (lambda (n) (interactive "p") (scroll-down n)))
-;; Use for other modes too
-(define-key Info-mode-map    (kbd "M-n") (lookup-key global-map (kbd "M-n")))
-(define-key Info-mode-map    (kbd "M-p") (lookup-key global-map (kbd "M-p")))
+                   ("<C-tab>" company-capf)
+
+                   ;; Quick buffer actions:
+                   ("s-k" (lambda () (interactive) (kill-buffer (current-buffer))))
+
+                   ;; describe-this-*:
+                   ("s-h f" (lambda ()
+                              (interactive)
+                              (describe-function (function-called-at-point))))
+                   ("s-h v" (lambda ()
+                              (interactive)
+                              (describe-variable (variable-at-point))))
+
+                   ;; Open eshell in split to the right:
+                   ("C-x 4 e" (lambda ()
+                                (interactive)
+                                (split-window-right)
+                                (other-window 1)
+                                (eshell)))))
+  (global-set-key (kbd (car key-def)) (cadr key-def)))
+
+;;;; Overriding mode bindings
+
+(define-key Info-mode-map (kbd "M-n") (lookup-key global-map (kbd "M-n")))
+(define-key Info-mode-map (kbd "M-p") (lookup-key global-map (kbd "M-p")))
 
 (add-hook 'message-mode-hook
           (lambda ()
             (define-key message-mode-map (kbd "M-n") (lookup-key global-map (kbd "M-n")))))
-
-(global-set-key (kbd "<C-tab>") #'completion-at-point)
 
 ;;;; Disable C-z for GUI Emacs
 
