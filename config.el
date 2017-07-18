@@ -320,6 +320,40 @@ current line."
   :init
   (counsel-projectile-on))
 
+;;;;; Fixing counsel-describe-*
+
+;; The function `ivy-thing-at-point' isn't a good choice for `describe-function'
+;; or `describe-variable'. Instead, I prefer the more specific functions
+;; `function-called-at-point' and `variable-at-point', respectively.
+
+;; `function-called-at-point' returns the correct function inside its /entire/
+;; s-expression, whereas `ivy-thing-at-point' only returns the function at the
+;; exact position of the point.
+
+;; Ideally, `counsel.el' would be edited to use these functions instead of
+;; `ivy-thing-at-point', but I'm too lazy right now to make a pull request.
+;; Plus, I'm not sure everybody wants this functionality. There might also be
+;; some reason that I'm not aware of, as to why `ivy-thing-at-point' is used.
+
+(with-eval-after-load 'counsel
+  (defun adv/counsel-describe-function (oldfun &optional &rest r)
+    (interactive)
+    (cl-letf (((symbol-function 'ivy-thing-at-point)
+               (lambda ()
+                 (-> (function-called-at-point)
+                     (symbol-name)))))
+      (call-interactively oldfun)))
+  (advice-add #'counsel-describe-function :around #'adv/counsel-describe-function)
+
+  (defun adv/counsel-describe-variable (oldfun &optional &rest r)
+    (interactive)
+    (cl-letf (((symbol-function 'ivy-thing-at-point)
+               (lambda ()
+                 (-> (variable-at-point)
+                     (symbol-name)))))
+      (call-interactively oldfun)))
+  (advice-add #'counsel-describe-variable :around #'adv/counsel-describe-variable))
+
 ;;;;; counsel-everything
 
 (with-eval-after-load 'ivy

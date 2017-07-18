@@ -81,6 +81,9 @@
  '(inhibit-startup-screen t)
  '(ispell-highlight-face (quote flyspell-incorrect))
  '(ispell-local-dictionary-alist nil)
+ '(ivy-ignore-buffers
+   (quote
+    ("\\` " "\\`\\*magit" "\\`\\*Ibuffer\\*" "\\`\\*Messages\\*")) nil nil "Use <C-h> e to access *Messages* buffer.")
  '(ivy-mode t)
  '(ivy-use-virtual-buffers t)
  '(linum-format "%4d │")
