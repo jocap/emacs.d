@@ -1057,6 +1057,13 @@ rarely desirable."
   :bind (:map LaTeX-mode-map
               ("C-c C-u" . my/start-update-viewer)))
 
+;;;; ielm
+
+(use-package ielm
+  :config
+  ;; Use RET for evaluation (use <C-j> for newline):
+  (define-key ielm-map (kbd "RET") #'ielm-send-input))
+
 ;;; Basic preferences
 
 (server-start)         ; use emacs as a server
