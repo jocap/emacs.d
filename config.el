@@ -1202,7 +1202,7 @@ buffer, stop there."
     (let ((orig-point (point)))
       (back-to-indentation)
       (when (= orig-point (point))
-        (move-to-column 0))))) ; based on function from Emacs Redux
+        (move-beginning-of-line 1))))) ; based on function from Emacs Redux
 
 (defun smarter-move-end-of-line (&optional &rest args)
   "Move to the end of the line, but before any potential comment.
