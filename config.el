@@ -335,6 +335,9 @@ current line."
 ;; Plus, I'm not sure everybody wants this functionality. There might also be
 ;; some reason that I'm not aware of, as to why `ivy-thing-at-point' is used.
 
+;; UPDATE: See https://github.com/abo-abo/swiper/issues/1088 for the reason why
+;; abo-abo, the creator of `counsel', prefers the `ivy-thing-at-point' behavior.
+
 (with-eval-after-load 'counsel
   (defun adv/counsel-describe-function (oldfun &optional &rest r)
     (interactive)
