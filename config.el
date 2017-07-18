@@ -1,3 +1,10 @@
+;; Emacs configuration
+;; =============================================================================
+
+(require 'cl-lib)
+(require 'dash)
+(require 'subr-x)
+
 ;;; Package configuration
 
 (require 'package)
