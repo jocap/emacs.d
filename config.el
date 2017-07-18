@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; Emacs configuration
 ;; =============================================================================
 
@@ -340,10 +342,17 @@ current line."
 ;; UPDATE: See https://github.com/abo-abo/swiper/issues/1088 for the reason why
 ;; abo-abo, the creator of `counsel', prefers the `ivy-thing-at-point' behavior.
 
+;; -----------------------------------------------------------------------------
+
+;; The following functions advice `counsel-describe-*' to use
+;; `function-called-at-point' and `variable-at-point' instead of
+;; `ivy-thing-at-point', by temporarily binding `ivy-thing-at-point' to the
+;; corresponding built-in function, using `cl-flet'.
+
 (with-eval-after-load 'counsel
   (defun adv/counsel-describe-function (oldfun &optional &rest r)
     (interactive)
-    (cl-letf (((symbol-function 'ivy-thing-at-point)
+    (cl-letf (((symbol-function #'ivy-thing-at-point)
                (lambda ()
                  (-> (function-called-at-point)
                      (symbol-name)))))
@@ -352,7 +361,7 @@ current line."
 
   (defun adv/counsel-describe-variable (oldfun &optional &rest r)
     (interactive)
-    (cl-letf (((symbol-function 'ivy-thing-at-point)
+    (cl-letf (((symbol-function #'ivy-thing-at-point)
                (lambda ()
                  (--> (variable-at-point)
                       (if (eq it 0) (intern "") it)
@@ -436,7 +445,7 @@ rarely desirable."
                               (counsel-everything ,up-dir))))
         (minibuffer-keyboard-quit))))
 
-  (global-set-key (kbd "C-x C-M-f") #'counsel-everything))
+  (global-set-key (kbd "C-x M-f") #'counsel-everything))
 
 ;;;; Projectile
 
@@ -881,10 +890,9 @@ rarely desirable."
     (let* ((num (number-to-string (1+ i)))
            (org-tree-view-face (intern (concat "org-tree-view/level-" num)))
            (org-face (intern (concat "org-level-" num))))
-      (eval (macroexpand
-             `(defface ,org-tree-view-face
-                  '((t . (:inherit ,org-face)))
-                (format "Face for level %s headlines." num))))))
+      (eval `(defface ,org-tree-view-face
+               '((t . (:inherit ,org-face)))
+               (format "Face for level %s headlines." ,num)))))
 
 ;;;;; Automatic wiktionary links
 
