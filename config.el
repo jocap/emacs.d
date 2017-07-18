@@ -1,10 +1,6 @@
 ;; Emacs configuration
 ;; =============================================================================
 
-(require 'cl-lib)
-(require 'dash)
-(require 'subr-x)
-
 ;;; Package configuration
 
 (require 'package)
@@ -20,8 +16,14 @@
 (eval-when-compile
   (require 'use-package))
 
+;;;; Libraries to be required
+
 (require 'diminish) ; if you use :diminish
 (require 'bind-key) ; if you use any :bind variant
+
+(require 'cl-lib)
+(require 'dash)
+(require 'subr-x)
 
 ;;;; Various packages
 
