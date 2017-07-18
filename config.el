@@ -239,10 +239,10 @@
   (add-hook 'racket-mode-hook           #'enable-paredit-mode)
 
   :config
-  (defun paredit-delete-indentation (&optional arg)
+  (defun my/paredit-delete-indentation (&optional arg)
     "Handle joining lines that end in a comment."
     (interactive "*P")
-    (let ((comment (delete-and-extract-comment (if arg 1 0))))
+    (let ((comment (my/delete-and-extract-comment (if arg 1 0))))
       (delete-indentation arg)
       (when comment
         (save-excursion
@@ -250,11 +250,11 @@
           (insert " ")
           (insert comment)))))
 
-  (defun paredit-newline-keep-comment (&optional arg)
+  (defun my/paredit-newline-keep-comment (&optional arg)
     "Insert newline, but keep any potential comment on the
 current line."
     (interactive "*P")
-    (let ((comment (delete-and-extract-comment)))
+    (let ((comment (my/delete-and-extract-comment)))
       (paredit-newline)
       (when comment
         (save-excursion
@@ -263,7 +263,7 @@ current line."
           (insert " ")
           (insert comment)))))
 
-  (global-set-key [remap paredit-newline] #'paredit-newline-keep-comment)
+  (global-set-key [remap paredit-newline] #'my/paredit-newline-keep-comment)
 
   ;; Disable comment column
   (add-hook 'paredit-mode-hook (lambda () (setq-local comment-column 0)))
@@ -272,7 +272,7 @@ current line."
   (define-key paredit-mode-map (kbd "M-q") nil)
 
   :bind (("M-R" . move-to-window-line-top-bottom)
-         ("M-^" . paredit-delete-indentation)
+         ("M-^" . my/paredit-delete-indentation)
          ("M-Q" . paredit-reindent-defun)))
 
 ;;;; Swiper, Ivy and Counsel
@@ -374,7 +374,7 @@ current line."
 (with-eval-after-load 'ivy
   ;; TODO: Add support for ignoring absolute paths
 
-  (defun counsel-everything (&optional dir)
+  (defun my/counsel-everything (&optional dir)
     "Find all files in the current directory, including subdirectories.
 If DIR is non-nil, use that directory instead of current one.
 
@@ -406,46 +406,46 @@ rarely desirable."
                          (shell-command-to-string (concat "find " dir " "
                                                           ignored-dirs-string))
                          "\n" t))))
-      (setf counsel-everything--dir dir) ; set global dir value (for counsel-everything-up-directory)
+      (setf my/counsel-everything--dir dir) ; set global dir value (for my/counsel-everything-up-directory)
       (ivy-read (format "(%s) Find everything: " dir-name) candidates
                 :matcher #'counsel--find-file-matcher
                 :action (lambda (file)
                           (with-ivy-window
-                            (find-file (expand-file-name file counsel-everything--dir))))
-                :keymap (make-counsel-everything-map)
+                            (find-file (expand-file-name file my/counsel-everything--dir))))
+                :keymap (make-my/counsel-everything-map)
                 :require-match 'confirm-after-completion
-                :caller #'counsel-everything)))
+                :caller #'my/counsel-everything)))
 
   (ivy-set-actions
-   #'counsel-everything
+   #'my/counsel-everything
    '(("j" find-file-other-window "other window")
      ("x" counsel-find-file-extern "open externally")
      ("r" counsel-find-file-as-root "open as root")))
 
-  (defvar counsel-everything--dir nil
-    "Internal variable used by counsel-everything-up-directory.")
+  (defvar my/counsel-everything--dir nil
+    "Internal variable used by my/counsel-everything-up-directory.")
 
-  (defun make-counsel-everything-map ()
+  (defun make-my/counsel-everything-map ()
     (let ((map (make-sparse-keymap)))
-      (define-key map (kbd "C-DEL")         #'counsel-everything-up-directory)
-      (define-key map (kbd "C-<backspace>") #'counsel-everything-up-directory)
+      (define-key map (kbd "C-DEL")         #'my/counsel-everything-up-directory)
+      (define-key map (kbd "C-<backspace>") #'my/counsel-everything-up-directory)
       map))
 
-  (defun counsel-everything-up-directory ()
+  (defun my/counsel-everything-up-directory ()
     (interactive)
     (let ((dir "")
           (up-dir))
-      (if (and (boundp 'counsel-everything--dir)
-               (not (equal counsel-everything--dir ".")))
-          (setf dir (concat counsel-everything--dir "/")))
+      (if (and (boundp 'my/counsel-everything--dir)
+               (not (equal my/counsel-everything--dir ".")))
+          (setf dir (concat my/counsel-everything--dir "/")))
       (setf up-dir (format "%s.." dir))
       (unless (string-equal (file-truename up-dir) "/")
         (eval `(run-at-time nil nil
                             (lambda ()
-                              (counsel-everything ,up-dir))))
+                              (my/counsel-everything ,up-dir))))
         (minibuffer-keyboard-quit))))
 
-  (global-set-key (kbd "C-x M-f") #'counsel-everything))
+  (global-set-key (kbd "C-x M-f") #'my/counsel-everything))
 
 ;;;; Projectile
 
@@ -482,13 +482,13 @@ rarely desirable."
   (add-hook 'org-shiftright-final-hook 'windmove-right)
 
   ;; Export to exports/ subdirectory
-  (defun /org-export-to-subdirectory (orig-fun &rest args)
+  (defun my/org-export-to-subdirectory (orig-fun &rest args)
     (shell-command (concat "mkdir -p exports"))
     (apply orig-fun
            (pop args)                     ; backend
            (concat "exports/" (pop args)) ; file
            args))
-  (advice-add #'org-export-to-file :around #'/org-export-to-subdirectory)
+  (advice-add #'org-export-to-file :around #'my/org-export-to-subdirectory)
 
   ;; Remove keybindings that I already use
   (define-key org-mode-map (kbd "C-'") nil)
@@ -896,7 +896,7 @@ rarely desirable."
 
 ;;;;; Automatic wiktionary links
 
-  (defun org-make-wiktionary-link (string &optional from to)
+  (defun my/org-make-wiktionary-link (string &optional from to)
     "Wraps the word at point or selected word in a Wiktionary link to the word."
 
     ;; (see http://ergoemacs.org/emacs/elisp_command_working_on_string_or_region.html)
@@ -921,11 +921,11 @@ rarely desirable."
         (goto-char from)
         (insert output))))
 
-  (define-key org-mode-map (kbd "C-c L") #'org-make-wiktionary-link)
+  (define-key org-mode-map (kbd "C-c L") #'my/org-make-wiktionary-link)
 
 ;;;;; Tangling my configuration
 
-  (defun org-babel-tangle-config ()
+  (defun my/org-babel-tangle-config ()
     (interactive)
 
     (let ((tangle-buffer (clone-indirect-buffer "<tangle>config" nil :norecord)))
@@ -937,11 +937,11 @@ rarely desirable."
       (kill-buffer tangle-buffer))
     (byte-compile-file "config.el"))
 
-  (define-key org-mode-map (kbd "C-c C-v M-t") #'org-babel-tangle-config)
+  (define-key org-mode-map (kbd "C-c C-v M-t") #'my/org-babel-tangle-config)
 
 ;;;;; Fixing `org-beginning-of-line'
 
-  (defun org-smarter-beginning-of-line (original-function &optional n)
+  (defun my/org-smarter-beginning-of-line (original-function &optional n)
     "The exact same function as `org-beginning-of-line',
   but with one exception: instead of calling `beginning-of-line'
   twice, it calls `smarter-beginning-of-line' once."
@@ -953,7 +953,7 @@ rarely desirable."
       ;; First move to a visible line.
       (if (bound-and-true-p visual-line-mode)
           (beginning-of-visual-line n)
-        (smarter-move-beginning-of-line n))
+        (my/smarter-move-beginning-of-line n))
       (cond
         ;; No special behavior.  Point is already at the beginning of
         ;; a line, logical or visual.
@@ -991,17 +991,17 @@ rarely desirable."
         ;; No special context.  Point is already at beginning of line.
         (t nil))))
 
-  (advice-add 'org-beginning-of-line :around #'org-smarter-beginning-of-line))
+  (advice-add 'org-beginning-of-line :around #'my/org-smarter-beginning-of-line))
 
 ;;;; Racket
 
 (use-package racket-mode
   :bind (:map racket-repl-mode-map
-              ("<f5>" . /racket-repl-run))
+              ("<f5>" . my/racket-repl-run))
   :bind (:map racket-mode-map
-              ("<S-f5>" . /racket-interrupt-run))
+              ("<S-f5>" . my/racket-interrupt-run))
   :config
-  (defun /racket-repl-run ()
+  (defun my/racket-repl-run ()
     "From any buffer (usually the Racket REPL buffer), run the
     Racket program in the first buffer found whose name ends with
     \".rkt\"."
@@ -1012,7 +1012,7 @@ rarely desirable."
                             (buffer-list))))) ; assume first .rkt buffer
       (with-current-buffer rkt-buffer
         (racket-run))))
-  (defun /racket-interrupt-run ()
+  (defun my/racket-interrupt-run ()
     "Run the Racket program in the current buffer, after sending
     an interrupt signal to the Racket REPL (C-c)."
     (interactive)
@@ -1030,14 +1030,14 @@ rarely desirable."
   (require 'auctex-latexmk)
   (auctex-latexmk-setup)
 
-  (defun /start-update-viewer ()
+  (defun my/start-update-viewer ()
     "Starts/updates PDF viewer."
     (interactive)
     (if (string-match "no process found"
                       (shell-command-to-string "killall -HUP mupdf-x11"))
         (error "PDF viewer is not running")))
 
-  (defun /run-view ()
+  (defun my/run-view ()
     "Saves the current LaTeX document, processes it and finally runs it."
     (interactive)
     (save-buffer)
@@ -1046,16 +1046,16 @@ rarely desirable."
                                 (file-name-base (buffer-file-name)))))
       (set-process-sentinel process (lambda (process sentinel)
                                       (when (= 0 (process-exit-status process))
-                                        (/start-update-viewer))))))
+                                        (my/start-update-viewer))))))
 
-  (defun /view-after-run (&rest r)
-    (/start-update-viewer))
+  (defun my/view-after-run (&rest r)
+    (my/start-update-viewer))
 
-  (advice-add #'Latexmk-sentinel :after #'/view-after-run)
+  (advice-add #'Latexmk-sentinel :after #'my/view-after-run)
   (add-hook 'TeX-mode-hook (lambda () (setf TeX-command-default "LatexMk")))
 
   :bind (:map LaTeX-mode-map
-              ("C-c C-u" . /start-update-viewer)))
+              ("C-c C-u" . my/start-update-viewer)))
 
 ;;; Basic preferences
 
@@ -1077,9 +1077,9 @@ rarely desirable."
 (add-to-list 'interpreter-mode-alist
              '("python3" . python-mode))
 
-;;;; Python `shell-compile'
+;;;; Python `my/shell-compile'
 ;; TODO: Move into `use-package' declaration
-(defun shell-compile () ; (courtesy of djangoliv @ stack interchange)
+(defun my/shell-compile () ; (courtesy of djangoliv @ stack interchange)
   (interactive)
   (shell-command (concat "python " (buffer-file-name)))
   (if (<= (* 2 (window-height)) (frame-height))
@@ -1087,16 +1087,16 @@ rarely desirable."
     (/ (frame-height) 2)))
 (add-hook 'python-mode-hook
           '(lambda ()
-            (define-key python-mode-map (kbd "C-c C-c") 'shell-compile)))
+            (define-key python-mode-map (kbd "C-c C-c") #'my/shell-compile)))
 
 ;;;; Silent mouse-wheel scrolling
 
-(defun silent-mwheel-scroll (oldfun &rest r)
+(defun my/silent-mwheel-scroll (oldfun &rest r)
   (interactive (list last-input-event))
   (ignore-errors
     (call-interactively oldfun)))
 
-(advice-add #'mwheel-scroll :around #'silent-mwheel-scroll)
+(advice-add #'mwheel-scroll :around #'my/silent-mwheel-scroll)
 
 ;;;; Directories
 
@@ -1138,7 +1138,7 @@ rarely desirable."
   (let ((user-init-file (concat user-emacs-directory ".commands")))
     ad-do-it))
 (load-file (concat user-emacs-directory ".commands"))
-(defun delete-and-extract-comment (&optional bol-arg)
+(defun my/delete-and-extract-comment (&optional bol-arg)
   "Delete and return the comment at the end of the line. If there
 is no comment, return nil."
   (let (comment)
@@ -1195,36 +1195,36 @@ evaluation of `form'.
       desktop-path                (list desktop-dirname)
       desktop-save                t)
 
-(defun init-desktop (&optional arg)
+(defun my/init-desktop (&optional arg)
   "Load the desktop (if C-u is provided) and enable autosaving."
   (interactive "p")
   (if current-prefix-arg (desktop-read))
   (desktop-save-mode 1)
   (message "Desktop-Save mode enabled"))
 
-(global-set-key (kbd "C-c D") 'init-desktop)
+(global-set-key (kbd "C-c D") 'my/init-desktop)
 
 ;;;;; Alignment
 
-(defun align-comments-in-region (beginning end)
+(defun my/align-comments-in-region (beginning end)
   "Align comments within marked region."
   (interactive "*r")
   (let (indent-tabs-mode align-to-tab-stop)
     (align-regexp beginning end (concat "\\(\\s-*\\)"
                                         (regexp-quote comment-start)))))
 
-(global-set-key (kbd "C-c M-a") #'align-comments-in-region)
+(global-set-key (kbd "C-c M-a") #'my/align-comments-in-region)
 
 ;;;;; `smart-open-line'
 
-(defun smart-open-line () ; (courtesy of Emacs Redux)
+(defun my/smart-open-line () ; (courtesy of Emacs Redux)
   "Insert an empty line after the current line.
 Position the cursor at beginning, according to current mode."
   (interactive)
   (move-end-of-line nil)
   (newline-and-indent))
 
-(defun smart-open-line-above ()
+(defun my/smart-open-line-above ()
   "Insert an empty line above the current line.
 Position the cursor at beginning, according to current mode."
   (interactive)
@@ -1234,12 +1234,12 @@ Position the cursor at beginning, according to current mode."
       (delete-horizontal-space))
   (forward-line -1)
   (indent-according-to-mode))
-(global-set-key (kbd "M-o") 'smart-open-line)
-(global-set-key (kbd "M-O") 'smart-open-line-above)
+(global-set-key (kbd "M-o") 'my/smart-open-line)
+(global-set-key (kbd "M-O") 'my/smart-open-line-above)
 
 ;;;;; `smarter-move-{beginning|end}-of-line'
 
-(defun smarter-move-beginning-of-line (&optional &rest args)
+(defun my/smarter-move-beginning-of-line (&optional &rest args)
   "Move point back to indentation of beginning of line.
 Move point to the first non-whitespace character on this line. If
 point is already there, move to the beginning of the line.
@@ -1259,7 +1259,7 @@ buffer, stop there."
       (when (= orig-point (point))
         (move-beginning-of-line 1))))) ; based on function from Emacs Redux
 
-(defun smarter-move-end-of-line (&optional &rest args)
+(defun my/smarter-move-end-of-line (&optional &rest args)
   "Move to the end of the line, but before any potential comment.
 If already at the pre-comment end of line, move to the actual end
 of line. If ARG is not nil or 1, move forward ARG - 1 lines
@@ -1283,9 +1283,9 @@ there."
         (when (= orig-point (point))
           (move-end-of-line 1))))))
 (global-set-key [remap move-beginning-of-line]
-                'smarter-move-beginning-of-line)
+                'my/smarter-move-beginning-of-line)
 (global-set-key [remap move-end-of-line]
-                'smarter-move-end-of-line)
+                'my/smarter-move-end-of-line)
 
 ;;;;; Switching back and forth between two buffers
 
@@ -1299,7 +1299,7 @@ there."
 
   ;; TODO: Perhaps advice `set-buffer' and `set-window-buffer' only.
 
-  (defun /back-and-forth ()
+  (defun my/back-and-forth ()
     "Function for switching back and forth between two buffers."
     (interactive)
     (let ((new-previous-buffer (current-buffer)))
@@ -1308,7 +1308,7 @@ there."
         (next-buffer))
       (setf previous-buffer new-previous-buffer))))
 
-(global-set-key (kbd "s-b") #'/back-and-forth)
+(global-set-key (kbd "s-b") #'my/back-and-forth)
 
 ;;;; Modes
 ;;;;; xmodmap-mode
@@ -1371,10 +1371,10 @@ there."
 
 ;;;; Disable C-z for GUI Emacs
 
-(defun suspend-frame-unless-gui (oldfun &rest r)
+(defun my/suspend-frame-unless-gui (oldfun &rest r)
   (unless (display-graphic-p) (apply oldfun r)))
 
-(advice-add #'suspend-frame :around #'suspend-frame-unless-gui)
+(advice-add #'suspend-frame :around #'my/suspend-frame-unless-gui)
 
 ;;; Themes
 
@@ -1386,7 +1386,7 @@ there."
 (setf light-theme 'leuven
       dark-theme  'gruvbox-dark-soft)
 
-(defun /daylight-sets-color ()
+(defun my/daylight-sets-color ()
   "Sets a light theme for day and a dark theme for night.
 Depends on the script `sun' being found in path."
   (interactive)
@@ -1403,16 +1403,16 @@ Depends on the script `sun' being found in path."
             (load-theme light-theme t)
           (load-theme dark-theme t))))))
 
-(add-hook 'after-init-hook #'/daylight-sets-color)
+(add-hook 'after-init-hook #'my/daylight-sets-color)
 
 ;;;; Dynamic theme configuration
 
 (advice-add 'load-theme :after (lambda (theme &optional no-confirm no-enable)
-                                 (unless no-enable (theme-do-all theme))))
+                                 (unless no-enable (my/theme-do-all theme))))
 
 ;;;;; `theme-do-all'
 
-(defun theme-do-all (theme)
+(defun my/theme-do-all (theme)
   "Actions to perform whenever a theme is loaded."
 
   (setf current-theme theme)
@@ -1542,7 +1542,7 @@ Depends on the script `sun' being found in path."
 (defun theme-reload ()
   (interactive)
   (if (boundp 'current-theme)
-      (theme-do-all current-theme)))
+      (my/theme-do-all current-theme)))
 
 (global-set-key (kbd "C-c R") #'theme-reload)
 
@@ -1565,7 +1565,7 @@ Depends on the script `sun' being found in path."
 
 (defvar notmuch-hello-refresh-count 0)
 
-(defun notmuch-hello-refresh-status-message ()
+(defun my/notmuch-hello-refresh-status-message ()
   (let* ((new-count
           (string-to-number
            (car (process-lines notmuch-command "count"))))
@@ -1582,7 +1582,7 @@ Depends on the script `sun' being found in path."
                 (notmuch-hello-nice-number (- diff-count)))))
     (setq notmuch-hello-refresh-count new-count)))
 
-(add-hook 'notmuch-hello-refresh-hook 'notmuch-hello-refresh-status-message)
+(add-hook 'notmuch-hello-refresh-hook #'my/notmuch-hello-refresh-status-message)
 (setq notmuch-address-selection-function
       (lambda (prompt collection initial-input)
         (completing-read prompt (cons initial-input collection) nil t nil 'notmuch-address-history)))
@@ -1630,13 +1630,13 @@ Depends on the script `sun' being found in path."
 ;;; Custom hooks
 ;;;; `window-focus-out-hook', `window-focus-in-hook'
 
-(defun run-window-focus-out-hook (window &optional norecord)
+(defun my/run-window-focus-out-hook (window &optional norecord)
   (run-hooks 'window-focus-out-hook))
-(defun run-window-focus-in-hook (window &optional norecord)
+(defun my/run-window-focus-in-hook (window &optional norecord)
   (run-hooks 'window-focus-in-hook))
 
-(advice-add 'select-window :before 'run-window-focus-out-hook)
-(advice-add 'select-window :after 'run-window-focus-in-hook)
+(advice-add 'select-window :before 'my/run-window-focus-out-hook)
+(advice-add 'select-window :after 'my/run-window-focus-in-hook)
 
 
 ;; TODO: Add exception for magit buffer switching.
@@ -1652,28 +1652,28 @@ Depends on the script `sun' being found in path."
 
 ;;;; `before-minibuffer-hook', `after-minibuffer-hook'
 
-(defun run-before-minibuffer-hook (&optional &rest args)
+(defun my/run-before-minibuffer-hook (&optional &rest args)
   (run-hooks 'before-minibuffer-hook)
-  (add-hook 'post-command-hook 'run-after-minibuffer-hook))
-(defun run-after-minibuffer-hook (&optional &rest args)
+  (add-hook 'post-command-hook 'my/run-after-minibuffer-hook))
+(defun my/run-after-minibuffer-hook (&optional &rest args)
   (unless (minibufferp)
     (run-hooks 'after-minibuffer-hook)
-    (remove-hook 'post-command-hook 'run-after-minibuffer-hook)))
+    (remove-hook 'post-command-hook 'my/run-after-minibuffer-hook)))
 
-(advice-add 'read-from-minibuffer :before 'run-before-minibuffer-hook)
-(advice-add 'read-no-blanks-input :before 'run-before-minibuffer-hook)
-(advice-add 'read-string          :before 'run-before-minibuffer-hook)
+(advice-add 'read-from-minibuffer :before 'my/run-before-minibuffer-hook)
+(advice-add 'read-no-blanks-input :before 'my/run-before-minibuffer-hook)
+(advice-add 'read-string          :before 'my/run-before-minibuffer-hook)
 
 ;;;; `before-helm-hook', `after-helm-hook'
 
-(defun run-before-helm-hook (&optional &rest args)
+(defun my/run-before-helm-hook (&optional &rest args)
   (run-hooks 'before-helm-hook))
-(defun run-after-helm-hook (&optional &rest args)
+(defun my/run-after-helm-hook (&optional &rest args)
   (run-hooks 'after-helm-hook))
 
-(add-hook 'helm-before-initialize-hook 'run-before-helm-hook)
-(add-hook 'helm-exit-minibuffer-hook   'run-after-helm-hook)
-(advice-add 'helm-keyboard-quit :after 'run-after-helm-hook)
+(add-hook 'helm-before-initialize-hook 'my/run-before-helm-hook)
+(add-hook 'helm-exit-minibuffer-hook   'my/run-after-helm-hook)
+(advice-add 'helm-keyboard-quit :after 'my/run-after-helm-hook)
 
 ;;; Operating systems
 ;;;; Fix selection on OS X
