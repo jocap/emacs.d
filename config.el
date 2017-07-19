@@ -278,7 +278,7 @@ current line."
 ;;;; Swiper, Ivy and Counsel
 
 (use-package swiper
-  :bind (("C-s" . swiper)))
+  :bind (("s-s" . swiper)))
 
 (use-package ivy
   :init
@@ -354,8 +354,7 @@ current line."
     (interactive)
     (cl-letf (((symbol-function #'ivy-thing-at-point)
                (lambda ()
-                 (-> (function-called-at-point)
-                     (symbol-name)))))
+                 (symbol-name (function-called-at-point)))))
       (call-interactively oldfun)))
   (advice-add #'counsel-describe-function :around #'adv/counsel-describe-function)
 
@@ -363,7 +362,7 @@ current line."
     (interactive)
     (cl-letf (((symbol-function #'ivy-thing-at-point)
                (lambda ()
-                 (--> (variable-at-point)
+                 (--> (variable-at-point) ; (require 'dash)
                       (if (eq it 0) (intern "") it)
                       (symbol-name it)))))
       (call-interactively oldfun)))
