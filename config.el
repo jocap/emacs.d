@@ -1081,8 +1081,13 @@ rarely desirable."
 (add-to-list 'interpreter-mode-alist
              '("python3" . python-mode))
 
+;;;; `prettify-symbols-mode'
+(add-hook 'emacs-lisp-mode-hook
+          (lambda () (prettify-symbols-mode)))
+
 ;;;; Python `my/shell-compile'
 ;; TODO: Move into `use-package' declaration
+
 (defun my/shell-compile () ; (courtesy of djangoliv @ stack interchange)
   (interactive)
   (shell-command (concat "python " (buffer-file-name)))
@@ -1342,6 +1347,9 @@ there."
 
                    ("M-n" (lambda (n) (interactive "p") (scroll-up n)))
                    ("M-p" (lambda (n) (interactive "p") (scroll-down n)))
+
+                   ("<C-M-backspace>" backward-kill-sexp)
+                   ;; ^ mapped to ESC <C-backspace>, which doesn't work as well
 
                    ("<C-tab>" company-capf)
 
