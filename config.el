@@ -290,9 +290,7 @@ current line."
         '((swiper . ivy--regex-plus)
           (t . ivy--regex-fuzzy)))
 
-  :bind (("C-s"     . swiper)
-
-         ("C-c C-r" . ivy-resume)
+  :bind (("C-c C-r" . ivy-resume)
          ("<f6>"    . ivy-resume)
 
          ;; NOTE: Install `smex' to sort counsel-M-x by recently used
