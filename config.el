@@ -152,7 +152,7 @@
   (with-eval-after-load 'undo-tree
     (define-key undo-tree-map (kbd "C-/") nil)
     (define-key undo-tree-map (kbd "C-?") nil))
-  (global-set-key (kbd "C-/") 'multiple-cursors-hydra/body))
+  (global-set-key (kbd "s-/") 'multiple-cursors-hydra/body))
 
 ;;;; `visual-regexp'
 
@@ -1298,9 +1298,13 @@ there."
 
 ;;;;; Switching back and forth between two buffers
 
-(let ((previous-buffer nil)) ; create closure
+(let ((previous-buffers (make-ring 3))) ; create closure
+  ;; The previous buffers are stored in a ring with a max size of 3.
+
   (defun adv/set-previous-buffer (&optional &rest r)
-    (setf previous-buffer (current-buffer)))
+    (unless (member (current-buffer) (ring-elements previous-buffers))
+      (ring-insert previous-buffers (current-buffer))))
+
   (dolist (fun '(switch-to-buffer
                  next-buffer
                  previous-buffer))
@@ -1312,10 +1316,16 @@ there."
     "Function for switching back and forth between two buffers."
     (interactive)
     (let ((new-previous-buffer (current-buffer)))
-      (if previous-buffer
-          (switch-to-buffer previous-buffer)
+      (if (> (ring-length previous-buffers) 0)
+          (let ((prev-buf (ring-ref previous-buffers 0)))
+            (if (buffer-name prev-buf) ; unless buffer is killed
+                (switch-to-buffer prev-buf) ; switch to first buffer in ring
+              (switch-to-buffer (ring-ref previous-buffers 1)))) ; else try next
         (next-buffer))
-      (setf previous-buffer new-previous-buffer))))
+      (ring-insert previous-buffers new-previous-buffer)))
+
+  (defun my/back-and-forth--previous-buffers ()
+    (ring-elements previous-buffers)))
 
 (global-set-key (kbd "s-b") #'my/back-and-forth)
 
