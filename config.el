@@ -1367,6 +1367,7 @@ there."
                    ("s-k" (lambda () (interactive) (kill-buffer (current-buffer))))
 
                    ;; describe-this-*:
+		   ("s-h" ,nil) ;; ensure prefix key works as expected
                    ("s-h f" (lambda ()
                               (interactive)
                               (describe-function (function-called-at-point))))
@@ -1698,7 +1699,6 @@ Depends on the script `sun' being found in path."
 (advice-add 'helm-keyboard-quit :after 'my/run-after-helm-hook)
 
 ;;; Operating systems
-;;;; Fix selection on OS X
 
 (when (eq system-type 'darwin)
   ;; Fix selections
