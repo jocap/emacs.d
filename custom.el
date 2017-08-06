@@ -79,6 +79,12 @@
     ("#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36")))
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
+ '(initial-scratch-message
+   ";; -*- lexical-binding: t -*-
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with \\[find-file] and enter text in its buffer.
+
+")
  '(ispell-highlight-face (quote flyspell-incorrect))
  '(ispell-local-dictionary-alist nil)
  '(ivy-ignore-buffers

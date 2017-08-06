@@ -1324,7 +1324,7 @@ there."
         (next-buffer))
       (ring-insert previous-buffers new-previous-buffer)))
 
-  (defun my/back-and-forth--previous-buffers ()
+  (defun my/back-and-forth--previous-buffers () ; for debug purposes
     (ring-elements previous-buffers)))
 
 (global-set-key (kbd "s-b") #'my/back-and-forth)

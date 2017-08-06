@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; =============================================================================
 ;; Basic preferences
 
@@ -154,6 +156,14 @@
                            (group 1.0))
                  (vertical 1.0
                            (summary 1.0 point))))))
+
+;; -----------------------------------------------------------------------------
+;; Keybindings
+
+(with-eval-after-load 'gnus-sum
+  (define-key gnus-summary-mode-map (kbd "<mouse-1>") #'gnus-summary-scroll-up))
+(with-eval-after-load 'gnus-topic
+  (define-key gnus-topic-mode-map (kbd "<mouse-1>") #'gnus-topic-select-group))
 
 ;; =============================================================================
 ;; Hydra configuration courtesy of Chen Bin
