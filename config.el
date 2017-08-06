@@ -1702,7 +1702,9 @@ Depends on the script `sun' being found in path."
 
 (when (eq system-type 'darwin)
   ;; Fix selections
-  (defalias 'x-selection-owner-p 'ns-selection-owner-p))
+  (defalias 'x-selection-owner-p 'ns-selection-owner-p)
+  ;; Use different font
+  (setf default-frame-alist '((font . "Fira Mono-12"))))
 
 ;;; Lastly
 
