@@ -159,7 +159,7 @@
  '(org-tree-view/level 6)
  '(package-selected-packages
    (quote
-    (suggest ahk-mode smex popwin outline-ivy outorg web-mode racket-mode fish-mode f aggressive-indent-mode ws-butler aggressive-indent undo-tree counsel-projectile zenburn-theme ivy-hydra hydra which-key counsel tramp-term php-mode apache-mode lua-mode form-feed notmuch company emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (suggest ahk-mode smex popwin outline-ivy outorg racket-mode fish-mode f aggressive-indent-mode ws-butler aggressive-indent undo-tree counsel-projectile zenburn-theme ivy-hydra hydra which-key counsel tramp-term php-mode apache-mode lua-mode form-feed notmuch company emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(popwin-mode t)
  '(pos-tip-background-color "#073642")
@@ -215,6 +215,7 @@
  '(vc-annotate-very-old-color nil)
  '(visible-bell nil)
  '(vr/engine (quote pcre2el))
+ '(web-mode-self-insert-command-list (quote (self-insert-command outshine-self-insert-command)))
  '(weechat-color-list
    (quote
     (unspecified "#002b36" "#073642" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#839496" "#657b83")))

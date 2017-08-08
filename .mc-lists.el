@@ -11,6 +11,7 @@
         ivy-done
         iy-go-to-char--command
         kill-region
+        kill-sexp
         org-beginning-of-line
         org-delete-char
         org-self-insert-command

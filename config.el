@@ -94,6 +94,10 @@
   (openwith-mode t)
   (setq openwith-associations '(("\\.pdf\\'" "mupdf" (file)))))
 
+(use-package web-mode
+  :ensure nil
+  :load-path "packages/web-mode")
+
 ;;;; `outline-mode'
 
 (use-package outshine
@@ -109,7 +113,7 @@
   ;; Narrowing now works within the headline rather than requiring to be on it:
   (advice-add 'outshine-narrow-to-subtree :before
               (lambda (&rest args) (unless (outline-on-heading-p t)
-                                     (outline-previous-visible-heading 1)))))
+                                (outline-previous-visible-heading 1)))))
 
 ;; NOTE: Advice to `outshine-narrow-to-subtree' is courtesy of Eric Kaschalk
 ;; (http://www.modernemacs.com/post/outline-ivy/)
@@ -448,7 +452,7 @@ rarely desirable."
 
 (use-package projectile
   :config
-  (projectile-global-mode)
+  ;; (projectile-global-mode)
   (setq projectile-enable-caching t)
   (setq projectile-require-project-root nil)
 
@@ -491,7 +495,6 @@ rarely desirable."
   (define-key org-mode-map (kbd "C-'") nil)
 
   ;; Enable for all Org files
-  (add-hook 'org-mode-hook #'swedish-mode) ; Swedish letters
   (add-hook 'org-mode-hook #'org-autolist-mode) ; better list behavior
 
   :bind (("C-c o a" . org-agenda)
@@ -1621,34 +1624,20 @@ Depends on the script `sun' being found in path."
 (add-to-list 'ispell-skip-region-alist '("\\[fn:.+:" . "\\]"))
 (add-to-list 'ispell-skip-region-alist '("=.*" . ".*=")) ; org verbatim
 
-;;;; `swedish-mode'
-
-;; Based on `umlaut-mode'by Moritz Ulrich <ulrich.moritz@googlemail.com>
-;; (See https://gist.github.com/the-kenny/394120)
-;; Published under GNU General Public License
-
-(defvar swedish-mode-map (make-keymap) "Swedish mode keymap.")
-
-(define-key swedish-mode-map (kbd "s-[")  (lambda () (interactive) (insert ?å)))
-(define-key swedish-mode-map (kbd "s-'")  (lambda () (interactive) (insert ?ä)))
-(define-key swedish-mode-map (kbd "s-;")  (lambda () (interactive) (insert ?ö)))
-(define-key swedish-mode-map (kbd "s-{")  (lambda () (interactive) (insert ?Å)))
-(define-key swedish-mode-map (kbd "s-\"") (lambda () (interactive) (insert ?Ä)))
-(define-key swedish-mode-map (kbd "s-:")  (lambda () (interactive) (insert ?Ö)))
-
-(define-minor-mode swedish-mode
-  "A mode for conveniently using Swedish letters in Emacs."
-  nil
-  :lighter " åäö"
-  swedish-mode-map)
-
-(provide 'swedish-mode)
-
 ;;;; Combining acute accent
 
 ;; Very useful for marking stress when doing Russian homework.
 
 (global-set-key (kbd "C-c 8 '") (lambda () (interactive) (insert-char 769)))
+
+;;;; Swedish letters
+
+(global-set-key (kbd "s-[")  (lambda () (interactive) (insert ?å)))
+(global-set-key (kbd "s-'")  (lambda () (interactive) (insert ?ä)))
+(global-set-key (kbd "s-;")  (lambda () (interactive) (insert ?ö)))
+(global-set-key (kbd "s-{")  (lambda () (interactive) (insert ?Å)))
+(global-set-key (kbd "s-\"") (lambda () (interactive) (insert ?Ä)))
+(global-set-key (kbd "s-:")  (lambda () (interactive) (insert ?Ö)))
 
 ;;; Custom hooks
 ;;;; `window-focus-out-hook', `window-focus-in-hook'
