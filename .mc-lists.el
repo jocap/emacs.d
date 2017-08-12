@@ -12,6 +12,8 @@
         iy-go-to-char--command
         kill-region
         kill-sexp
+        my/smarter-move-beginning-of-line
+        my/smarter-move-end-of-line
         org-beginning-of-line
         org-delete-char
         org-self-insert-command
@@ -39,6 +41,7 @@
 
 (setq mc/cmds-to-run-once
       '(
+        beginning-of-buffer
         counsel-M-x
         electric-newline-and-maybe-indent
         eval-print-last-sexp

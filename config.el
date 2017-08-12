@@ -37,6 +37,10 @@
   :config
   (ace-link-setup-default))
 
+(use-package ace-window
+  :config
+  (global-set-key (kbd "C-x C-a") #'ace-window))
+
 (use-package popwin
   :init
   (require 'popwin)
@@ -97,6 +101,24 @@
 (use-package web-mode
   :ensure nil
   :load-path "packages/web-mode")
+
+(use-package direx
+  :config
+  (let (direx-window)
+    (defun my/direx ()
+      (interactive)
+      (if (and direx-window (window-live-p direx-window))
+          (if (eq direx-window (selected-window))
+              (windmove-right)
+            (select-window direx-window))
+        (split-window-right)
+        (adjust-window-trailing-edge (selected-window) (- 25 (window-width)) t)
+        (direx:jump-to-directory)
+        (sticky-buffer-mode)
+        (local-set-key (kbd "q") (lambda () (interactive) (kill-buffer (current-buffer))))
+        (setf direx-window (selected-window))
+        (windmove-right))))
+  (global-set-key (kbd "C-x C-j") #'my/direx))
 
 ;;;; `outline-mode'
 
@@ -1084,6 +1106,15 @@ rarely desirable."
 (add-to-list 'interpreter-mode-alist
              '("python3" . python-mode))
 
+;;;; Dedicated windows
+(define-minor-mode sticky-buffer-mode ; thanks user1882585 @ StackOverflow
+    "Make the current window always display this buffer."
+  nil " sticky" nil
+  (set-window-dedicated-p (selected-window) sticky-buffer-mode))
+(global-set-key (kbd "C-x M-o") #'sticky-buffer-mode)
+
+(add-hook 'term-mode-hook #'sticky-buffer-mode)
+
 ;;;; `prettify-symbols-mode'
 (add-hook 'emacs-lisp-mode-hook
           (lambda () (prettify-symbols-mode)))
@@ -1370,7 +1401,7 @@ there."
                    ("s-k" (lambda () (interactive) (kill-buffer (current-buffer))))
 
                    ;; describe-this-*:
-		   ("s-h" ,nil) ;; ensure prefix key works as expected
+                   ("s-h" ,nil) ;; ensure prefix key works as expected
                    ("s-h f" (lambda ()
                               (interactive)
                               (describe-function (function-called-at-point))))
