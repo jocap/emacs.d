@@ -1382,6 +1382,9 @@ there."
 
 (dolist (key-def `(("M-<f1>" menu-bar-mode)
 
+                   ("<f4>" kmacro-start-macro)
+                   ("<f5>" kmacro-end-or-call-macro)
+
                    ("M-]" other-window)
                    ("M-[" (lambda (n)
                             (interactive "p")
