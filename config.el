@@ -1534,13 +1534,6 @@ Depends on the script `sun' being found in path."
                              bg-2)))
           (set-face-attribute 'ivy-current-match nil :background final-bg))))
 
-    ;; * fix italic faces
-    ;; (mapc
-    ;;  (lambda (face)
-    ;;    (when (eq (face-attribute face :slant) 'italic)
-    ;;      (set-face-attribute face nil :family "Fira Mono Medium")))
-    ;;  (face-list))
-
     ;; * Reset fci-mode
     (let ((inhibit-message t))
       (call-interactively 'fci-mode)
@@ -1728,6 +1721,16 @@ Depends on the script `sun' being found in path."
   (defalias 'x-selection-owner-p 'ns-selection-owner-p)
   ;; Use different font
   (setf default-frame-alist '((font . "Fira Mono-12"))))
+
+(when (eq system-type 'gnu/linux)
+  ;; Fix italic face
+  (advice-add #'my/theme-do-all :after
+              (lambda (&optional &rest args)
+                (mapc
+                 (lambda (face)
+                   (when (eq (face-attribute face :slant) 'italic)
+                     (set-face-attribute face nil :family "Fira Mono Medium")))
+                 (face-list)))))
 
 ;;; Lastly
 
