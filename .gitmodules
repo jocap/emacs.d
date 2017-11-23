@@ -4,6 +4,3 @@
 [submodule "packages/outshine"]
 	path = packages/outshine
 	url = git@github.com:jocap/outshine.git
-[submodule "packages/web-mode"]
-	path = packages/web-mode
-	url = git@github.com:fxbois/web-mode.git
