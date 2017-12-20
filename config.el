@@ -98,10 +98,6 @@
   (openwith-mode t)
   (setq openwith-associations '(("\\.pdf\\'" "mupdf" (file)))))
 
-(use-package web-mode
-  :ensure nil
-  :load-path "packages/web-mode")
-
 (use-package direx
   :config
   (let (direx-window)
@@ -344,10 +340,6 @@ current line."
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)))
 
-(use-package counsel-projectile
-  :init
-  (counsel-projectile-on))
-
 ;;;;; Fixing counsel-describe-*
 
 ;; The function `ivy-thing-at-point' isn't a good choice for `describe-function'
@@ -374,7 +366,7 @@ current line."
 ;; corresponding built-in function, using `cl-flet'.
 
 (with-eval-after-load 'counsel
-  (defun adv/counsel-describe-function (oldfun &optional &rest r)
+  (defun adv/counsel-describe-function (oldfun &rest r)
     (interactive)
     (cl-letf (((symbol-function #'ivy-thing-at-point)
                (lambda ()
@@ -382,7 +374,7 @@ current line."
       (call-interactively oldfun)))
   (advice-add #'counsel-describe-function :around #'adv/counsel-describe-function)
 
-  (defun adv/counsel-describe-variable (oldfun &optional &rest r)
+  (defun adv/counsel-describe-variable (oldfun &rest r)
     (interactive)
     (cl-letf (((symbol-function #'ivy-thing-at-point)
                (lambda ()
@@ -1086,6 +1078,12 @@ rarely desirable."
   ;; Use RET for evaluation (use <C-j> for newline):
   (define-key ielm-map (kbd "RET") #'ielm-send-input))
 
+;;;; Prolog
+
+(use-package ediprolog
+  :bind (:map prolog-mode-map
+              ("C-c C-e" . ediprolog-dwim)))
+
 ;;; Basic preferences
 
 (server-start)         ; use emacs as a server
@@ -1113,7 +1111,7 @@ rarely desirable."
   (set-window-dedicated-p (selected-window) sticky-buffer-mode))
 (global-set-key (kbd "C-x M-o") #'sticky-buffer-mode)
 
-(add-hook 'term-mode-hook #'sticky-buffer-mode)
+;; (add-hook 'term-mode-hook #'sticky-buffer-mode)
 
 ;;;; `prettify-symbols-mode'
 (add-hook 'emacs-lisp-mode-hook
@@ -1282,7 +1280,7 @@ Position the cursor at beginning, according to current mode."
 
 ;;;;; `smarter-move-{beginning|end}-of-line'
 
-(defun my/smarter-move-beginning-of-line (&optional &rest args)
+(defun my/smarter-move-beginning-of-line (&rest args)
   "Move point back to indentation of beginning of line.
 Move point to the first non-whitespace character on this line. If
 point is already there, move to the beginning of the line.
@@ -1302,7 +1300,7 @@ buffer, stop there."
       (when (= orig-point (point))
         (move-beginning-of-line 1))))) ; based on function from Emacs Redux
 
-(defun my/smarter-move-end-of-line (&optional &rest args)
+(defun my/smarter-move-end-of-line (&rest args)
   "Move to the end of the line, but before any potential comment.
 If already at the pre-comment end of line, move to the actual end
 of line. If ARG is not nil or 1, move forward ARG - 1 lines
@@ -1329,39 +1327,6 @@ there."
                 'my/smarter-move-beginning-of-line)
 (global-set-key [remap move-end-of-line]
                 'my/smarter-move-end-of-line)
-
-;;;;; Switching back and forth between two buffers
-
-(let ((previous-buffers (make-ring 3))) ; create closure
-  ;; The previous buffers are stored in a ring with a max size of 3.
-
-  (defun adv/set-previous-buffer (&optional &rest r)
-    (unless (member (current-buffer) (ring-elements previous-buffers))
-      (ring-insert previous-buffers (current-buffer))))
-
-  (dolist (fun '(switch-to-buffer
-                 next-buffer
-                 previous-buffer))
-    (advice-add fun :before #'adv/set-previous-buffer))
-
-  ;; TODO: Perhaps advice `set-buffer' and `set-window-buffer' only.
-
-  (defun my/back-and-forth ()
-    "Function for switching back and forth between two buffers."
-    (interactive)
-    (let ((new-previous-buffer (current-buffer)))
-      (if (> (ring-length previous-buffers) 0)
-          (let ((prev-buf (ring-ref previous-buffers 0)))
-            (if (buffer-name prev-buf) ; unless buffer is killed
-                (switch-to-buffer prev-buf) ; switch to first buffer in ring
-              (switch-to-buffer (ring-ref previous-buffers 1)))) ; else try next
-        (next-buffer))
-      (ring-insert previous-buffers new-previous-buffer)))
-
-  (defun my/back-and-forth--previous-buffers () ; for debug purposes
-    (ring-elements previous-buffers)))
-
-(global-set-key (kbd "s-b") #'my/back-and-forth)
 
 ;;;; Modes
 ;;;;; xmodmap-mode
@@ -1677,60 +1642,14 @@ Depends on the script `sun' being found in path."
 (advice-add 'select-window :before 'my/run-window-focus-out-hook)
 (advice-add 'select-window :after 'my/run-window-focus-in-hook)
 
-
-;; TODO: Add exception for magit buffer switching.
-;; NOTE: This doesn't always play nice with magit. For example, select-window
-;; seems to be run when opening the commit message buffer, but *not* when
-;; returning to the magit status buffer. I'm not quite sure why, but I suppose I
-;; could add an exception for it. I'd have to look at the magit source. Perhaps
-;; I could just run a function upon switch-to-buffer that checks whether the
-;; current-window is different from the previous-current-window (saved in a
-;; variable); that might be the most simple solution, similar to what hl-line
-;; does, but as I've said before, more efficient than attaching everything to
-;; post-command-hook ...
-
-;;;; `before-minibuffer-hook', `after-minibuffer-hook'
-
-(defun my/run-before-minibuffer-hook (&optional &rest args)
-  (run-hooks 'before-minibuffer-hook)
-  (add-hook 'post-command-hook 'my/run-after-minibuffer-hook))
-(defun my/run-after-minibuffer-hook (&optional &rest args)
-  (unless (minibufferp)
-    (run-hooks 'after-minibuffer-hook)
-    (remove-hook 'post-command-hook 'my/run-after-minibuffer-hook)))
-
-(advice-add 'read-from-minibuffer :before 'my/run-before-minibuffer-hook)
-(advice-add 'read-no-blanks-input :before 'my/run-before-minibuffer-hook)
-(advice-add 'read-string          :before 'my/run-before-minibuffer-hook)
-
-;;;; `before-helm-hook', `after-helm-hook'
-
-(defun my/run-before-helm-hook (&optional &rest args)
-  (run-hooks 'before-helm-hook))
-(defun my/run-after-helm-hook (&optional &rest args)
-  (run-hooks 'after-helm-hook))
-
-(add-hook 'helm-before-initialize-hook 'my/run-before-helm-hook)
-(add-hook 'helm-exit-minibuffer-hook   'my/run-after-helm-hook)
-(advice-add 'helm-keyboard-quit :after 'my/run-after-helm-hook)
-
 ;;; Operating systems
 
 (when (eq system-type 'darwin)
   ;; Fix selections
   (defalias 'x-selection-owner-p 'ns-selection-owner-p)
   ;; Use different font
-  (setf default-frame-alist '((font . "Fira Mono-12"))))
-
-(when (eq system-type 'gnu/linux)
-  ;; Fix italic face
-  (advice-add #'my/theme-do-all :after
-              (lambda (&optional &rest args)
-                (mapc
-                 (lambda (face)
-                   (when (eq (face-attribute face :slant) 'italic)
-                     (set-face-attribute face nil :family "Fira Mono Medium")))
-                 (face-list)))))
+  ;; (setf default-frame-alist '((font . "Fira Mono-12")))
+  )
 
 ;;; Lastly
 

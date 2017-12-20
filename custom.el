@@ -92,7 +92,6 @@
  '(ivy-ignore-buffers
    (quote
     ("\\` " "\\`\\*magit-" "\\`\\*Ibuffer\\*" "\\`\\*Messages\\*")) nil nil "Use <C-h> e to access *Messages* buffer.")
- '(ivy-mode t)
  '(ivy-use-virtual-buffers t)
  '(linum-format "%4d │")
  '(magit-diff-use-overlays nil)
@@ -161,7 +160,7 @@
  '(org-tree-view/level 6)
  '(package-selected-packages
    (quote
-    (ace-window direx suggest ahk-mode smex popwin outline-ivy outorg racket-mode fish-mode f aggressive-indent-mode ws-butler aggressive-indent undo-tree counsel-projectile zenburn-theme ivy-hydra hydra which-key counsel tramp-term php-mode apache-mode lua-mode form-feed notmuch company emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters multiple-cursors markdown-mode gruvbox-theme expand-region)))
+    (ediprolog perl6-mode web-mode ace-window direx suggest ahk-mode smex popwin outline-ivy outorg racket-mode fish-mode f aggressive-indent-mode ws-butler aggressive-indent undo-tree counsel-projectile zenburn-theme ivy-hydra hydra which-key counsel tramp-term php-mode apache-mode lua-mode form-feed notmuch company emacs-lisp-mode pcomplete-extension git-gutter+ buffer-move org-autolist org ox-twbs eziam-theme openwith org-plus-contrib htmlize ace-link s zenity-color-picker term-projectile dash diminish use-package dashboard flx-ido restart-emacs fill-column-indicator iy-go-to-char magit avy paredit paredit-everywhere auctex auctex-latexmk pcre2el wrap-region solarized-theme visual-regexp-steroids vimrc-mode subatomic256-theme rainbow-delimiters multiple-cursors markdown-mode gruvbox-theme expand-region)))
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(popwin-mode t)
  '(pos-tip-background-color "#073642")
@@ -174,6 +173,10 @@
          nil
        (format " {%s}"
                (projectile-project-name))))) nil nil "Makes it look a little cleaner.")
+ '(prolog-electric-if-then-else-flag nil)
+ '(prolog-indent-width 2)
+ '(prolog-paren-indent 2)
+ '(prolog-system (quote swi))
  '(require-final-newline t)
  '(resize-mini-windows (quote grow-only))
  '(ring-bell-function (quote ignore))

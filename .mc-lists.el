@@ -4,9 +4,12 @@
 (setq mc/cmds-to-run-for-all
       '(
         Buffer-menu-delete
+        backward-sexp
         c-electric-slash
+        comment-line
         delete-horizontal-space
         electric-pair-delete-pair
+        forward-sexp
         indent-for-tab-command
         ivy-done
         iy-go-to-char--command
