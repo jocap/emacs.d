@@ -131,6 +131,9 @@
   (add-hook 'outline-minor-mode-hook #'outshine-hook-function)
   (add-hook 'prog-mode-hook #'outline-minor-mode)
 
+  (defun my/no-outshine-padding () (interactive) (setq comment-padding ""))
+  (add-hook 'css-mode-hook #'my/no-outshine-padding)
+
   ;; Narrowing now works within the headline rather than requiring to be on it:
   (advice-add 'outshine-narrow-to-subtree :before
               (lambda (&rest args) (unless (outline-on-heading-p t)
@@ -143,7 +146,7 @@
   :ensure nil
   :load-path "packages/outline-ivy"
   :bind (:map outline-minor-mode-map
-              ("s-o" . oi-jump)))
+              ("s-j" . oi-jump)))
 
 ;;;; `multiple-cursors'
 
@@ -499,14 +502,18 @@ rarely desirable."
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
   (add-hook 'org-shiftright-final-hook 'windmove-right)
 
-  ;; Export to exports/ subdirectory
-  (defun my/org-export-to-subdirectory (orig-fun &rest args)
-    (shell-command (concat "mkdir -p exports"))
-    (apply orig-fun
-           (pop args)                     ; backend
-           (concat "exports/" (pop args)) ; file
-           args))
-  (advice-add #'org-export-to-file :around #'my/org-export-to-subdirectory)
+  ;; Export to exports/ subdirectory and use light theme
+  (defun adv/org-export-to-file (orig-fun &rest args)
+    ;; (shell-command (concat "mkdir -p exports"))
+    (let ((theme current-theme))
+      (load-theme 'leuven)
+      ;; (apply orig-fun
+      ;;        (pop args)                     ; backend
+      ;;        (concat "exports/" (pop args)) ; file
+      ;;        args)
+      (apply orig-fun args)
+      (load-theme theme)))
+  (advice-add #'org-export-to-file :around #'adv/org-export-to-file)
 
   ;; Remove keybindings that I already use
   (define-key org-mode-map (kbd "C-'") nil)
@@ -1133,6 +1140,11 @@ rarely desirable."
           '(lambda ()
             (define-key python-mode-map (kbd "C-c C-c") #'my/shell-compile)))
 
+;;;; messsage-mode "cut here"
+
+(add-hook 'message-mode-hook
+          (lambda () (defalias 'cut-here #'message-mark-inserted-region)))
+
 ;;;; Silent mouse-wheel scrolling
 
 (defun my/silent-mwheel-scroll (oldfun &rest r)
@@ -1367,6 +1379,9 @@ there."
                    ;; ^ mapped to ESC <C-backspace>, which doesn't work as well
 
                    ("<C-tab>" company-capf)
+
+                   ;; Quickly switch to *Messages* buffer
+                   ("C-h C-m" (lambda () (interactive) (switch-to-buffer "*Messages*")))
 
                    ;; Quick buffer actions:
                    ("s-k" (lambda () (interactive) (kill-buffer (current-buffer))))
@@ -1651,8 +1666,17 @@ Depends on the script `sun' being found in path."
   ;; Fix selections
   (defalias 'x-selection-owner-p 'ns-selection-owner-p)
   ;; Use different font
-  ;; (setf default-frame-alist '((font . "Fira Mono-12")))
-  )
+  (setf default-frame-alist '((font . "Fira Mono-12"))))
+
+(when (eq system-type 'gnu/linux)
+  ;; Fix italic face
+  (advice-add #'my/theme-do-all :after
+              (lambda (&rest args)
+                (mapc
+                 (lambda (face)
+                   (when (eq (face-attribute face :slant) 'italic)
+                     (set-face-attribute face nil :family "Fira Mono Medium")))
+                 (face-list)))))
 
 ;;; Lastly
 
