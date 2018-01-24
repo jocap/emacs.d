@@ -116,6 +116,9 @@
         (windmove-right))))
   (global-set-key (kbd "C-x C-j") #'my/direx))
 
+(use-package sudo-edit
+  :bind ((("C-c C-x C-r" . sudo-edit))))
+
 ;;;; `outline-mode'
 
 (use-package outshine
