@@ -8,6 +8,8 @@
    [default default default italic underline success warning error])
  '(ansi-color-names-vector
    ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
+ '(ansi-term-color-vector
+   [unspecified "#151515" "#fb9fb1" "#acc267" "#ddb26f" "#6fc2ef" "#e1a3ee" "#6fc2ef" "#d0d0d0"])
  '(browse-url-browser-function (quote browse-url-firefox))
  '(canlock-password "be2823e7d498a33803cffe058356861618f4c7ea")
  '(case-fold-search nil)
@@ -149,6 +151,8 @@
 %s
 </div>
 </div>")
+ '(org-html-validation-link
+   "<a href=\"https://validator.w3.org/check?uri=referer\">Validate</a>")
  '(org-log-done (quote time))
  '(org-pretty-entities t)
  '(org-replace-disputed-keys t)
